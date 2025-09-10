@@ -103,23 +103,26 @@ export default function EditChecklistRealizado() {
 
   const checkItensIsValid = async () => {
     const responseItems = await useChecklisRealizadoItemsDb.getByChecklistRealizadoId(checklistRealizado.id);
-    const isAllInconforme = responseItems.some(item => item.is_inconforme);
+    const hasSomeInconforme = responseItems.some(item => item.is_inconforme);
     if (!Boolean(checklistRealizado.is_respostas_obrigatoria)) {
-      return { valid: true, hasInconformidades: isAllInconforme };
+      return { valid: true, hasInconformidades: hasSomeInconforme };
     }
     const itemsValid = responseItems.every(item => item.is_respondido);
     if (!itemsValid) {
       setDialogDesc('Responda todos os itens.');
-      return { valid: false, hasInconformidades: isAllInconforme };
+      return { valid: false, hasInconformidades: hasSomeInconforme };
     }
-    const totalItemsInconformesDescricaoRequired = responseItems.filter(item => item.is_desc_nconf_required && !item.inconformidade_funcionarios).length;
-    const totalItemsDescricaoFilled = responseItems.filter(item => item.inconformidade_funcionarios).length;
+    const totalItemsInconformesDescricaoRequired = responseItems.filter(item =>
+      item.is_desc_nconf_required && item.is_inconforme
+    ).length;
+    const totalItemsDescricaoFilled = responseItems.filter(item => String(item.descricao)?.length > 0).length;
+    console.log(totalItemsInconformesDescricaoRequired, totalItemsDescricaoFilled);
     const possuiDescricoesPendentes = totalItemsInconformesDescricaoRequired > 0 && totalItemsDescricaoFilled < totalItemsInconformesDescricaoRequired;
-    if (checklistRealizado.is_gera_nao_conformidade && possuiDescricoesPendentes) {
+    if (hasSomeInconforme && checklistRealizado.is_gera_nao_conformidade && possuiDescricoesPendentes) {
       setDialogDesc('Existem itens com não conformidades pendentes de descrição.');
-      return { valid: false, hasInconformidades: isAllInconforme };
+      return { valid: false, hasInconformidades: hasSomeInconforme };
     }
-    return { valid: true, hasInconformidades: isAllInconforme };
+    return { valid: true, hasInconformidades: hasSomeInconforme };
   }
 
   const validateFinish = async () => {
