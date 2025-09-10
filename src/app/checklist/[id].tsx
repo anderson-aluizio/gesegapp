@@ -116,7 +116,6 @@ export default function EditChecklistRealizado() {
       item.is_desc_nconf_required && item.is_inconforme
     ).length;
     const totalItemsDescricaoFilled = responseItems.filter(item => String(item.descricao)?.length > 0).length;
-    console.log(totalItemsInconformesDescricaoRequired, totalItemsDescricaoFilled);
     const possuiDescricoesPendentes = totalItemsInconformesDescricaoRequired > 0 && totalItemsDescricaoFilled < totalItemsInconformesDescricaoRequired;
     if (hasSomeInconforme && checklistRealizado.is_gera_nao_conformidade && possuiDescricoesPendentes) {
       setDialogDesc('Existem itens com não conformidades pendentes de descrição.');
