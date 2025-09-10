@@ -199,6 +199,10 @@ export default function EditChecklistRealizado() {
               <Dialog visible={isdialogFinishShow} onDismiss={() => setIsdialogFinishShow(false)}>
                 <Dialog.Title>Finalizar Registro</Dialog.Title>
                 <Dialog.Content>
+                  <Text variant="bodySmall">
+                    Antes de finalizar confira se todas as informações estão corretas. Se o botão "Atualizar" estiver habilitado é porque
+                    o checklist possui alterações não salvas.
+                  </Text>
                   {isChecklistRealizadoTipoObservacao && (
                     <View style={styles.section}>
                       <Checkbox

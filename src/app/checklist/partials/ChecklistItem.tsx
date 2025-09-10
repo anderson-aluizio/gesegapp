@@ -75,16 +75,19 @@ const ChecklistItem = memo(({
             item.is_respondido && styles.questionCardCompleted
         ]}>
             <View style={styles.cardHeader}>
-                <View style={styles.cardHeaderTop}>
-                    <Text variant="labelSmall" style={styles.subGrupoBadge}>
-                        {item.checklist_sub_grupo}
-                    </Text>
-                    {item.is_respondido && (
-                        <View style={styles.completedBadge}>
-                            <Text style={styles.completedBadgeText}>✓ Respondido</Text>
-                        </View>
-                    )}
-                </View>
+                {item.is_respondido && (
+                    <View style={styles.cardHeaderTop}>
+                        <Text variant="labelSmall" style={styles.respondidoBadge}>
+                            ✓ Respondido
+                        </Text>
+                        <Text variant="labelSmall" style={styles.clearBadge} onPress={handleClear}>
+                            × Limpar
+                        </Text>
+                    </View>
+                )}
+                <Text variant="labelSmall" style={styles.subGrupoBadge}>
+                    {item.checklist_sub_grupo}
+                </Text>
                 <Text variant="labelLarge" style={[
                     styles.questionTitle,
                     item.is_respondido && styles.questionTitleCompleted
@@ -92,19 +95,6 @@ const ChecklistItem = memo(({
                     {item.checklist_item_nome}
                 </Text>
             </View>
-            {item.is_respondido && (
-                <View style={styles.cardHeaderLeft}>
-                    <Button
-                        mode="text"
-                        compact
-                        onPress={handleClear}
-                        textColor="#dc2626"
-                        icon="close-circle-outline"
-                    >
-                        Limpar
-                    </Button>
-                </View>
-            )}
             <View style={{ marginVertical: 8 }}>
                 {(!item.checklist_alternativas_array || item.checklist_alternativas_array.length === 0) ? (
                     <TextInput
@@ -203,7 +193,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         width: '100%',
-        marginBottom: 8,
+        marginBottom: 6,
     },
     cardHeaderLeft: {
         flexDirection: 'row',
@@ -226,20 +216,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 2,
         alignSelf: 'flex-start',
-    },
-    completedBadge: {
-        backgroundColor: '#10b981',
-        borderRadius: 12,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        alignSelf: 'flex-start',
-    },
-    completedBadgeText: {
-        color: '#fff',
         fontSize: 11,
-        fontWeight: '600',
-        textTransform: 'uppercase',
-        letterSpacing: 0.5,
+    },
+    respondidoBadge: {
+        backgroundColor: '#10b981',
+        color: '#fff',
+        borderRadius: 12,
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        alignSelf: 'flex-start',
+        fontSize: 11,
+    },
+    clearBadge: {
+        backgroundColor: '#f02323ff',
+        color: '#fff',
+        borderRadius: 12,
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        alignSelf: 'flex-start',
+        fontSize: 11,
     },
     radioItem: {
         paddingVertical: 2,
