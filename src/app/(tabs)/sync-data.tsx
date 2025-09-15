@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View, Animated, Dimensions } from 'react-native';
+import { ScrollView, StyleSheet, View, Animated, Dimensions, Alert } from 'react-native';
 import { Button, Dialog, Portal, Text, ProgressBar, Card, Surface, IconButton, Snackbar } from 'react-native-paper';
 import { useState, useEffect, useRef } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -6,6 +6,7 @@ import { createDatabaseSyncService, type SyncProgress } from '@/services';
 import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import SendChecklistRealizado from '@/components/SendChecklistRealizado';
 import NetInfo from '@react-native-community/netinfo';
+import { checkForUpdate } from '@/services/updateChecker';
 
 interface ShowDialogProps {
     desc: string;
@@ -136,6 +137,12 @@ export default function SyncDataScreen() {
 
     const updateData = async (centroCustoId: string) => {
         showSyncProgressDialog();
+        const updateRequired = await checkForUpdate();
+        if (updateRequired) {
+            Alert.alert('Error', 'É necessário atualizar o aplicativo antes de continuar');
+            hideSyncProgressDialog();
+            return;
+        }
 
         try {
             updateSyncProgress('🔍 Verificando conexão com servidor...');

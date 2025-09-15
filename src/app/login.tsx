@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     View,
     StyleSheet,
@@ -12,15 +12,21 @@ import { Button, TextInput } from 'react-native-paper';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/ResetData';
+import { checkForUpdate } from '@/services/updateChecker';
 
 export default function LoginScreen() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
     const { login } = useAuth();
 
     const handleLogin = async () => {
+        const updateRequired = await checkForUpdate();
+        if (updateRequired) {
+            Alert.alert('Error', 'É necessário atualizar o aplicativo antes de continuar');
+            return;
+        }
         if (!email || !password) {
             Alert.alert('Error', 'Preencha todos os campos');
             return;

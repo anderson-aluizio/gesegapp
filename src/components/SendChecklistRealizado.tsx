@@ -2,6 +2,7 @@ import { useChecklisRealizadoDatabase } from "@/database/Models/useChecklisReali
 import { useChecklisRealizadoItemsDatabase } from "@/database/Models/useChecklisRealizadoItemsDatabase";
 import { useChecklistRealizadoFuncionarioDatabase } from "@/database/Models/useChecklistRealizadoFuncionarioDatabase";
 import { apiClient } from "@/services";
+import { checkForUpdate } from "@/services/updateChecker";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
@@ -14,6 +15,12 @@ const SendChecklistRealizado = () => {
 
     const handleSendChecklist = async () => {
         setLoading(true);
+        const updateRequired = await checkForUpdate();
+        if (updateRequired) {
+            Alert.alert('Error', 'É necessário atualizar o aplicativo antes de continuar');
+            setLoading(false);
+            return;
+        }
         try {
             const checklists = await checklistDb.getFinalizados();
             if (checklists.length === 0) {
