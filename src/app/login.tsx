@@ -24,21 +24,21 @@ export default function LoginScreen() {
     const handleLogin = async () => {
         const updateRequired = await checkForUpdate();
         if (updateRequired) {
-            Alert.alert('Error', 'É necessário atualizar o aplicativo antes de continuar');
+            Alert.alert('Atenção', 'É necessário atualizar o aplicativo antes de continuar');
             return;
         }
         if (!email || !password) {
-            Alert.alert('Error', 'Preencha todos os campos');
+            Alert.alert('Atenção', 'Preencha todos os campos');
             return;
         }
 
         if (!email.includes('@dinamo.srv.br')) {
-            Alert.alert('Error', 'Por favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
+            Alert.alert('Atenção', 'Por favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
             return;
         }
 
         if (password.length < 6) {
-            Alert.alert('Error', 'A senha deve ter pelo menos 6 caracteres');
+            Alert.alert('Atenção', 'A senha deve ter pelo menos 6 caracteres');
             return;
         }
 

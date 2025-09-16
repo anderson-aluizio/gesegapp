@@ -8,7 +8,7 @@ interface UpdateInfo {
 }
 
 const VERSION_URL = 'https://geseg2.dinamo.srv.br/api/mobile-actual-app-version';
-const LOCAL_VERSION = '0.0.1';
+const LOCAL_VERSION = '0.0.4';
 
 export async function checkForUpdate(): Promise<boolean> {
     try {

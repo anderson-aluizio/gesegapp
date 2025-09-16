@@ -139,7 +139,7 @@ export default function SyncDataScreen() {
         showSyncProgressDialog();
         const updateRequired = await checkForUpdate();
         if (updateRequired) {
-            Alert.alert('Error', 'É necessário atualizar o aplicativo antes de continuar');
+            Alert.alert('Atenção', 'É necessário atualizar o aplicativo antes de continuar');
             hideSyncProgressDialog();
             return;
         }
