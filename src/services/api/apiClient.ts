@@ -11,11 +11,12 @@ export class ApiClient {
 
     constructor() {
         const envUrl = process.env.EXPO_PUBLIC_API_URL;
-        if (envUrl) {
-            this.baseURL = envUrl.startsWith('http') ? envUrl : `http://${envUrl}`;
-        } else {
-            this.baseURL = 'https://geseg2.dinamo.srv.br/api';
+        if (!envUrl) {
+            throw new Error(
+                'EXPO_PUBLIC_API_URL is not defined. Please create a .env file based on .env.example and set the API URL.'
+            );
         }
+        this.baseURL = envUrl.startsWith('http') ? envUrl : `http://${envUrl}`;
     }
 
     private async getAuthHeaders(): Promise<Record<string, string>> {

@@ -7,8 +7,8 @@ interface UpdateInfo {
     versionName: string;
 }
 
-const VERSION_URL = 'https://geseg2.dinamo.srv.br/api/mobile-actual-app-version';
-const LOCAL_VERSION = '0.0.4';
+const VERSION_URL = `${process.env.EXPO_PUBLIC_API_URL}/mobile-actual-app-version`;
+const LOCAL_VERSION = process.env.EXPO_PUBLIC_LOCAL_VERSION || '0.0.1';
 
 export async function checkForUpdate(): Promise<boolean> {
     try {
