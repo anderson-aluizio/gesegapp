@@ -144,11 +144,40 @@ export async function initializeDatabase(database: SQLiteDatabase) {
       centro_custo_id text NOT NULL,
       FOREIGN KEY (centro_custo_id) REFERENCES centro_custos(id) ON UPDATE no action ON DELETE no action
     );
+    CREATE TABLE IF NOT EXISTS equipe_turnos (
+      id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      equipe_id integer NOT NULL,
+      date text NOT NULL,
+      veiculo_id text NOT NULL,
+      is_encerrado integer DEFAULT 0 NOT NULL,
+      created_at text NOT NULL,
+      encerrado_at text,
+      is_finalizado integer DEFAULT 0 NOT NULL,
+      finalizado_at text,
+      finalizado_by integer,
+      FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON UPDATE no action ON DELETE no action,
+      FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON UPDATE no action ON DELETE no action
+    );
+    CREATE INDEX IF NOT EXISTS et_equipe_id_idx ON equipe_turnos (equipe_id);
+    CREATE INDEX IF NOT EXISTS et_date_idx ON equipe_turnos (date);
+    CREATE INDEX IF NOT EXISTS et_veiculo_id_idx ON equipe_turnos (veiculo_id);
+    CREATE TABLE IF NOT EXISTS equipe_turno_funcionarios (
+      id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      equipe_turno_id integer NOT NULL,
+      funcionario_cpf text NOT NULL,
+      is_lider integer DEFAULT 0 NOT NULL,
+      FOREIGN KEY (equipe_turno_id) REFERENCES equipe_turnos(id) ON UPDATE no action ON DELETE no action,
+      FOREIGN KEY (funcionario_cpf) REFERENCES funcionarios(cpf) ON UPDATE no action ON DELETE no action
+    );
+    CREATE INDEX IF NOT EXISTS etf_equipe_turno_id_idx ON equipe_turno_funcionarios (equipe_turno_id);
+    CREATE INDEX IF NOT EXISTS etf_funcionario_cpf_idx ON equipe_turno_funcionarios (funcionario_cpf);
   `)
 }
 
 export async function dropTables(database: SQLiteDatabase) {
   await database.execAsync(`
+    DROP TABLE IF EXISTS equipe_turno_funcionarios;
+    DROP TABLE IF EXISTS equipe_turnos;
     DROP TABLE IF EXISTS centro_custo_estruturas;
     DROP TABLE IF EXISTS centro_custos;
     DROP TABLE IF EXISTS checklist_estruturas;
@@ -165,6 +194,8 @@ export async function dropTables(database: SQLiteDatabase) {
 }
 export async function clearTables(database: SQLiteDatabase) {
   await database.execAsync(`
+    DELETE FROM equipe_turno_funcionarios;
+    DELETE FROM equipe_turnos;
     DELETE FROM centro_custo_estruturas;
     DELETE FROM centro_custos;
     DELETE FROM checklist_estruturas;

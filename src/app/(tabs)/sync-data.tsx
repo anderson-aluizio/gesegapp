@@ -5,14 +5,17 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { createDatabaseSyncService, type SyncProgress } from '@/services';
 import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import SendChecklistRealizado from '@/components/SendChecklistRealizado';
+import SendEquipeTurno from '@/components/SendEquipeTurno';
 import NetInfo from '@react-native-community/netinfo';
 import { checkForUpdate } from '@/services/updateChecker';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ShowDialogProps {
     desc: string;
 }
 
 export default function SyncDataScreen() {
+    const { user } = useAuth();
     const [dialogVisible, setDialogVisible] = useState<boolean>(false);
     const [dialogDesc, setDialogDesc] = useState<string>('');
     const [syncProgressDialogVisible, setSyncProgressDialogVisible] = useState<boolean>(false);
@@ -29,6 +32,8 @@ export default function SyncDataScreen() {
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(50)).current;
     const progressAnim = useRef(new Animated.Value(0)).current;
+
+    const showTurnoEquipe = user?.is_operacao === true;
 
     useEffect(() => {
         Animated.parallel([
@@ -192,6 +197,7 @@ export default function SyncDataScreen() {
                 showsVerticalScrollIndicator={false}
             >
                 <SendChecklistRealizado />
+                {showTurnoEquipe && <SendEquipeTurno />}
                 <Animated.View style={[
                     styles.contentContainer,
                     {

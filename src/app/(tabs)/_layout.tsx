@@ -1,10 +1,18 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Redirect } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
 import { Icon } from 'react-native-paper';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function TabLayout() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
+
+  const showTurnoEquipe = user.is_operacao == true;
 
   return (
     <ProtectedRoute>
@@ -31,6 +39,14 @@ export default function TabLayout() {
           options={{
             title: 'Sincronizar',
             tabBarIcon: ({ color }) => <Icon source="sync" color={color} size={20} />,
+          }}
+        />
+        <Tabs.Screen
+          name="turno-equipe"
+          options={{
+            title: 'Turnos',
+            tabBarIcon: ({ color }) => <Icon source="clock-outline" color={color} size={20} />,
+            href: !showTurnoEquipe ? null : '/turno-equipe',
           }}
         />
       </Tabs>

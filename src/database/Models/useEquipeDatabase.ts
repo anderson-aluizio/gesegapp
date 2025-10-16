@@ -43,14 +43,21 @@ export const useEquipeDatabase = () => {
     }
   }
 
-  const getByParams = async (centroCustoId: string, paramQuery: string) => {
+  const getByParams = async (centroCustoId = '', paramQuery: string) => {
     try {
-      const query = `SELECT * FROM equipes WHERE centro_custo_id = ? AND nome LIKE ? ORDER BY nome LIMIT 10`;
+      // Build query conditionally: if centroCustoId is empty, omit the centro_custo_id filter
+      let query: string
+      let params: Array<string | number>
 
-      const response = await database.getAllAsync<EquipeDatabase>(query, [
-        centroCustoId,
-        `%${paramQuery}%`
-      ]);
+      if (centroCustoId === '') {
+        query = `SELECT * FROM equipes WHERE nome LIKE ? ORDER BY nome LIMIT 10`;
+        params = [`%${paramQuery}%`];
+      } else {
+        query = `SELECT * FROM equipes WHERE centro_custo_id = ? AND nome LIKE ? ORDER BY nome LIMIT 10`;
+        params = [centroCustoId, `%${paramQuery}%`];
+      }
+
+      const response = await database.getAllAsync<EquipeDatabase>(query, params);
 
       return response
     } catch (error) {

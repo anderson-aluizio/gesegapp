@@ -9,6 +9,7 @@ export default interface UserInterface {
     name: string;
     token: string;
     centro_custos: { id: string; nome: string; }[];
+    is_operacao: boolean;
 }
 
 export interface LoginResponse {
@@ -78,7 +79,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     id: responseLogin.user.id,
                     name: responseLogin.user.name,
                     email: responseLogin.user.email,
-                    centro_custos: responseLogin.user.centro_custos
+                    centro_custos: responseLogin.user.centro_custos,
+                    is_operacao: responseLogin.user.is_operacao || false
                 }));
 
                 setIsAuthenticated(true);
@@ -87,7 +89,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     name: responseLogin.user.name,
                     email: responseLogin.user.email,
                     token: responseLogin.user.token,
-                    centro_custos: responseLogin.user.centro_custos
+                    centro_custos: responseLogin.user.centro_custos,
+                    is_operacao: responseLogin.user.is_operacao || false
                 });
 
                 if (responseLogin.user.centro_custos) {
