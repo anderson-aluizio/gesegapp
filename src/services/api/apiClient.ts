@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkForUpdate, type UpdateInfo } from '../updateChecker';
 
 export interface ApiResponse<T> {
     data: T;
@@ -6,8 +7,19 @@ export interface ApiResponse<T> {
     message?: string;
 }
 
+export class UpdateRequiredError extends Error {
+    updateInfo?: UpdateInfo;
+
+    constructor(message: string, updateInfo?: UpdateInfo) {
+        super(message);
+        this.name = 'UpdateRequiredError';
+        this.updateInfo = updateInfo;
+    }
+}
+
 export class ApiClient {
     private baseURL: string;
+    private updateCheckEnabled: boolean = true;
 
     constructor() {
         const envUrl = process.env.EXPO_PUBLIC_API_URL;
@@ -17,6 +29,14 @@ export class ApiClient {
             );
         }
         this.baseURL = envUrl.startsWith('http') ? envUrl : `http://${envUrl}`;
+    }
+
+    /**
+     * Enables or disables automatic update checking on API requests.
+     * Useful for testing or specific scenarios where update check should be skipped.
+     */
+    public setUpdateCheckEnabled(enabled: boolean): void {
+        this.updateCheckEnabled = enabled;
     }
 
     private async getAuthHeaders(): Promise<Record<string, string>> {
@@ -33,8 +53,27 @@ export class ApiClient {
         return headers;
     }
 
+    /**
+     * Interceptor that checks if an app update is required before making API requests.
+     * Throws UpdateRequiredError if an update is needed.
+     */
+    private async checkUpdateBeforeRequest(): Promise<void> {
+        if (!this.updateCheckEnabled) {
+            return;
+        }
+
+        const updateCheck = await checkForUpdate();
+        if (updateCheck.updateRequired) {
+            throw new UpdateRequiredError(
+                'App update required. Please update to continue.',
+                updateCheck.updateInfo
+            );
+        }
+    }
+
     async get<T>(endpoint: string): Promise<T> {
         const fullUrl = `${this.baseURL}${endpoint}`;
+        await this.checkUpdateBeforeRequest();
         try {
             const headers = await this.getAuthHeaders();
             const response = await fetch(fullUrl, {
@@ -56,6 +95,7 @@ export class ApiClient {
 
     async post<T>(endpoint: string, body: any): Promise<T> {
         const fullUrl = `${this.baseURL}${endpoint}`;
+        await this.checkUpdateBeforeRequest();
         try {
             const headers = await this.getAuthHeaders();
             const response = await fetch(fullUrl, {

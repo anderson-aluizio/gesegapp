@@ -14,7 +14,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/ResetData';
-import { checkForUpdate } from '@/services/updateChecker';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState<string>('');
@@ -46,11 +45,6 @@ export default function LoginScreen() {
     }, []);
 
     const handleLogin = async () => {
-        const updateRequired = await checkForUpdate();
-        if (updateRequired) {
-            Alert.alert('Atenção', 'É necessário atualizar o aplicativo antes de continuar');
-            return;
-        }
         if (!email || !password) {
             Alert.alert('Atenção', 'Preencha todos os campos');
             return;

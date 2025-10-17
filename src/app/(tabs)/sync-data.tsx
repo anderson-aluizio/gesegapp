@@ -7,7 +7,6 @@ import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/Models/u
 import SendChecklistRealizado from '@/components/SendChecklistRealizado';
 import SendEquipeTurno from '@/components/SendEquipeTurno';
 import NetInfo from '@react-native-community/netinfo';
-import { checkForUpdate } from '@/services/updateChecker';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface ShowDialogProps {
@@ -142,12 +141,6 @@ export default function SyncDataScreen() {
 
     const updateData = async (centroCustoId: string) => {
         showSyncProgressDialog();
-        const updateRequired = await checkForUpdate();
-        if (updateRequired) {
-            Alert.alert('Atenção', 'É necessário atualizar o aplicativo antes de continuar');
-            hideSyncProgressDialog();
-            return;
-        }
 
         try {
             updateSyncProgress('🔍 Verificando conexão com servidor...');

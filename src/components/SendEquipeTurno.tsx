@@ -1,7 +1,6 @@
 import { useEquipeTurnoDatabase } from "@/database/Models/useEquipeTurnoDatabase";
 import { useEquipeTurnoFuncionarioDatabase } from "@/database/Models/useEquipeTurnoFuncionarioDatabase";
 import { apiClient } from "@/services";
-import { checkForUpdate } from "@/services/updateChecker";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
@@ -13,12 +12,6 @@ const SendEquipeTurno = () => {
 
     const handleSendTurnos = async () => {
         setLoading(true);
-        const updateRequired = await checkForUpdate();
-        if (updateRequired) {
-            Alert.alert('Atenção', 'É necessário atualizar o aplicativo antes de continuar');
-            setLoading(false);
-            return;
-        }
         try {
             const turnos = await turnoDb.getFinalizados();
             if (turnos.length === 0) {
