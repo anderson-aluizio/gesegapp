@@ -1,7 +1,7 @@
 import { useChecklisRealizadoDatabase } from "@/database/Models/useChecklisRealizadoDatabase";
 import { useChecklisRealizadoItemsDatabase } from "@/database/Models/useChecklisRealizadoItemsDatabase";
 import { useChecklistRealizadoFuncionarioDatabase } from "@/database/Models/useChecklistRealizadoFuncionarioDatabase";
-import { apiClient } from "@/services";
+import { apiClientWrapper } from "@/services";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
@@ -30,7 +30,7 @@ const SendChecklistRealizado = () => {
                 const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
                 const checklistData = { ...checklist, funcionarios, items };
 
-                await apiClient.post('/store-checklist-realizado', checklistData);
+                await apiClientWrapper.post('/store-checklist-realizado', checklistData);
                 await checklistDb.remove(checklist.id);
             }
             Alert.alert(

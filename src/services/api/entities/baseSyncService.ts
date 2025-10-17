@@ -1,4 +1,4 @@
-import { apiClient } from '../apiClient';
+import { apiClientWrapper } from '../apiClientWrapper';
 
 export interface PaginatedResponse<T> {
     current_page: number;
@@ -33,7 +33,7 @@ export abstract class BaseSyncService {
                     url += `&centro_custo_id=${centroCustoId}`;
                 }
 
-                const paginatedResponse = await apiClient.get<PaginatedResponse<T>>(url);
+                const paginatedResponse = await apiClientWrapper.get<PaginatedResponse<T>>(url);
 
                 if (paginatedResponse.data.length > 0) {
                     await insertFunction(paginatedResponse.data);

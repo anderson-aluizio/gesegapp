@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiClient } from '@/services';
+import { apiClientWrapper } from '@/services';
 
 export default interface UserInterface {
     id: number;
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const login = async (email: string, password: string): Promise<boolean> => {
         try {
-            const responseLogin = await apiClient.post<LoginResponse>('/auth-user', {
+            const responseLogin = await apiClientWrapper.post<LoginResponse>('/auth-user', {
                 email,
                 password,
             });

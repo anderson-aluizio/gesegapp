@@ -1,6 +1,6 @@
 import { useEquipeTurnoDatabase } from "@/database/Models/useEquipeTurnoDatabase";
 import { useEquipeTurnoFuncionarioDatabase } from "@/database/Models/useEquipeTurnoFuncionarioDatabase";
-import { apiClient } from "@/services";
+import { apiClientWrapper } from "@/services";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
@@ -31,7 +31,7 @@ const SendEquipeTurno = () => {
                     const funcionarios = await turnoFuncionarioDb.getByEquipeTurnoId(turno.id);
                     const turnoData = { ...turno, funcionarios };
 
-                    await apiClient.post('/store-equipe-turno', turnoData);
+                    await apiClientWrapper.post('/store-equipe-turno', turnoData);
                     await turnoDb.remove(turno.id);
                     successCount++;
                 } catch (error) {
