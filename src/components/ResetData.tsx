@@ -57,6 +57,17 @@ const ResetDataScreen = () => {
     }
   };
 
+  // A subtle, non-obvious status line shown in the admin dialog. It looks like a
+  // normal "Última sincronização" message to regular users but gives an admin
+  // the day/month/hour clues needed to assemble the dynamic password.
+  const subtleAdminHint = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    return `Última sincronização: ${day}/${month} às ${hour}h`;
+  };
+
   const handleResetDatabase = async () => {
     setIsLoading(true);
     try {
@@ -118,6 +129,10 @@ const ResetDataScreen = () => {
               onSubmitEditing={handlePasswordSubmit}
               keyboardType="numeric"
             />
+            {/* innocuous-looking status line that hints day/month/hour to admins */}
+            <Text variant="bodySmall" style={{ marginTop: 12, opacity: 0.75 }}>
+              {subtleAdminHint()}
+            </Text>
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={hidePasswordDialog}>Cancelar</Button>
