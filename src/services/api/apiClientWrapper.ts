@@ -3,6 +3,16 @@ import { apiClient, UpdateRequiredError } from './apiClient';
 import type { UpdateInfo } from '../updateChecker';
 
 /**
+ * Custom error class to indicate that update alert was already shown
+ */
+export class UpdateRequiredHandledError extends Error {
+    constructor(message: string = 'Update required and alert shown') {
+        super(message);
+        this.name = 'UpdateRequiredHandledError';
+    }
+}
+
+/**
  * Shows an alert to the user prompting them to download the new version
  */
 function showUpdateAlert(updateInfo: UpdateInfo): void {
@@ -53,6 +63,8 @@ export class ApiClientWrapper {
         } catch (error) {
             if (error instanceof UpdateRequiredError && error.updateInfo) {
                 showUpdateAlert(error.updateInfo);
+                // Throw a different error type to indicate the update alert was shown
+                throw new UpdateRequiredHandledError();
             }
             throw error;
         }
@@ -64,6 +76,8 @@ export class ApiClientWrapper {
         } catch (error) {
             if (error instanceof UpdateRequiredError && error.updateInfo) {
                 showUpdateAlert(error.updateInfo);
+                // Throw a different error type to indicate the update alert was shown
+                throw new UpdateRequiredHandledError();
             }
             throw error;
         }

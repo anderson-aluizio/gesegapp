@@ -1,5 +1,5 @@
 export { apiClient } from './api/apiClient';
-export { apiClientWrapper } from './api/apiClientWrapper';
+export { apiClientWrapper, UpdateRequiredHandledError } from './api/apiClientWrapper';
 export { syncService } from './api/syncService';
 export { API_ENDPOINTS } from './api/endpoints';
 

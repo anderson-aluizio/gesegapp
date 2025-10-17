@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { apiClientWrapper } from '@/services';
+import { apiClientWrapper, UpdateRequiredHandledError } from '@/services';
 
 export default interface UserInterface {
     id: number;
@@ -104,6 +104,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 return false;
             }
         } catch (error) {
+            // Re-throw UpdateRequiredHandledError so the login screen can handle it
+            if (error instanceof UpdateRequiredHandledError) {
+                throw error;
+            }
+
             console.error('Login error:', error);
             return false;
         }

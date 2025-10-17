@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/ResetData';
+import { UpdateRequiredHandledError } from '@/services';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState<string>('');
@@ -85,6 +86,13 @@ export default function LoginScreen() {
                 Alert.alert('Erro', 'Credenciais inválidas. Por favor, tente novamente.');
             }
         } catch (error) {
+            // If it's an UpdateRequiredHandledError, the alert was already shown
+            // Don't show additional error messages
+            if (error instanceof UpdateRequiredHandledError) {
+                console.log('Update required - alert already shown to user');
+                return;
+            }
+
             console.error('Erro ao fazer login:', error);
             Alert.alert('Erro', 'Ocorreu um erro durante o login');
         } finally {
