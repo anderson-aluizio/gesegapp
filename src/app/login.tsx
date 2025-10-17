@@ -7,8 +7,10 @@ import {
     Platform,
     ScrollView,
     Image,
+    Text,
 } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import { Button, TextInput, Checkbox } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/ResetData';
@@ -17,9 +19,31 @@ import { checkForUpdate } from '@/services/updateChecker';
 export default function LoginScreen() {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [remember, setRemember] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const { login } = useAuth();
+
+    const CREDENTIALS_KEY = '@geseg:credentials';
+
+    // Load stored credentials (if any) when the screen mounts
+    useEffect(() => {
+        const loadStoredCredentials = async () => {
+            try {
+                const json = await AsyncStorage.getItem(CREDENTIALS_KEY);
+                if (json) {
+                    const data = JSON.parse(json);
+                    if (data?.email) setEmail(data.email);
+                    if (data?.password) setPassword(data.password);
+                    if (data?.remember) setRemember(true);
+                }
+            } catch (err) {
+                console.warn('Erro ao carregar credenciais salvas:', err);
+            }
+        };
+
+        loadStoredCredentials();
+    }, []);
 
     const handleLogin = async () => {
         const updateRequired = await checkForUpdate();
@@ -48,6 +72,20 @@ export default function LoginScreen() {
             const success = await login(email, password);
 
             if (success) {
+                // Persist or remove credentials based on the "remember" toggle.
+                try {
+                    if (remember) {
+                        await AsyncStorage.setItem(
+                            CREDENTIALS_KEY,
+                            JSON.stringify({ email, password, remember: true })
+                        );
+                    } else {
+                        await AsyncStorage.removeItem(CREDENTIALS_KEY);
+                    }
+                } catch (err) {
+                    console.warn('Erro ao salvar/remover credenciais:', err);
+                }
+
                 router.replace('/(tabs)');
             } else {
                 Alert.alert('Erro', 'Credenciais inválidas. Por favor, tente novamente.');
@@ -106,6 +144,17 @@ export default function LoginScreen() {
                         mode="outlined"
                         disabled={loading}
                     />
+
+                    <View style={styles.rememberRow}>
+                        <View style={styles.rememberTextWrapper}>
+                            <Text style={styles.rememberText}>Lembrar credenciais</Text>
+                        </View>
+                        <Checkbox
+                            status={remember ? 'checked' : 'unchecked'}
+                            onPress={() => setRemember(!remember)}
+                            disabled={loading}
+                        />
+                    </View>
 
                     <Button
                         mode="contained"
@@ -178,6 +227,20 @@ const styles = StyleSheet.create({
     },
     input: {
         marginBottom: 16,
+    },
+    rememberRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+        paddingHorizontal: 4,
+    },
+    rememberTextWrapper: {
+        flex: 1,
+    },
+    rememberText: {
+        fontSize: 16,
+        color: '#333',
     },
     loginButton: {
         marginTop: 10,
