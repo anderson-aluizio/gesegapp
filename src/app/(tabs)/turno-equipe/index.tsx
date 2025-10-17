@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, View, Animated, Alert } from 'react-native';
+import { FlatList, StyleSheet, View, Animated, Alert, StatusBar } from 'react-native';
 import { Button, Dialog, Portal, Text, Surface, IconButton, ActivityIndicator, Card, Chip, List, Divider } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
@@ -208,17 +208,27 @@ export default function TurnoEquipeScreen() {
     return (
         <ProtectedRoute>
             <View style={styles.container}>
+                <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" />
                     </View>
                 ) : (
                     <>
-                        <Surface style={styles.headerSurface} elevation={2}>
-                            <Text variant="headlineSmall" style={styles.headerTitle}>
-                                Turnos de Trabalho
-                            </Text>
-                        </Surface>
+                        <View style={styles.headerContainer}>
+                            <View style={styles.headerTop}>
+                                <IconButton
+                                    icon="arrow-left"
+                                    iconColor="#fff"
+                                    size={24}
+                                    onPress={() => router.back()}
+                                    style={styles.backButton}
+                                />
+                                <Text style={styles.headerTitle}>Turnos de Trabalho</Text>
+                                <View style={styles.headerSpacer} />
+                            </View>
+                        </View>
 
                         <View style={styles.contentContainer}>
                             {turnos.length > 0 ? (
@@ -300,21 +310,39 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    headerSurface: {
+    headerContainer: {
         backgroundColor: '#667eea',
-        paddingHorizontal: 20,
-        paddingVertical: 24,
+        paddingVertical: 16,
+        paddingHorizontal: 16,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    headerTop: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 4,
+    },
+    backButton: {
+        margin: 0,
     },
     headerTitle: {
-        color: '#ffffff',
+        color: '#fff',
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 4,
+        flex: 1,
+        textAlign: 'center',
     },
-    headerSubtitle: {
-        color: '#ffffff',
-        opacity: 0.9,
+    headerSpacer: {
+        width: 40,
     },
     contentContainer: {
         flex: 1,

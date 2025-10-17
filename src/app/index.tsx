@@ -1,26 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { useAuth } from '@/contexts/AuthContext';
-import { Redirect } from 'expo-router';
+import { router } from 'expo-router';
 
 export default function RootRedirect() {
     const { isAuthenticated, loading } = useAuth();
 
-    if (loading) {
-        return (
-            <View style={styles.container}>
-                <ActivityIndicator size="large" />
-                <Text style={styles.text}>Loading...</Text>
-            </View>
-        );
-    }
+    useEffect(() => {
+        if (!loading) {
+            if (!isAuthenticated) {
+                router.replace('/login');
+            } else {
+                router.replace('/(tabs)/home');
+            }
+        }
+    }, [isAuthenticated, loading]);
 
-    if (!isAuthenticated) {
-        return <Redirect href="/login" />;
-    }
-
-    return <Redirect href="/(tabs)" />;
+    return (
+        <View style={styles.container}>
+            <ActivityIndicator size="large" />
+            <Text style={styles.text}>Loading...</Text>
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({

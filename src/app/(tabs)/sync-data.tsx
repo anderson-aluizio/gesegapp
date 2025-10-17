@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View, Animated, Dimensions, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Animated, Dimensions, Alert, StatusBar } from 'react-native';
 import { Button, Dialog, Portal, Text, ProgressBar, Card, Surface, IconButton, Snackbar } from 'react-native-paper';
 import { useState, useEffect, useRef } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -8,12 +8,14 @@ import SendChecklistRealizado from '@/components/SendChecklistRealizado';
 import SendEquipeTurno from '@/components/SendEquipeTurno';
 import NetInfo from '@react-native-community/netinfo';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'expo-router';
 
 interface ShowDialogProps {
     desc: string;
 }
 
 export default function SyncDataScreen() {
+    const router = useRouter();
     const { user } = useAuth();
     const [dialogVisible, setDialogVisible] = useState<boolean>(false);
     const [dialogDesc, setDialogDesc] = useState<string>('');
@@ -184,6 +186,22 @@ export default function SyncDataScreen() {
     };
     return (
         <View style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+
+            <View style={styles.headerContainer}>
+                <View style={styles.headerTop}>
+                    <IconButton
+                        icon="arrow-left"
+                        iconColor="#fff"
+                        size={24}
+                        onPress={() => router.back()}
+                        style={styles.backButton}
+                    />
+                    <Text style={styles.headerTitle}>Sincronização</Text>
+                    <View style={styles.headerSpacer} />
+                </View>
+            </View>
+
             <ScrollView
                 style={styles.scrollContainer}
                 contentContainerStyle={styles.scrollContent}
@@ -375,7 +393,41 @@ export default function SyncDataScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#f8f9fa',
+    },
+    headerContainer: {
+        backgroundColor: '#667eea',
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    headerTop: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 4,
+    },
+    backButton: {
+        margin: 0,
+    },
+    headerTitle: {
+        color: '#fff',
+        fontSize: 20,
+        fontWeight: 'bold',
+        flex: 1,
+        textAlign: 'center',
+    },
+    headerSpacer: {
+        width: 40,
     },
     headerSurface: {
         backgroundColor: '#0439c9',
@@ -399,17 +451,6 @@ const styles = StyleSheet.create({
     },
     headerIconText: {
         fontSize: 32,
-    },
-    headerTitle: {
-        color: '#ffffff',
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 8,
-    },
-    headerSubtitle: {
-        color: '#ffffff',
-        opacity: 0.9,
-        textAlign: 'center',
     },
     scrollContainer: {
         flex: 1,

@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     setshouldRefreshCentroCustos(true);
                 }
 
-                router.replace('/(tabs)');
+                router.replace('/(tabs)/home');
                 return true;
             } else {
                 console.error('Invalid login response:', responseLogin);

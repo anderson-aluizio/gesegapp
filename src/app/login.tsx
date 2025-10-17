@@ -81,7 +81,7 @@ export default function LoginScreen() {
                     console.warn('Erro ao salvar/remover credenciais:', err);
                 }
 
-                router.replace('/(tabs)');
+                router.replace('/(tabs)/home');
             } else {
                 Alert.alert('Erro', 'Credenciais inválidas. Por favor, tente novamente.');
             }

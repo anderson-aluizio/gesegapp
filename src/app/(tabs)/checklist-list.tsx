@@ -10,7 +10,7 @@ import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklis
 import { useCentroCustosRefresh } from '@/hooks/useCentroCustosRefresh';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 
-export default function HomeScreen() {
+export default function ChecklistListScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -25,7 +25,7 @@ export default function HomeScreen() {
     const checklistDb = useChecklisRealizadoDatabase();
     const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
     const centroCustoDb = useCentroCustoDatabase();
-    const { logout, user } = useAuth();
+    const { user } = useAuth();
 
     useCentroCustosRefresh();
 
@@ -132,27 +132,15 @@ export default function HomeScreen() {
             <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>
-                    <View style={styles.logoContainer}>
-                        <Image
-                            source={require('../../../assets/images/geseg-logo-nobg.png')}
-                            style={styles.headerLogo}
-                            resizeMode="contain"
-                        />
-                    </View>
-                </View>
-                <View style={styles.userInfoContainer}>
-                    <View style={styles.userBadge}>
-                        <IconButton
-                            icon="logout"
-                            iconColor="#fff"
-                            size={18}
-                            onPress={logout}
-                            style={styles.logoutButton}
-                        />
-                        <Text style={styles.userText} numberOfLines={1}>
-                            {user?.email}
-                        </Text>
-                    </View>
+                    <IconButton
+                        icon="arrow-left"
+                        iconColor="#fff"
+                        size={24}
+                        onPress={() => router.back()}
+                        style={styles.backButton}
+                    />
+                    <Text style={styles.headerTitle}>Checklists</Text>
+                    <View style={styles.headerSpacer} />
                 </View>
             </View>
 
@@ -439,45 +427,19 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 12,
+        paddingVertical: 4,
     },
-    logoContainer: {
-        flex: 1,
-        alignItems: 'center',
-    },
-    headerLogo: {
-        width: 140,
-        height: 70,
-        borderRadius: 8,
-    },
-    userInfoContainer: {
-        alignItems: 'center',
-    },
-    userBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        paddingHorizontal: 12,
-        paddingVertical: 0,
-        borderRadius: 25,
-    },
-    userIcon: {
+    backButton: {
         margin: 0,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 15,
-        width: 30,
-        height: 30,
     },
-    userText: {
+    headerTitle: {
         color: '#fff',
-        fontSize: 14,
-        fontWeight: '500',
-        marginLeft: 8,
+        fontSize: 20,
+        fontWeight: 'bold',
         flex: 1,
+        textAlign: 'center',
     },
-    logoutButton: {
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        borderRadius: 25,
-        elevation: 2,
+    headerSpacer: {
+        width: 40,
     },
 });

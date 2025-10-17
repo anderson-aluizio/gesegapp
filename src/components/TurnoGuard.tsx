@@ -30,17 +30,16 @@ export default function TurnoGuard({ children }: TurnoGuardProps) {
         '/turno-equipe/create',
         '/sync-data',
         '/login',
+        '/home',
       ];
 
       if (allowedPaths.some(path => pathname?.includes(path))) {
         setIsChecking(false);
-        console.log('Allowed path accessed:', pathname);
         return;
       }
 
       if (!user || !user.is_operacao) {
         setIsChecking(false);
-        console.log('User not operational or not logged in');
         return;
       }
 
@@ -50,7 +49,6 @@ export default function TurnoGuard({ children }: TurnoGuardProps) {
 
       if (!dataSynced) {
         router.replace('/sync-data');
-        console.log('Required data not synced yet');
         return;
       }
 
