@@ -128,7 +128,6 @@ export default function TurnoEquipeScreen() {
                         </View>
                     </View>
 
-                    {/* Informações resumidas sempre visíveis */}
                     <View style={styles.summarySection}>
                         <View style={styles.infoRow}>
                             <IconButton icon="car" size={16} style={styles.infoIcon} />
@@ -145,7 +144,6 @@ export default function TurnoEquipeScreen() {
                         </View>
                     </View>
 
-                    {/* Detalhes expandidos */}
                     {isExpanded ? (
                         <View style={styles.expandedSection}>
                             <Divider style={styles.divider} />
@@ -368,7 +366,6 @@ const styles = StyleSheet.create({
     infoRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 2,
     },
     infoIcon: {
         margin: 0,

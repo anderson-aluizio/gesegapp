@@ -377,7 +377,6 @@ const AutocompleteSearchDropdown = (props: AutocompleteSearchDropdownProps) => {
                 />
             )}
 
-            {/* Selected Items List for Multiple Selection */}
             {props.isMultiple && selectedItems.length > 0 && (
                 <View style={styles.selectedItemsContainer}>
                     <Text style={styles.selectedItemsTitle}>
