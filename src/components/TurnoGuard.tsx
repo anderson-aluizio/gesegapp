@@ -34,11 +34,13 @@ export default function TurnoGuard({ children }: TurnoGuardProps) {
 
       if (allowedPaths.some(path => pathname?.includes(path))) {
         setIsChecking(false);
+        console.log('Allowed path accessed:', pathname);
         return;
       }
 
       if (!user || !user.is_operacao) {
         setIsChecking(false);
+        console.log('User not operational or not logged in');
         return;
       }
 
@@ -47,7 +49,8 @@ export default function TurnoGuard({ children }: TurnoGuardProps) {
       const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
 
       if (!dataSynced) {
-        setIsChecking(false);
+        router.replace('/sync-data');
+        console.log('Required data not synced yet');
         return;
       }
 
