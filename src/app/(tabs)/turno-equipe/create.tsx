@@ -126,25 +126,19 @@ export default function CreateTurnoEquipeScreen() {
         setIsSubmitting(true);
 
         try {
-            // Check if there's already an open turno for this equipe on this date
             const dateStr = selectedDate.toISOString().split('T')[0];
-            const existingTurno = await equipeTurnoDb.checkExistingTurnoAberto(
-                Number(selectedEquipe),
-                dateStr
-            );
+            const existingTurno = await equipeTurnoDb.checkExistingTurnoToday(dateStr);
 
             if (existingTurno) {
-                setDialogDesc('Já existe um turno aberto para esta equipe hoje.');
+                setDialogDesc('Já existe um turno criado para hoje.');
                 setIsSubmitting(false);
                 return;
             }
 
-            // Create turno
             const turnoResult = await equipeTurnoDb.create({
                 equipe_id: Number(selectedEquipe),
                 date: selectedDate,
-                veiculo_id: selectedVeiculo,
-                is_encerrado: false
+                veiculo_id: selectedVeiculo
             });
 
             if (!turnoResult.lastInsertRowId) {
@@ -153,7 +147,6 @@ export default function CreateTurnoEquipeScreen() {
                 return;
             }
 
-            // Add funcionarios
             for (const funcionario of selectedFuncionarios) {
                 await equipeTurnoFuncionarioDb.create({
                     equipe_turno_id: Number(turnoResult.lastInsertRowId),
@@ -162,7 +155,6 @@ export default function CreateTurnoEquipeScreen() {
                 });
             }
 
-            // Success - navigate back
             router.replace('/turno-equipe');
         } catch (error) {
             console.error('Erro ao criar turno:', error);

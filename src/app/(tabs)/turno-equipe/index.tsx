@@ -1,22 +1,24 @@
 import { FlatList, StyleSheet, View, Animated, Alert } from 'react-native';
-import { Button, Dialog, Portal, Text, Surface, IconButton, ActivityIndicator, Card } from 'react-native-paper';
+import { Button, Dialog, Portal, Text, Surface, IconButton, ActivityIndicator, Card, Chip, List, Divider } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
 import { EquipeTurnoDatabaseWithRelations, useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { useAuth } from '@/contexts/AuthContext';
+import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { isBeforeToday } from '@/utils/dateUtils';
 
 export default function TurnoEquipeScreen() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [turnos, setTurnos] = useState<EquipeTurnoDatabaseWithRelations[]>([]);
     const [selectedTurno, setSelectedTurno] = useState<EquipeTurnoDatabaseWithRelations | null>(null);
-    const [isShowEncerrarDialog, setIsShowEncerrarDialog] = useState<boolean>(false);
     const [isShowDeleteDialog, setIsShowDeleteDialog] = useState<boolean>(false);
+    const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+    const [funcionariosByTurno, setFuncionariosByTurno] = useState<Map<number, EquipeTurnoFuncionarioDatabaseWithRelations[]>>(new Map());
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const turnoDb = useEquipeTurnoDatabase();
-    const { user } = useAuth();
+    const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
 
     const list = async () => {
         try {
@@ -44,119 +46,166 @@ export default function TurnoEquipeScreen() {
         router.push('/turno-equipe/create');
     };
 
-    const handleClickTurno = (turno: EquipeTurnoDatabaseWithRelations) => {
-        if (!turno) return;
-        router.push(`/turno-equipe/${turno.id}`);
-    };
-
-    const handleEncerrarTurno = async () => {
-        if (!selectedTurno || !user) return;
-        setIsShowEncerrarDialog(false);
-
-        try {
-            await turnoDb.updateEncerrado(selectedTurno.id, user.id);
-            Alert.alert('Sucesso', 'Turno encerrado com sucesso.');
-            await list();
-        } catch (error) {
-            console.error('Erro ao encerrar turno:', error);
-            Alert.alert('Erro', 'Erro ao encerrar turno. Tente novamente.');
-        } finally {
-            setSelectedTurno(null);
-        }
-    };
-
     const handleDeleteTurno = async () => {
         if (!selectedTurno) return;
         setIsShowDeleteDialog(false);
 
         try {
             await turnoDb.remove(selectedTurno.id);
-            Alert.alert('Sucesso', 'Turno excluído com sucesso.');
+            Alert.alert('Sucesso', 'Turno removido com sucesso.');
             await list();
         } catch (error) {
-            console.error('Erro ao excluir turno:', error);
-            Alert.alert('Erro', 'Erro ao excluir turno. Tente novamente.');
+            console.error('Erro ao remover turno:', error);
+            Alert.alert('Erro', 'Erro ao remover turno. Tente novamente.');
         } finally {
             setSelectedTurno(null);
         }
     };
 
-    const handleLongPressTurno = (turno: EquipeTurnoDatabaseWithRelations) => {
+    const handleDeletePress = (turno: EquipeTurnoDatabaseWithRelations) => {
+        if (isBeforeToday(turno.date)) {
+            Alert.alert('Atenção', 'Você não pode remover registros de turnos anteriores.');
+            return;
+        }
         setSelectedTurno(turno);
         setIsShowDeleteDialog(true);
     };
 
-    const handleEncerrarPress = (turno: EquipeTurnoDatabaseWithRelations) => {
-        setSelectedTurno(turno);
-        setIsShowEncerrarDialog(true);
+    const toggleCardExpansion = async (turnoId: number) => {
+        const newExpanded = new Set(expandedCards);
+
+        if (newExpanded.has(turnoId)) {
+            newExpanded.delete(turnoId);
+        } else {
+            newExpanded.add(turnoId);
+            if (!funcionariosByTurno.has(turnoId)) {
+                const funcionarios = await turnoFuncionarioDb.getByEquipeTurnoId(turnoId);
+                setFuncionariosByTurno(new Map(funcionariosByTurno.set(turnoId, funcionarios)));
+            }
+        }
+
+        setExpandedCards(newExpanded);
     };
 
-    const renderTurnoCard = ({ item }: { item: EquipeTurnoDatabaseWithRelations }) => (
-        <Card
-            style={[
-                styles.turnoCard,
-                item.is_encerrado ? styles.turnoCardEncerrado : styles.turnoCardAberto
-            ]}
-            onPress={() => handleClickTurno(item)}
-            onLongPress={() => handleLongPressTurno(item)}
-        >
-            <Card.Content>
-                <View style={styles.cardHeader}>
-                    <View style={styles.statusBadge}>
-                        <Text style={[
-                            styles.statusText,
-                            item.is_encerrado ? styles.statusTextEncerrado : styles.statusTextAberto
-                        ]}>
-                            {item.is_encerrado ? 'Encerrado' : 'Aberto'}
-                        </Text>
+    const renderTurnoCard = ({ item }: { item: EquipeTurnoDatabaseWithRelations }) => {
+        const isExpanded = expandedCards.has(item.id);
+        const funcionarios = funcionariosByTurno.get(item.id) || [];
+        const isPast = isBeforeToday(item.date);
+
+        return (
+            <Card style={styles.turnoCard}>
+                <Card.Content>
+                    <View style={styles.cardHeader}>
+                        <View style={styles.headerLeft}>
+                            <Text variant="titleMedium" style={styles.equipeName}>
+                                {item.equipe_nome}
+                            </Text>
+                            <Text variant="bodySmall" style={styles.dateText}>
+                                {new Date(item.date).toLocaleDateString('pt-BR', {
+                                    weekday: 'long',
+                                    day: '2-digit',
+                                    month: 'long',
+                                    year: 'numeric'
+                                })}
+                            </Text>
+                        </View>
+                        <View style={styles.headerRight}>
+                            {!isPast ? (
+                                <IconButton
+                                    icon="delete"
+                                    size={20}
+                                    iconColor="#e74c3c"
+                                    onPress={() => handleDeletePress(item)}
+                                    style={styles.deleteButton}
+                                />
+                            ) : null}
+                            <IconButton
+                                icon={isExpanded ? 'chevron-up' : 'chevron-down'}
+                                size={24}
+                                onPress={() => toggleCardExpansion(item.id)}
+                                style={styles.expandButton}
+                            />
+                        </View>
                     </View>
-                    {!item.is_encerrado ? (
-                        <IconButton
-                            icon="check-circle"
-                            size={20}
-                            iconColor="#4caf50"
-                            onPress={() => handleEncerrarPress(item)}
-                            style={styles.encerrarButton}
-                        />
+
+                    {/* Informações resumidas sempre visíveis */}
+                    <View style={styles.summarySection}>
+                        <View style={styles.infoRow}>
+                            <IconButton icon="car" size={16} style={styles.infoIcon} />
+                            <Text variant="bodySmall" style={styles.infoText}>
+                                {item.veiculo_nome}
+                            </Text>
+                        </View>
+
+                        <View style={styles.infoRow}>
+                            <IconButton icon="account-group" size={16} style={styles.infoIcon} />
+                            <Text variant="bodySmall" style={styles.infoText}>
+                                {Number(item.total_funcionarios) || 0} colaboradores(s)
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Detalhes expandidos */}
+                    {isExpanded ? (
+                        <View style={styles.expandedSection}>
+                            <Divider style={styles.divider} />
+
+                            {isPast ? (
+                                <Surface style={styles.historicalBanner} elevation={0}>
+                                    <IconButton icon="information" size={16} iconColor="#856404" style={styles.bannerIcon} />
+                                    <Text variant="bodySmall" style={styles.bannerText}>
+                                        Registro histórico - não editável
+                                    </Text>
+                                </Surface>
+                            ) : null}
+
+                            <Text variant="labelLarge" style={styles.sectionTitle}>
+                                Informações Detalhadas
+                            </Text>
+
+                            <List.Item
+                                title="Data de Criação"
+                                description={new Date(item.created_at).toLocaleString('pt-BR')}
+                                left={props => <List.Icon {...props} icon="clock-start" />}
+                                titleStyle={styles.listItemTitle}
+                            />
+
+                            <Divider style={styles.divider} />
+
+                            <Text variant="labelLarge" style={styles.sectionTitle}>
+                                Equipe do Turno
+                            </Text>
+
+                            {funcionarios.length === 0 ? (
+                                <Text variant="bodySmall" style={styles.emptyFuncionarios}>
+                                    Nenhum funcionário cadastrado
+                                </Text>
+                            ) : (
+                                funcionarios.map((funcionario, index) => (
+                                    <View key={funcionario.id}>
+                                        <View style={styles.funcionarioItem}>
+                                            <View style={styles.funcionarioInfo}>
+                                                <Text variant="bodyMedium" style={styles.funcionarioNome}>
+                                                    {funcionario.funcionario_nome}
+                                                </Text>
+                                                <Text variant="bodySmall" style={styles.funcionarioDetails}>
+                                                    {funcionario.funcionario_cargo_nome} • Mat: {funcionario.funcionario_matricula}
+                                                </Text>
+                                                {funcionario.is_lider === 1 ? (
+                                                    <Chip icon="information">Líder</Chip>
+                                                ) : null}
+                                            </View>
+                                        </View>
+                                        {index < funcionarios.length - 1 ? <Divider style={styles.itemDivider} /> : null}
+                                    </View>
+                                ))
+                            )}
+                        </View>
                     ) : null}
-                </View>
-
-                <Text variant="titleMedium" style={styles.equipeName}>
-                    {item.equipe_nome}
-                </Text>
-
-                <View style={styles.infoRow}>
-                    <IconButton icon="calendar" size={16} style={styles.infoIcon} />
-                    <Text variant="bodySmall" style={styles.infoText}>
-                        {new Date(item.date).toLocaleDateString('pt-BR')}
-                    </Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                    <IconButton icon="car" size={16} style={styles.infoIcon} />
-                    <Text variant="bodySmall" style={styles.infoText}>
-                        {item.veiculo_nome}
-                    </Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                    <IconButton icon="account-group" size={16} style={styles.infoIcon} />
-                    <Text variant="bodySmall" style={styles.infoText}>
-                        {item.total_funcionarios || 0} funcionário(s)
-                    </Text>
-                </View>
-
-                {item.is_encerrado && item.encerrado_at ? (
-                    <View style={styles.infoRow}>
-                        <IconButton icon="clock-outline" size={16} style={styles.infoIcon} />
-                        <Text variant="bodySmall" style={styles.infoTextMuted}>
-                            Encerrado em {new Date(item.encerrado_at).toLocaleString('pt-BR')}
-                        </Text>
-                    </View>
-                ) : null}
-            </Card.Content>
-        </Card>
-    );
+                </Card.Content>
+            </Card>
+        );
+    };
 
     return (
         <ProtectedRoute>
@@ -169,10 +218,7 @@ export default function TurnoEquipeScreen() {
                     <>
                         <Surface style={styles.headerSurface} elevation={2}>
                             <Text variant="headlineSmall" style={styles.headerTitle}>
-                                Turnos de Equipe
-                            </Text>
-                            <Text variant="bodySmall" style={styles.headerSubtitle}>
-                                Gerencie os turnos das equipes de trabalho
+                                Turnos de Trabalho
                             </Text>
                         </Surface>
 
@@ -212,40 +258,11 @@ export default function TurnoEquipeScreen() {
                 )}
 
                 <Portal>
-                    <Dialog visible={isShowEncerrarDialog} onDismiss={() => setIsShowEncerrarDialog(false)} style={styles.dialog}>
-                        <Dialog.Title style={styles.dialogTitle}>✓ Encerrar Turno</Dialog.Title>
-                        <Dialog.Content>
-                            <Text variant="bodyLarge" style={styles.dialogContent}>
-                                Tem certeza que deseja encerrar este turno?
-                            </Text>
-                        </Dialog.Content>
-                        <Dialog.Actions>
-                            <View style={styles.dialogButtonsContainer}>
-                                <Button
-                                    mode="outlined"
-                                    onPress={() => setIsShowEncerrarDialog(false)}
-                                    style={styles.dialogButton}
-                                    textColor="#666"
-                                >
-                                    Cancelar
-                                </Button>
-                                <Button
-                                    mode="contained"
-                                    buttonColor="#4caf50"
-                                    onPress={handleEncerrarTurno}
-                                    style={styles.dialogButton}
-                                >
-                                    Encerrar
-                                </Button>
-                            </View>
-                        </Dialog.Actions>
-                    </Dialog>
-
                     <Dialog visible={isShowDeleteDialog} onDismiss={() => setIsShowDeleteDialog(false)} style={styles.dialog}>
-                        <Dialog.Title style={styles.dialogTitle}>🗑️ Confirmar Exclusão</Dialog.Title>
+                        <Dialog.Title style={styles.dialogTitle}>🗑️ Remover Turno</Dialog.Title>
                         <Dialog.Content>
                             <Text variant="bodyLarge" style={styles.dialogContent}>
-                                Tem certeza que deseja excluir este turno? Esta ação não pode ser desfeita.
+                                Tem certeza que deseja remover este turno? Esta ação não pode ser desfeita.
                             </Text>
                         </Dialog.Content>
                         <Dialog.Actions>
@@ -264,7 +281,7 @@ export default function TurnoEquipeScreen() {
                                     onPress={handleDeleteTurno}
                                     style={styles.dialogButton}
                                 >
-                                    Excluir
+                                    Remover
                                 </Button>
                             </View>
                         </Dialog.Actions>
@@ -314,45 +331,39 @@ const styles = StyleSheet.create({
     turnoCard: {
         marginBottom: 12,
         borderRadius: 12,
-    },
-    turnoCardAberto: {
         borderLeftWidth: 4,
-        borderLeftColor: '#4caf50',
-    },
-    turnoCardEncerrado: {
-        borderLeftWidth: 4,
-        borderLeftColor: '#999',
-        opacity: 0.8,
+        borderLeftColor: '#667eea',
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         marginBottom: 8,
     },
-    statusBadge: {
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 12,
-        backgroundColor: '#f0f0f0',
+    headerLeft: {
+        flex: 1,
     },
-    statusText: {
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    statusTextAberto: {
-        color: '#4caf50',
-    },
-    statusTextEncerrado: {
-        color: '#999',
-    },
-    encerrarButton: {
-        margin: 0,
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     equipeName: {
         fontWeight: 'bold',
-        marginBottom: 8,
         color: '#333',
+        marginBottom: 4,
+    },
+    dateText: {
+        color: '#666',
+        textTransform: 'capitalize',
+    },
+    deleteButton: {
+        margin: 0,
+    },
+    expandButton: {
+        margin: 0,
+    },
+    summarySection: {
+        gap: 4,
     },
     infoRow: {
         flexDirection: 'row',
@@ -366,9 +377,70 @@ const styles = StyleSheet.create({
     infoText: {
         color: '#666',
     },
-    infoTextMuted: {
+    expandedSection: {
+        marginTop: 12,
+    },
+    divider: {
+        marginVertical: 12,
+    },
+    historicalBanner: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff3cd',
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        marginBottom: 12,
+    },
+    bannerIcon: {
+        margin: 0,
+        marginRight: -4,
+    },
+    bannerText: {
+        color: '#856404',
+        flex: 1,
+    },
+    sectionTitle: {
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 8,
+    },
+    listItemTitle: {
+        fontSize: 14,
+        color: '#666',
+    },
+    emptyFuncionarios: {
         color: '#999',
-        fontSize: 11,
+        textAlign: 'center',
+        paddingVertical: 12,
+    },
+    funcionarioItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    funcionarioInfo: {
+        flex: 1,
+    },
+    funcionarioNome: {
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    funcionarioDetails: {
+        color: '#666',
+        marginBottom: 6,
+    },
+    liderChip: {
+        alignSelf: 'flex-start',
+        backgroundColor: '#e3f2fd',
+    },
+    liderChipText: {
+        color: '#1976d2',
+    },
+    itemDivider: {
+        marginVertical: 4,
     },
     emptyState: {
         flex: 1,

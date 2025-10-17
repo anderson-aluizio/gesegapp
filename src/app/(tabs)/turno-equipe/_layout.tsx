@@ -17,13 +17,6 @@ export default function TurnoEquipeLayout() {
           headerShown: true,
         }}
       />
-      <Stack.Screen
-        name="[id]"
-        options={{
-          title: 'Detalhes do Turno',
-          headerShown: true,
-        }}
-      />
     </Stack>
   );
 }

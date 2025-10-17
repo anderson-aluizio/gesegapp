@@ -5,9 +5,7 @@ export type EquipeTurnoDatabase = {
   equipe_id: number;
   date: string;
   veiculo_id: string;
-  is_encerrado: number;
   created_at: string;
-  encerrado_at: string | null;
   is_finalizado: number;
   finalizado_at: string | null;
   finalizado_by: number | null;
@@ -23,7 +21,6 @@ export type CreateEquipeTurnoInput = {
   equipe_id: number;
   date: Date;
   veiculo_id: string;
-  is_encerrado?: boolean;
 }
 
 export const useEquipeTurnoDatabase = () => {
@@ -93,25 +90,24 @@ export const useEquipeTurnoDatabase = () => {
     }
   }
 
-  const checkExistingTurnoAberto = async (equipeId: number, date: string) => {
+  const checkExistingTurnoToday = async (date: string) => {
     try {
       const query = `
         SELECT * FROM equipe_turnos
-        WHERE equipe_id = ?
-        AND DATE(date) = DATE(?)
-        AND is_encerrado = 0
+        WHERE DATE(date) = DATE(?)
         LIMIT 1
       `;
 
-      const response = await database.getFirstAsync<EquipeTurnoDatabase>(query, [equipeId, date]);
+      const response = await database.getFirstAsync<EquipeTurnoDatabase>(query, [date]);
       return response;
     } catch (error) {
       throw error;
     }
   }
 
-  const getTurnosAbertos = async () => {
+  const getTodayTurno = async () => {
     try {
+      const today = new Date().toISOString().split('T')[0];
       const query = `
         SELECT
           et.*,
@@ -121,12 +117,22 @@ export const useEquipeTurnoDatabase = () => {
         FROM equipe_turnos et
         LEFT JOIN equipes e ON et.equipe_id = e.id
         LEFT JOIN veiculos v ON et.veiculo_id = v.id
-        WHERE et.is_encerrado = 0
-        ORDER BY et.date DESC, et.created_at DESC
+        WHERE DATE(et.date) = DATE(?)
+        ORDER BY et.created_at DESC
+        LIMIT 1
       `;
 
-      const response = await database.getAllAsync<EquipeTurnoDatabaseWithRelations>(query, []);
+      const response = await database.getFirstAsync<EquipeTurnoDatabaseWithRelations>(query, [today]);
       return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  const hasTodayTurno = async (): Promise<boolean> => {
+    try {
+      const turno = await getTodayTurno();
+      return !!turno;
     } catch (error) {
       throw error;
     }
@@ -150,36 +156,15 @@ export const useEquipeTurnoDatabase = () => {
   const create = async (data: CreateEquipeTurnoInput) => {
     try {
       const statement = await database.prepareAsync(
-        `INSERT INTO equipe_turnos (equipe_id, date, veiculo_id, is_encerrado, created_at)
-         VALUES (?, ?, ?, ?, ?)`
+        `INSERT INTO equipe_turnos (equipe_id, date, veiculo_id, created_at)
+         VALUES (?, ?, ?, ?)`
       );
 
       const result = await statement.executeAsync([
         data.equipe_id,
         data.date.toISOString(),
         data.veiculo_id,
-        data.is_encerrado ? 1 : 0,
         new Date().toISOString()
-      ]);
-
-      await statement.finalizeAsync();
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  const updateEncerrado = async (id: number, userId: number) => {
-    try {
-      const statement = await database.prepareAsync(
-        `UPDATE equipe_turnos
-         SET is_encerrado = 1, encerrado_at = ?
-         WHERE id = ?`
-      );
-
-      const result = await statement.executeAsync([
-        new Date().toISOString(),
-        id
       ]);
 
       await statement.finalizeAsync();
@@ -212,10 +197,8 @@ export const useEquipeTurnoDatabase = () => {
 
   const remove = async (id: number) => {
     try {
-      // First delete related funcionarios
       await database.execAsync(`DELETE FROM equipe_turno_funcionarios WHERE equipe_turno_id = ${id}`);
 
-      // Then delete the turno
       const statement = await database.prepareAsync(
         `DELETE FROM equipe_turnos WHERE id = ?`
       );
@@ -232,11 +215,11 @@ export const useEquipeTurnoDatabase = () => {
     getAll,
     show,
     getByDate,
-    checkExistingTurnoAberto,
-    getTurnosAbertos,
+    checkExistingTurnoToday,
+    getTodayTurno,
+    hasTodayTurno,
     getFinalizados,
     create,
-    updateEncerrado,
     updateFinalizado,
     remove
   }

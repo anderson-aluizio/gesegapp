@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar"
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { AutocompleteDropdownContextProvider } from 'react-native-autocomplete-dropdown'
+import TurnoGuard from "@/components/TurnoGuard"
 
 export default function Layout() {
   return (
@@ -16,12 +17,14 @@ export default function Layout() {
           <AuthProvider>
             <SQLiteProvider databaseName="myDatabase.db" onInit={safeInitializeDatabase}>
               <PaperProvider>
-                <Stack>
-                  <Stack.Screen name="index" options={{ headerShown: false }} />
-                  <Stack.Screen name="login" options={{ headerShown: false }} />
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="+not-found" />
-                </Stack>
+                <TurnoGuard>
+                  <Stack>
+                    <Stack.Screen name="index" options={{ headerShown: false }} />
+                    <Stack.Screen name="login" options={{ headerShown: false }} />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="+not-found" />
+                  </Stack>
+                </TurnoGuard>
                 <StatusBar style="auto" />
               </PaperProvider>
             </SQLiteProvider>
