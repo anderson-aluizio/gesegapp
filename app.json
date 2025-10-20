@@ -46,6 +46,14 @@
             "package": "com.dinamo.geseg"
           }
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "gesegapp",
+          "organization": "dinamo-engenharia"
+        }
       ]
     ],
     "experiments": {
