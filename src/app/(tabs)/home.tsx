@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 25,
     elevation: 2,
+    transform: [{ scaleX: -1 }],
   },
   scrollContainer: {
     flex: 1,
