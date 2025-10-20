@@ -1,9 +1,9 @@
-import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, Platform, StatusBar } from 'react-native';
-import { Text, Surface, IconButton, Card } from 'react-native-paper';
+import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, StatusBar } from 'react-native';
+import { Text, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -56,7 +56,7 @@ export default function HomeScreen() {
       description: 'Gerenciar turnos de trabalho',
       icon: 'clock-outline',
       route: '/turno-equipe',
-      colors: ['#f093fb', '#f5576c'],
+      colors: ['#ffb444ff', '#ff7300ff'],
       requiresOperational: true,
     },
     {
@@ -132,21 +132,6 @@ export default function HomeScreen() {
       >
         <Animated.View
           style={[
-            styles.welcomeSection,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }]
-            }
-          ]}
-        >
-          <Text style={styles.welcomeTitle}>Bem-vindo ao GESEG</Text>
-          <Text style={styles.welcomeSubtitle}>
-            Selecione um módulo para começar
-          </Text>
-        </Animated.View>
-
-        <Animated.View
-          style={[
             styles.modulesGrid,
             {
               opacity: fadeAnim,
@@ -193,7 +178,7 @@ export default function HomeScreen() {
                       <View style={styles.iconContainer}>
                         <IconButton
                           icon={module.icon}
-                          size={40}
+                          size={30}
                           iconColor="#ffffff"
                           style={styles.moduleIcon}
                         />
@@ -207,15 +192,6 @@ export default function HomeScreen() {
                           {module.description}
                         </Text>
                       </View>
-
-                      {!isDisabled && (
-                        <IconButton
-                          icon="chevron-right"
-                          size={20}
-                          iconColor="rgba(255, 255, 255, 0.7)"
-                          style={styles.chevronIcon}
-                        />
-                      )}
                     </View>
                   </LinearGradient>
                 </Pressable>
@@ -303,18 +279,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingTop: 6,
     paddingBottom: 100,
   },
   welcomeSection: {
-    marginBottom: 24,
+    marginBottom: 14,
     paddingHorizontal: 4,
-  },
-  welcomeTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
   },
   welcomeSubtitle: {
     fontSize: 16,
@@ -351,8 +321,8 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   cardGradient: {
-    minHeight: 180,
-    padding: 16,
+    minHeight: 135,
+    padding: 8,
     justifyContent: 'space-between',
   },
   cardContent: {
@@ -360,7 +330,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   iconContainer: {
-    marginBottom: 12,
+    marginBottom: 6,
   },
   moduleIcon: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
@@ -369,7 +339,6 @@ const styles = StyleSheet.create({
   },
   cardTextContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
   },
   cardTitle: {
     fontSize: 18,
