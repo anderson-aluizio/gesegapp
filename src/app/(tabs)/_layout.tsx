@@ -33,6 +33,7 @@ export default function AuthenticatedLayout() {
           name="sync-data"
           options={{
             title: 'Sincronização',
+            headerShown: true,
           }}
         />
         <Stack.Screen
