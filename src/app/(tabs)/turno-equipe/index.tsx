@@ -4,6 +4,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
 import { EquipeTurnoDatabaseWithRelations, useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
 import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
+import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
+import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { isBeforeToday } from '@/utils/dateUtils';
 
@@ -19,6 +21,8 @@ export default function TurnoEquipeScreen() {
 
     const turnoDb = useEquipeTurnoDatabase();
     const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
+    const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
+    const centroCustoDb = useCentroCustoDatabase();
 
     const list = async () => {
         try {
@@ -42,8 +46,31 @@ export default function TurnoEquipeScreen() {
         }, [])
     );
 
-    const handleAddButton = () => {
-        router.push('/turno-equipe/create');
+    const handleAddButton = async () => {
+        try {
+            // Check if data is synced before allowing turno creation
+            const hasChecklistEstruturaItem = await checklistEstruturaItemsDb.getOneRow();
+            const hasCentroCustoSynced = await centroCustoDb.getWithChecklistEstrutura();
+            const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
+
+            if (!dataSynced) {
+                Alert.alert(
+                    'Dados não sincronizados',
+                    'É necessário sincronizar os dados antes de criar um turno. Deseja ir para a tela de sincronização?',
+                    [
+                        { text: 'Cancelar', style: 'cancel' },
+                        { text: 'Sincronizar', onPress: () => router.push('/sync-data') }
+                    ]
+                );
+                return;
+            }
+
+            // All validations passed, proceed to create turno
+            router.push('/turno-equipe/create');
+        } catch (error) {
+            console.error('Erro ao validar requisitos:', error);
+            Alert.alert('Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
+        }
     };
 
     const handleDeleteTurno = async () => {

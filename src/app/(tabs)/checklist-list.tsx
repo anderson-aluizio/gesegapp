@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
 import { useCentroCustosRefresh } from '@/hooks/useCentroCustosRefresh';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
 
 export default function ChecklistListScreen() {
     const router = useRouter();
@@ -25,9 +26,10 @@ export default function ChecklistListScreen() {
     const checklistDb = useChecklisRealizadoDatabase();
     const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
     const centroCustoDb = useCentroCustoDatabase();
+    const turnoDb = useEquipeTurnoDatabase();
     const { user } = useAuth();
 
-    useCentroCustosRefresh();
+    // useCentroCustosRefresh();
 
     const list = async () => {
         try {
@@ -70,22 +72,47 @@ export default function ChecklistListScreen() {
     );
 
     const handleAddButton = async () => {
-        const hasChecklistEstruturaItem = await checklistEstruturaItemsDb.getOneRow();
-        const hasCentroCustoSynced = await centroCustoDb.getWithChecklistEstrutura();
-        if (!hasChecklistEstruturaItem || !hasCentroCustoSynced || hasCentroCustoSynced.length === 0) {
-            Alert.alert('Atenção', 'Dados desatualizados. Por favor, clique em "Sincronizar" para atualizar os dados.', [
-                {
-                    text: 'Cancelar',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Sincronizar',
-                    onPress: () => router.push('/sync-data'),
+        try {
+            // 1. Check if data is synced
+            const hasChecklistEstruturaItem = await checklistEstruturaItemsDb.getOneRow();
+            const hasCentroCustoSynced = await centroCustoDb.getWithChecklistEstrutura();
+            const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
+
+            if (!dataSynced) {
+                Alert.alert(
+                    'Dados não sincronizados',
+                    'É necessário sincronizar os dados antes de criar um checklist. Deseja ir para a tela de sincronização?',
+                    [
+                        { text: 'Cancelar', style: 'cancel' },
+                        { text: 'Sincronizar', onPress: () => router.push('/sync-data') }
+                    ]
+                );
+                return;
+            }
+
+            // 2. Check if user is operational and if today's turno exists
+            if (user?.is_operacao) {
+                const hasTurno = await turnoDb.hasTodayTurno();
+
+                if (!hasTurno) {
+                    Alert.alert(
+                        'Turno não iniciado',
+                        'É necessário abrir o turno do dia antes de criar um checklist. Deseja abrir o turno agora?',
+                        [
+                            { text: 'Cancelar', style: 'cancel' },
+                            { text: 'Abrir Turno', onPress: () => router.push('/turno-equipe/create') }
+                        ]
+                    );
+                    return;
                 }
-            ]);
-            return;
+            }
+
+            // 3. All validations passed, proceed to create checklist
+            router.push('/checklist/create');
+        } catch (error) {
+            console.error('Erro ao validar requisitos:', error);
+            Alert.alert('Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
         }
-        router.push('/checklist/create');
     };
 
     const handleClickChecklist = (checklist: ChecklistRealizadoDatabase) => {

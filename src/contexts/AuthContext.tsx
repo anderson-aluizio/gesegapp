@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClientWrapper, UpdateRequiredHandledError } from '@/services';
+import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 
 export default interface UserInterface {
     id: number;
@@ -22,8 +23,6 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<boolean>;
     logout: () => Promise<void>;
     loading: boolean;
-    shouldRefreshCentroCustos: boolean;
-    clearRefreshFlag: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -40,15 +39,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [user, setUser] = useState<UserInterface | null>(null);
     const [loading, setLoading] = useState(true);
-    const [shouldRefreshCentroCustos, setshouldRefreshCentroCustos] = useState(false);
+    const centroCustoDb = useCentroCustoDatabase();
 
     useEffect(() => {
         checkAuthState();
     }, []);
-
-    const clearRefreshFlag = () => {
-        setshouldRefreshCentroCustos(false);
-    };
 
     const checkAuthState = async () => {
         try {
@@ -94,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 });
 
                 if (responseLogin.user.centro_custos) {
-                    setshouldRefreshCentroCustos(true);
+                    await centroCustoDb.deleteAndInsert(responseLogin.user.centro_custos);
                 }
 
                 router.replace('/(tabs)/home');
@@ -129,7 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading, shouldRefreshCentroCustos, clearRefreshFlag }}>
+        <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

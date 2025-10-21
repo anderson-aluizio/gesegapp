@@ -1,10 +1,13 @@
-import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, StatusBar } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, StatusBar, Alert } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
+import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
+import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
+import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 
 const { width } = Dimensions.get('window');
 const CARD_SPACING = 12;
@@ -25,6 +28,10 @@ export default function HomeScreen() {
   const { user, logout } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
+
+  const turnoDb = useEquipeTurnoDatabase();
+  const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
+  const centroCustoDb = useCentroCustoDatabase();
 
   useEffect(() => {
     Animated.parallel([
@@ -89,7 +96,47 @@ export default function HomeScreen() {
   };
 
   const handleQuickChecklistCreate = async () => {
-    router.push('/checklist/create');
+    try {
+      // 1. Check if data is synced
+      const hasChecklistEstruturaItem = await checklistEstruturaItemsDb.getOneRow();
+      const hasCentroCustoSynced = await centroCustoDb.getWithChecklistEstrutura();
+      const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
+
+      if (!dataSynced) {
+        Alert.alert(
+          'Dados não sincronizados',
+          'É necessário sincronizar os dados antes de criar um checklist. Deseja ir para a tela de sincronização?',
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Sincronizar', onPress: () => router.push('/sync-data') }
+          ]
+        );
+        return;
+      }
+
+      // 2. Check if user is operational and if today's turno exists
+      if (user?.is_operacao) {
+        const hasTurno = await turnoDb.hasTodayTurno();
+
+        if (!hasTurno) {
+          Alert.alert(
+            'Turno não iniciado',
+            'É necessário abrir o turno do dia antes de criar um checklist. Deseja abrir o turno agora?',
+            [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Abrir Turno', onPress: () => router.push('/turno-equipe/create') }
+            ]
+          );
+          return;
+        }
+      }
+
+      // 3. All validations passed, proceed to create checklist
+      router.push('/checklist/create');
+    } catch (error) {
+      console.error('Erro ao validar requisitos:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
+    }
   };
 
   return (

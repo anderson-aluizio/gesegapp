@@ -8,7 +8,7 @@ import SendChecklistRealizado from '@/components/SendChecklistRealizado';
 import SendEquipeTurno from '@/components/SendEquipeTurno';
 import NetInfo from '@react-native-community/netinfo';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import { useRouter, Stack } from 'expo-router';
 
 interface ShowDialogProps {
     desc: string;
@@ -186,6 +186,21 @@ export default function SyncDataScreen() {
     };
     return (
         <View style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+
+            <View style={styles.headerContainer}>
+                <View style={styles.headerTop}>
+                    <IconButton
+                        icon="arrow-left"
+                        iconColor="#fff"
+                        size={24}
+                        onPress={() => router.back()}
+                        style={styles.backButton}
+                    />
+                    <Text style={styles.headerTitle}>Sincronização</Text>
+                    <View style={styles.headerSpacer} />
+                </View>
+            </View>
             <ScrollView
                 style={styles.scrollContainer}
                 contentContainerStyle={styles.scrollContent}

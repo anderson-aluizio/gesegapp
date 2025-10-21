@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
-import { Button, Dialog, Portal, Text, Chip, Surface } from 'react-native-paper';
+import { Button, Dialog, Portal, Text, Chip, Surface, IconButton } from 'react-native-paper';
 import { useEquipeDatabase, EquipeDatabase } from '@/database/Models/useEquipeDatabase';
 import { useVeiculoDatabase } from '@/database/Models/useVeiculoDatabase';
 import { useFuncionarioDatabase } from '@/database/Models/useFuncionarioDatabase';
@@ -167,7 +167,18 @@ export default function CreateTurnoEquipeScreen() {
     return (
         <ProtectedRoute>
             <View style={styles.container}>
-                <Stack.Screen options={{ title: 'Abertura de Turno' }} />
+                <Stack.Screen
+                    options={{
+                        title: 'Abertura de Turno',
+                        headerLeft: () => (
+                            <IconButton
+                                icon="arrow-left"
+                                size={24}
+                                onPress={() => router.push('/home')}
+                            />
+                        ),
+                    }}
+                />
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <Surface style={styles.formCard} elevation={2}>
                         <View style={styles.inner}>
