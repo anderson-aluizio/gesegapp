@@ -1,52 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
 import { Button, Dialog, Portal, Text, Chip, Surface, IconButton } from 'react-native-paper';
-import { useEquipeDatabase, EquipeDatabase } from '@/database/Models/useEquipeDatabase';
-import { useVeiculoDatabase } from '@/database/Models/useVeiculoDatabase';
-import { useFuncionarioDatabase } from '@/database/Models/useFuncionarioDatabase';
 import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
 import { useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
 type FuncionarioSelected = {
     cpf: string;
     nome: string;
     is_lider: boolean;
+    is_blocked?: boolean;
 };
 
 export default function CreateTurnoEquipeScreen() {
-    const [equipes, setEquipes] = useState<AutocompleteDropdownOption[]>([]);
+    const { user } = useAuth();
+    const userFuncionarioSelected = {
+        cpf: user?.cpf || '',
+        nome: user?.name || '',
+        is_lider: true,
+        is_blocked: true
+    }
     const [selectedEquipe, setSelectedEquipe] = useState<string | null>(null);
     const [selectedVeiculo, setSelectedVeiculo] = useState<string | null>(null);
     const [selectedDate] = useState<Date>(new Date());
-    const [selectedFuncionarios, setSelectedFuncionarios] = useState<FuncionarioSelected[]>([]);
+    const [selectedFuncionarios, setSelectedFuncionarios] = useState<FuncionarioSelected[]>([userFuncionarioSelected]);
     const [searchFuncionario, setSearchFuncionario] = useState<string>('');
     const [dialogDesc, setDialogDesc] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const equipeDb = useEquipeDatabase();
-    const veiculoDb = useVeiculoDatabase();
-    const funcionarioDb = useFuncionarioDatabase();
     const equipeTurnoDb = useEquipeTurnoDatabase();
     const equipeTurnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
-
-    const loadEquipes = async () => {
-        const res = await equipeDb.getAll();
-        if (!res || res.length === 0) {
-            return [];
-        }
-        const formatted = res.map((item: EquipeDatabase) => ({
-            id: String(item.id),
-            title: String(item.nome),
-        }));
-        setEquipes(formatted);
-    }
-
-    useEffect(() => {
-        loadEquipes();
-    }, []);
 
     const handleChangeEquipe = (value: string | object | null) => {
         if (typeof value === 'string' || value === null) {
@@ -95,13 +81,11 @@ export default function CreateTurnoEquipeScreen() {
     const handleToggleLider = (cpf: string) => {
         setSelectedFuncionarios(selectedFuncionarios.map(f => ({
             ...f,
-            // Only the selected funcionario can be lider
             is_lider: f.cpf === cpf ? !f.is_lider : false
         })));
     };
 
     const handleSubmit = async () => {
-        // Validations
         if (!selectedEquipe) {
             setDialogDesc('Selecione uma equipe.');
             return;
@@ -238,6 +222,7 @@ export default function CreateTurnoEquipeScreen() {
                                                     </Text>
                                                 </View>
                                                 <Button
+                                                    disabled={funcionario.is_blocked}
                                                     mode="text"
                                                     onPress={() => handleRemoveFuncionario(funcionario.cpf)}
                                                     textColor="#e74c3c"

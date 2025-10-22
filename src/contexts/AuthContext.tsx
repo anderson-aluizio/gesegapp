@@ -6,6 +6,7 @@ import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase
 
 export default interface UserInterface {
     id: number;
+    cpf: string;
     email: string;
     name: string;
     token: string;
@@ -72,6 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 await AsyncStorage.setItem('authToken', responseLogin.user.token);
                 await AsyncStorage.setItem('userData', JSON.stringify({
                     id: responseLogin.user.id,
+                    cpf: responseLogin.user.cpf,
                     name: responseLogin.user.name,
                     email: responseLogin.user.email,
                     centro_custos: responseLogin.user.centro_custos,
@@ -81,6 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setIsAuthenticated(true);
                 setUser({
                     id: responseLogin.user.id,
+                    cpf: responseLogin.user.cpf,
                     name: responseLogin.user.name,
                     email: responseLogin.user.email,
                     token: responseLogin.user.token,
