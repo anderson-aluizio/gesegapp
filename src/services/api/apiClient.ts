@@ -106,17 +106,15 @@ export class ApiClient {
 
             if (!response.ok) {
                 const responseText = await response.text();
-                console.error(`HTTP Error Response Body:`, responseText);
 
                 if (response.status === 422) {
-                    try {
-                        const errorData = JSON.parse(responseText);
-                        throw new Error(`Validation Error: ${JSON.stringify(errorData)}`);
-                    } catch (parseError) {
-                        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Response: ${responseText}`);
-                    }
+                    const errorData = JSON.parse(responseText);
+                    const errorMessage = errorData && typeof errorData === 'object' && 'message' in errorData && errorData.message
+                        ? String(errorData.message)
+                        : 'Erro desconhecido';
+                    throw errorMessage;
                 }
-
+                console.error(`HTTP Error Response Body:`, responseText);
                 throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Response: ${responseText.substring(0, 200)}...`);
             }
 

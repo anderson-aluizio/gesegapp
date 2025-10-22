@@ -6,9 +6,6 @@ export type EquipeTurnoDatabase = {
   date: string;
   veiculo_id: string;
   created_at: string;
-  is_finalizado: number;
-  finalizado_at: string | null;
-  finalizado_by: number | null;
 }
 
 export type EquipeTurnoDatabaseWithRelations = EquipeTurnoDatabase & {
@@ -138,21 +135,6 @@ export const useEquipeTurnoDatabase = () => {
     }
   }
 
-  const getFinalizados = async () => {
-    try {
-      const query = `
-        SELECT * FROM equipe_turnos
-        WHERE is_finalizado = 1
-        ORDER BY finalizado_at DESC
-      `;
-
-      const response = await database.getAllAsync<EquipeTurnoDatabase>(query, []);
-      return response;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   const create = async (data: CreateEquipeTurnoInput) => {
     try {
       const statement = await database.prepareAsync(
@@ -165,27 +147,6 @@ export const useEquipeTurnoDatabase = () => {
         data.date.toISOString(),
         data.veiculo_id,
         new Date().toISOString()
-      ]);
-
-      await statement.finalizeAsync();
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  const updateFinalizado = async (id: number, userId: number) => {
-    try {
-      const statement = await database.prepareAsync(
-        `UPDATE equipe_turnos
-         SET is_finalizado = 1, finalizado_at = ?, finalizado_by = ?
-         WHERE id = ?`
-      );
-
-      const result = await statement.executeAsync([
-        new Date().toISOString(),
-        userId,
-        id
       ]);
 
       await statement.finalizeAsync();
@@ -218,9 +179,7 @@ export const useEquipeTurnoDatabase = () => {
     checkExistingTurnoToday,
     getTodayTurno,
     hasTodayTurno,
-    getFinalizados,
     create,
-    updateFinalizado,
     remove
   }
 }

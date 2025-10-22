@@ -150,9 +150,6 @@ export async function initializeDatabase(database: SQLiteDatabase) {
       date text NOT NULL,
       veiculo_id text NOT NULL,
       created_at text NOT NULL,
-      is_finalizado integer DEFAULT 0 NOT NULL,
-      finalizado_at text,
-      finalizado_by integer,
       FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON UPDATE no action ON DELETE no action,
       FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON UPDATE no action ON DELETE no action
     );
