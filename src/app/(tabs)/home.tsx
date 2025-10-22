@@ -95,6 +95,17 @@ export default function HomeScreen() {
     router.push(route as any);
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Confirmar Logout',
+      'Ao sair, todos os dados não sincronizados serão deletados. Deseja continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Sair', style: 'destructive', onPress: logout }
+      ]
+    );
+  };
+
   const handleQuickChecklistCreate = async () => {
     try {
       // 1. Check if data is synced
@@ -161,7 +172,7 @@ export default function HomeScreen() {
               icon="logout"
               iconColor="#fff"
               size={18}
-              onPress={logout}
+              onPress={handleLogout}
               style={styles.logoutButton}
             />
             <Text style={styles.userText} numberOfLines={1}>

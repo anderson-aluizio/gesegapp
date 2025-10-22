@@ -3,6 +3,8 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClientWrapper, UpdateRequiredHandledError } from '@/services';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { useSQLiteContext } from 'expo-sqlite';
+import { clearTables } from '@/database/databaseSchema';
 
 export default interface UserInterface {
     id: number;
@@ -41,6 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<UserInterface | null>(null);
     const [loading, setLoading] = useState(true);
     const centroCustoDb = useCentroCustoDatabase();
+    const db = useSQLiteContext();
 
     useEffect(() => {
         checkAuthState();
@@ -114,6 +117,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const logout = async () => {
         try {
+            await clearTables(db);
             await AsyncStorage.removeItem('authToken');
             await AsyncStorage.removeItem('userData');
 
