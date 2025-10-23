@@ -4,25 +4,46 @@ import { useChecklistRealizadoFuncionarioDatabase } from "@/database/Models/useC
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
+import { InfoDialog } from "@/components/sync-data";
+import { checkNetworkConnection } from "@/hooks";
 
 const SendChecklistRealizado = () => {
     const checklistDb = useChecklisRealizadoDatabase();
     const checklistFuncionarios = useChecklistRealizadoFuncionarioDatabase();
     const checklistItemsDb = useChecklisRealizadoItemsDatabase();
     const [loading, setLoading] = useState(false);
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState('');
+
+    const showDialog = (message: string) => {
+        setDialogMessage(message);
+        setDialogVisible(true);
+    };
+
+    const hideDialog = () => {
+        setDialogVisible(false);
+    };
 
     const handleSendChecklist = async () => {
         setLoading(true);
         try {
+            // Verificar conexão de rede
+            try {
+                const networkInfo = await checkNetworkConnection();
+                console.log('Network connection:', networkInfo);
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
+                showDialog(errorMessage);
+                setLoading(false);
+                return;
+            }
+
             const checklists = await checklistDb.getFinalizados();
             if (checklists.length === 0) {
-                Alert.alert(
-                    "Nenhum Registro",
-                    "Não há registros finalizados para enviar.",
-                    [{ text: "OK" }]
-                );
+                showDialog("Não há registros finalizados para enviar.");
+                setLoading(false);
                 return;
             }
 
@@ -47,54 +68,63 @@ const SendChecklistRealizado = () => {
             }
 
             if (errorCount === 0) {
-                Alert.alert(
-                    "Registros Enviados",
-                    `${successCount} registro(s) enviado(s) com sucesso!`,
-                    [{ text: "OK" }]
-                );
+                showDialog(`✅ Sucesso!\n\n${successCount} registro(s) enviado(s) com sucesso!`);
             } else {
                 const errorList = errorDetails.join('\n\n');
-                Alert.alert(
-                    "Envio Parcial",
-                    `${successCount} registro(s) enviado(s) com sucesso.\n${errorCount} registro(s) com erro.\n\nDetalhes dos erros:\n${errorList}`,
-                    [{ text: "OK" }]
+                showDialog(
+                    `⚠️ Envio Parcial\n\n` +
+                    `${successCount} registro(s) enviado(s) com sucesso.\n` +
+                    `${errorCount} registro(s) com erro.\n\n` +
+                    `Detalhes dos erros:\n${errorList}`
                 );
             }
         } catch (error) {
-            Alert.alert(
-                "Erro ao enviar",
-                "Ocorreu um erro ao enviar os registros finalizados. Por favor, tente novamente.",
-                [{ text: "OK" }]
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            showDialog(
+                `❌ Erro ao enviar\n\n` +
+                `Ocorreu um erro ao enviar os registros finalizados.\n\n` +
+                `Detalhes: ${errorMessage}\n\n` +
+                `Por favor, tente novamente.`
             );
             console.error("Erro ao enviar checklists:", error);
         } finally {
             setLoading(false);
         }
     }
+
     return (
-        <Surface style={styles.infoCard} elevation={2}>
-            <View style={styles.infoHeader}>
-                <Text variant="titleMedium" style={styles.infoTitle}>
-                    Enviar Registros Finalizados
+        <>
+            <Surface style={styles.infoCard} elevation={2}>
+                <View style={styles.infoHeader}>
+                    <Text variant="titleMedium" style={styles.infoTitle}>
+                        Enviar Registros Finalizados
+                    </Text>
+                </View>
+                <Text variant="bodySmall" style={styles.infoDescription}>
+                    Envie os registros realizados finalizados para o servidor.
                 </Text>
-            </View>
-            <Text variant="bodySmall" style={styles.infoDescription}>
-                Envie os registros realizados finalizados para o servidor.
-            </Text>
-            <Button
-                mode="contained"
-                icon="send"
-                onPress={handleSendChecklist}
-                style={{ marginTop: 10 }}
-                buttonColor="#0439c9"
-                disabled={loading}
-                loading={loading}
-            >
-                Enviar
-            </Button>
-        </Surface>
+                <Button
+                    mode="contained"
+                    icon="send"
+                    onPress={handleSendChecklist}
+                    style={{ marginTop: 10 }}
+                    buttonColor="#0439c9"
+                    disabled={loading}
+                    loading={loading}
+                >
+                    Enviar
+                </Button>
+            </Surface>
+
+            <InfoDialog
+                visible={dialogVisible}
+                description={dialogMessage}
+                onDismiss={hideDialog}
+            />
+        </>
     );
 }
+
 export default SendChecklistRealizado;
 
 const styles = StyleSheet.create({

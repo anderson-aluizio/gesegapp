@@ -3,8 +3,10 @@ import { useEquipeTurnoFuncionarioDatabase } from "@/database/Models/useEquipeTu
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
+import { InfoDialog } from "@/components/sync-data";
+import { checkNetworkConnection } from "@/hooks";
 
 export type EquipeTurnoFormatted = {
     equipe_id: number;
@@ -20,17 +22,36 @@ const SendEquipeTurno = () => {
     const turnoDb = useEquipeTurnoDatabase();
     const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
     const [loading, setLoading] = useState(false);
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState('');
+
+    const showDialog = (message: string) => {
+        setDialogMessage(message);
+        setDialogVisible(true);
+    };
+
+    const hideDialog = () => {
+        setDialogVisible(false);
+    };
 
     const handleSendTurnos = async () => {
         setLoading(true);
         try {
+            // Verificar conexão de rede
+            try {
+                const networkInfo = await checkNetworkConnection();
+                console.log('Network connection:', networkInfo);
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
+                showDialog(errorMessage);
+                setLoading(false);
+                return;
+            }
+
             const turnos = await turnoDb.getAll();
             if (turnos.length === 0) {
-                Alert.alert(
-                    "Nenhum Registro",
-                    "Não há turnos finalizados para enviar.",
-                    [{ text: "OK" }]
-                );
+                showDialog("Não há turnos finalizados para enviar.");
+                setLoading(false);
                 return;
             }
 
@@ -62,24 +83,23 @@ const SendEquipeTurno = () => {
             }
 
             if (errorCount === 0) {
-                Alert.alert(
-                    "Turnos Enviados",
-                    `${successCount} turno(s) enviado(s) com sucesso!`,
-                    [{ text: "OK" }]
-                );
+                showDialog(`✅ Sucesso!\n\n${successCount} turno(s) enviado(s) com sucesso!`);
             } else {
                 const errorList = errorDetails.join('\n\n');
-                Alert.alert(
-                    "Envio Parcial",
-                    `${successCount} turno(s) enviado(s) com sucesso.\n${errorCount} turno(s) com erro.\n\nDetalhes dos erros:\n${errorList}`,
-                    [{ text: "OK" }]
+                showDialog(
+                    `⚠️ Envio Parcial\n\n` +
+                    `${successCount} turno(s) enviado(s) com sucesso.\n` +
+                    `${errorCount} turno(s) com erro.\n\n` +
+                    `Detalhes dos erros:\n${errorList}`
                 );
             }
         } catch (error) {
-            Alert.alert(
-                "Erro ao enviar",
-                "Ocorreu um erro ao enviar os turnos finalizados. Por favor, tente novamente.",
-                [{ text: "OK" }]
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            showDialog(
+                `❌ Erro ao enviar\n\n` +
+                `Ocorreu um erro ao enviar os turnos finalizados.\n\n` +
+                `Detalhes: ${errorMessage}\n\n` +
+                `Por favor, tente novamente.`
             );
             console.error("Erro ao enviar turnos:", error);
         } finally {
@@ -88,29 +108,38 @@ const SendEquipeTurno = () => {
     }
 
     return (
-        <Surface style={styles.infoCard} elevation={2}>
-            <View style={styles.infoHeader}>
-                <Text variant="titleMedium" style={styles.infoTitle}>
-                    Enviar Turnos Finalizados
+        <>
+            <Surface style={styles.infoCard} elevation={2}>
+                <View style={styles.infoHeader}>
+                    <Text variant="titleMedium" style={styles.infoTitle}>
+                        Enviar Turnos Finalizados
+                    </Text>
+                </View>
+                <Text variant="bodySmall" style={styles.infoDescription}>
+                    Envie os turnos de equipe finalizados para o servidor.
                 </Text>
-            </View>
-            <Text variant="bodySmall" style={styles.infoDescription}>
-                Envie os turnos de equipe finalizados para o servidor.
-            </Text>
-            <Button
-                mode="contained"
-                icon="send"
-                onPress={handleSendTurnos}
-                style={{ marginTop: 10 }}
-                buttonColor="#0439c9"
-                disabled={loading}
-                loading={loading}
-            >
-                Enviar Turnos
-            </Button>
-        </Surface>
+                <Button
+                    mode="contained"
+                    icon="send"
+                    onPress={handleSendTurnos}
+                    style={{ marginTop: 10 }}
+                    buttonColor="#0439c9"
+                    disabled={loading}
+                    loading={loading}
+                >
+                    Enviar Turnos
+                </Button>
+            </Surface>
+
+            <InfoDialog
+                visible={dialogVisible}
+                description={dialogMessage}
+                onDismiss={hideDialog}
+            />
+        </>
     );
 }
+
 export default SendEquipeTurno;
 
 const styles = StyleSheet.create({
