@@ -1,6 +1,7 @@
 import { useEquipeTurnoDatabase } from "@/database/Models/useEquipeTurnoDatabase";
 import { useEquipeTurnoFuncionarioDatabase } from "@/database/Models/useEquipeTurnoFuncionarioDatabase";
 import { apiClientWrapper } from "@/services";
+import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
@@ -55,7 +56,8 @@ const SendEquipeTurno = () => {
                     successCount++;
                 } catch (error) {
                     errorCount++;
-                    errorDetails.push(`Turno ID ${turno.id}: ${error}`);
+                    const errorMessage = getErrorMessage(error);
+                    errorDetails.push(`Turno ID ${turno.id}: ${errorMessage}`);
                 }
             }
 

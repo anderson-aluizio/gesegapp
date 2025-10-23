@@ -2,6 +2,7 @@ import { useChecklisRealizadoDatabase } from "@/database/Models/useChecklisReali
 import { useChecklisRealizadoItemsDatabase } from "@/database/Models/useChecklisRealizadoItemsDatabase";
 import { useChecklistRealizadoFuncionarioDatabase } from "@/database/Models/useChecklistRealizadoFuncionarioDatabase";
 import { apiClientWrapper } from "@/services";
+import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
@@ -25,19 +26,40 @@ const SendChecklistRealizado = () => {
                 return;
             }
 
-            for (const checklist of checklists) {
-                const funcionarios = await checklistFuncionarios.getByChecklistRealizadoId(checklist.id);
-                const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
-                const checklistData = { ...checklist, funcionarios, items };
+            let successCount = 0;
+            let errorCount = 0;
+            const errorDetails: string[] = [];
 
-                await apiClientWrapper.post('/store-checklist-realizado', checklistData);
-                await checklistDb.remove(checklist.id);
+            for (const checklist of checklists) {
+                try {
+                    const funcionarios = await checklistFuncionarios.getByChecklistRealizadoId(checklist.id);
+                    const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
+                    const checklistData = { ...checklist, funcionarios, items };
+
+                    await apiClientWrapper.post('/store-checklist-realizado', checklistData);
+                    await checklistDb.remove(checklist.id);
+                    successCount++;
+                } catch (error) {
+                    errorCount++;
+                    const errorMessage = getErrorMessage(error);
+                    errorDetails.push(`Checklist ID ${checklist.id}: ${errorMessage}`);
+                }
             }
-            Alert.alert(
-                "Registros Enviados",
-                `Registros enviado com sucesso!`,
-                [{ text: "OK" }]
-            );
+
+            if (errorCount === 0) {
+                Alert.alert(
+                    "Registros Enviados",
+                    `${successCount} registro(s) enviado(s) com sucesso!`,
+                    [{ text: "OK" }]
+                );
+            } else {
+                const errorList = errorDetails.join('\n\n');
+                Alert.alert(
+                    "Envio Parcial",
+                    `${successCount} registro(s) enviado(s) com sucesso.\n${errorCount} registro(s) com erro.\n\nDetalhes dos erros:\n${errorList}`,
+                    [{ text: "OK" }]
+                );
+            }
         } catch (error) {
             Alert.alert(
                 "Erro ao enviar",

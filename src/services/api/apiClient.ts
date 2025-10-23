@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { checkForUpdate, type UpdateInfo } from '../updateChecker';
+import { type ValidationError, isValidationError } from './apiErrors';
 
 export interface ApiResponse<T> {
     data: T;
@@ -112,7 +113,12 @@ export class ApiClient {
                     const errorMessage = errorData && typeof errorData === 'object' && 'message' in errorData && errorData.message
                         ? String(errorData.message)
                         : 'Erro desconhecido';
-                    throw errorMessage;
+                    const validationError: ValidationError = {
+                        status: 422,
+                        message: errorMessage,
+                        isValidationError: true
+                    };
+                    throw validationError;
                 }
                 console.error(`HTTP Error Response Body:`, responseText);
                 throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Response: ${responseText.substring(0, 200)}...`);
@@ -129,6 +135,10 @@ export class ApiClient {
             const data = await response.json();
             return data;
         } catch (error) {
+            // Don't log validation errors (422) to console as they are expected user input errors
+            if (isValidationError(error)) {
+                throw error;
+            }
             console.error(`API Error for POST ${endpoint}:`, error);
             throw error;
         }
