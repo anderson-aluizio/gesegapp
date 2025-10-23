@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, View, StatusBar, Animated, Platform, Image, Alert } from 'react-native';
+import { FlatList, StyleSheet, View, StatusBar, Animated, Platform, Image } from 'react-native';
 import { Button, Dialog, Portal, Text, Surface, FAB, Searchbar, IconButton, ActivityIndicator } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
@@ -10,6 +10,7 @@ import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklis
 import { useCentroCustosRefresh } from '@/hooks/useCentroCustosRefresh';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
+import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
 
 export default function ChecklistListScreen() {
     const router = useRouter();
@@ -21,6 +22,15 @@ export default function ChecklistListScreen() {
     const [isShowEditDialog, setIsShowEditDialog] = useState<boolean>(false);
     const [isShowDeleteDialog, setIsShowDeleteDialog] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>('');
+    const [infoDialogVisible, setInfoDialogVisible] = useState<boolean>(false);
+    const [infoDialogMessage, setInfoDialogMessage] = useState<string>('');
+    const [confirmDialogVisible, setConfirmDialogVisible] = useState<boolean>(false);
+    const [confirmDialogConfig, setConfirmDialogConfig] = useState({
+        title: '',
+        description: '',
+        onConfirm: () => {},
+        confirmText: 'Confirmar',
+    });
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const checklistDb = useChecklisRealizadoDatabase();
@@ -30,6 +40,16 @@ export default function ChecklistListScreen() {
     const { user } = useAuth();
 
     // useCentroCustosRefresh();
+
+    const showInfoDialog = (message: string) => {
+        setInfoDialogMessage(message);
+        setInfoDialogVisible(true);
+    };
+
+    const showConfirmDialog = (title: string, description: string, onConfirm: () => void, confirmText: string = 'Confirmar') => {
+        setConfirmDialogConfig({ title, description, onConfirm, confirmText });
+        setConfirmDialogVisible(true);
+    };
 
     const list = async () => {
         try {
@@ -79,13 +99,14 @@ export default function ChecklistListScreen() {
             const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
 
             if (!dataSynced) {
-                Alert.alert(
-                    'Dados não sincronizados',
+                showConfirmDialog(
+                    '📊 Dados não sincronizados',
                     'É necessário sincronizar os dados antes de criar um checklist. Deseja ir para a tela de sincronização?',
-                    [
-                        { text: 'Cancelar', style: 'cancel' },
-                        { text: 'Sincronizar', onPress: () => router.push('/sync-data') }
-                    ]
+                    () => {
+                        setConfirmDialogVisible(false);
+                        router.push('/sync-data');
+                    },
+                    'Sincronizar'
                 );
                 return;
             }
@@ -95,13 +116,14 @@ export default function ChecklistListScreen() {
                 const hasTurno = await turnoDb.hasTodayTurno();
 
                 if (!hasTurno) {
-                    Alert.alert(
-                        'Turno não iniciado',
+                    showConfirmDialog(
+                        '⏰ Turno não iniciado',
                         'É necessário abrir o turno do dia antes de criar um checklist. Deseja abrir o turno agora?',
-                        [
-                            { text: 'Cancelar', style: 'cancel' },
-                            { text: 'Abrir Turno', onPress: () => router.push('/turno-equipe/create') }
-                        ]
+                        () => {
+                            setConfirmDialogVisible(false);
+                            router.push('/turno-equipe/create');
+                        },
+                        'Abrir Turno'
                     );
                     return;
                 }
@@ -111,7 +133,7 @@ export default function ChecklistListScreen() {
             router.push('/checklist/create');
         } catch (error) {
             console.error('Erro ao validar requisitos:', error);
-            Alert.alert('Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
+            showInfoDialog('❌ Erro\n\nOcorreu um erro ao validar os requisitos. Tente novamente.');
         }
     };
 
@@ -298,6 +320,22 @@ export default function ChecklistListScreen() {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
+
+            <InfoDialog
+                visible={infoDialogVisible}
+                description={infoDialogMessage}
+                onDismiss={() => setInfoDialogVisible(false)}
+            />
+
+            <ConfirmDialog
+                visible={confirmDialogVisible}
+                title={confirmDialogConfig.title}
+                description={confirmDialogConfig.description}
+                onConfirm={confirmDialogConfig.onConfirm}
+                onDismiss={() => setConfirmDialogVisible(false)}
+                confirmText={confirmDialogConfig.confirmText}
+                cancelText="Cancelar"
+            />
         </View>
     );
 }

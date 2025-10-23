@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, View, Animated, Alert, StatusBar } from 'react-native';
+import { FlatList, StyleSheet, View, Animated, StatusBar } from 'react-native';
 import { Button, Dialog, Portal, Text, Surface, IconButton, ActivityIndicator, Card, Chip, List, Divider } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
@@ -8,6 +8,7 @@ import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklis
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { isBeforeToday } from '@/utils/dateUtils';
+import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
 
 export default function TurnoEquipeScreen() {
     const router = useRouter();
@@ -17,12 +18,31 @@ export default function TurnoEquipeScreen() {
     const [isShowDeleteDialog, setIsShowDeleteDialog] = useState<boolean>(false);
     const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
     const [funcionariosByTurno, setFuncionariosByTurno] = useState<Map<number, EquipeTurnoFuncionarioDatabaseWithRelations[]>>(new Map());
+    const [infoDialogVisible, setInfoDialogVisible] = useState<boolean>(false);
+    const [infoDialogMessage, setInfoDialogMessage] = useState<string>('');
+    const [confirmDialogVisible, setConfirmDialogVisible] = useState<boolean>(false);
+    const [confirmDialogConfig, setConfirmDialogConfig] = useState({
+        title: '',
+        description: '',
+        onConfirm: () => {},
+        confirmText: 'Confirmar',
+    });
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const turnoDb = useEquipeTurnoDatabase();
     const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
     const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
     const centroCustoDb = useCentroCustoDatabase();
+
+    const showInfoDialog = (message: string) => {
+        setInfoDialogMessage(message);
+        setInfoDialogVisible(true);
+    };
+
+    const showConfirmDialog = (title: string, description: string, onConfirm: () => void, confirmText: string = 'Confirmar') => {
+        setConfirmDialogConfig({ title, description, onConfirm, confirmText });
+        setConfirmDialogVisible(true);
+    };
 
     const list = async () => {
         try {
@@ -54,13 +74,14 @@ export default function TurnoEquipeScreen() {
             const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
 
             if (!dataSynced) {
-                Alert.alert(
-                    'Dados não sincronizados',
+                showConfirmDialog(
+                    '📊 Dados não sincronizados',
                     'É necessário sincronizar os dados antes de criar um turno. Deseja ir para a tela de sincronização?',
-                    [
-                        { text: 'Cancelar', style: 'cancel' },
-                        { text: 'Sincronizar', onPress: () => router.push('/sync-data') }
-                    ]
+                    () => {
+                        setConfirmDialogVisible(false);
+                        router.push('/sync-data');
+                    },
+                    'Sincronizar'
                 );
                 return;
             }
@@ -69,7 +90,7 @@ export default function TurnoEquipeScreen() {
             router.push('/turno-equipe/create');
         } catch (error) {
             console.error('Erro ao validar requisitos:', error);
-            Alert.alert('Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
+            showInfoDialog('❌ Erro\n\nOcorreu um erro ao validar os requisitos. Tente novamente.');
         }
     };
 
@@ -79,11 +100,11 @@ export default function TurnoEquipeScreen() {
 
         try {
             await turnoDb.remove(selectedTurno.id);
-            Alert.alert('Sucesso', 'Turno removido com sucesso.');
+            showInfoDialog('✅ Sucesso\n\nTurno removido com sucesso.');
             await list();
         } catch (error) {
             console.error('Erro ao remover turno:', error);
-            Alert.alert('Erro', 'Erro ao remover turno. Tente novamente.');
+            showInfoDialog('❌ Erro\n\nErro ao remover turno. Tente novamente.');
         } finally {
             setSelectedTurno(null);
         }
@@ -91,7 +112,7 @@ export default function TurnoEquipeScreen() {
 
     const handleDeletePress = (turno: EquipeTurnoDatabaseWithRelations) => {
         if (isBeforeToday(turno.date)) {
-            Alert.alert('Atenção', 'Você não pode remover registros de turnos anteriores.');
+            showInfoDialog('⚠️ Atenção\n\nVocê não pode remover registros de turnos anteriores.');
             return;
         }
         setSelectedTurno(turno);
@@ -322,6 +343,22 @@ export default function TurnoEquipeScreen() {
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
+
+                <InfoDialog
+                    visible={infoDialogVisible}
+                    description={infoDialogMessage}
+                    onDismiss={() => setInfoDialogVisible(false)}
+                />
+
+                <ConfirmDialog
+                    visible={confirmDialogVisible}
+                    title={confirmDialogConfig.title}
+                    description={confirmDialogConfig.description}
+                    onConfirm={confirmDialogConfig.onConfirm}
+                    onDismiss={() => setConfirmDialogVisible(false)}
+                    confirmText={confirmDialogConfig.confirmText}
+                    cancelText="Cancelar"
+                />
             </View>
         </ProtectedRoute>
     );

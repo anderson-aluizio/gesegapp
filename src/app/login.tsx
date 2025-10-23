@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
     View,
     StyleSheet,
-    Alert,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -15,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/ResetData';
 import { UpdateRequiredHandledError } from '@/services';
+import { InfoDialog } from '@/components/sync-data';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState<string>('');
@@ -22,9 +22,16 @@ export default function LoginScreen() {
     const [remember, setRemember] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+    const [dialogMessage, setDialogMessage] = useState<string>('');
     const { login } = useAuth();
 
     const CREDENTIALS_KEY = '@geseg:credentials';
+
+    const showDialog = (message: string) => {
+        setDialogMessage(message);
+        setDialogVisible(true);
+    };
 
     // Load stored credentials (if any) when the screen mounts
     useEffect(() => {
@@ -47,17 +54,17 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Atenção', 'Preencha todos os campos');
+            showDialog('⚠️ Atenção\n\nPreencha todos os campos');
             return;
         }
 
         if (!email.includes('@dinamo.srv.br')) {
-            Alert.alert('Atenção', 'Por favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
+            showDialog('⚠️ Atenção\n\nPor favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
             return;
         }
 
         if (password.length < 6) {
-            Alert.alert('Atenção', 'A senha deve ter pelo menos 6 caracteres');
+            showDialog('⚠️ Atenção\n\nA senha deve ter pelo menos 6 caracteres');
             return;
         }
 
@@ -83,7 +90,7 @@ export default function LoginScreen() {
 
                 router.replace('/(tabs)/home');
             } else {
-                Alert.alert('Erro', 'Credenciais inválidas. Por favor, tente novamente.');
+                showDialog('❌ Erro\n\nCredenciais inválidas. Por favor, tente novamente.');
             }
         } catch (error) {
             // If it's an UpdateRequiredHandledError, the alert was already shown
@@ -94,7 +101,7 @@ export default function LoginScreen() {
             }
 
             console.error('Erro ao fazer login:', error);
-            Alert.alert('Erro', 'Ocorreu um erro durante o login');
+            showDialog('❌ Erro\n\nOcorreu um erro durante o login');
         } finally {
             setLoading(false);
         }
@@ -174,6 +181,12 @@ export default function LoginScreen() {
             <View style={styles.resetDataContainer}>
                 <ResetData />
             </View>
+
+            <InfoDialog
+                visible={dialogVisible}
+                description={dialogMessage}
+                onDismiss={() => setDialogVisible(false)}
+            />
         </KeyboardAvoidingView>
     );
 }

@@ -1,14 +1,13 @@
-import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, StatusBar } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, StatusBar, Alert } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
 import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
-import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
 
 const { width } = Dimensions.get('window');
 const CARD_SPACING = 12;
@@ -29,17 +28,6 @@ export default function HomeScreen() {
   const { user, logout } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-
-  const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
-  const [infoDialogVisible, setInfoDialogVisible] = useState(false);
-  const [infoDialogMessage, setInfoDialogMessage] = useState('');
-  const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
-  const [confirmDialogConfig, setConfirmDialogConfig] = useState({
-    title: '',
-    description: '',
-    onConfirm: () => {},
-    confirmText: 'Confirmar',
-  });
 
   const turnoDb = useEquipeTurnoDatabase();
   const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
@@ -107,23 +95,15 @@ export default function HomeScreen() {
     router.push(route as any);
   };
 
-  const showInfoDialog = (message: string) => {
-    setInfoDialogMessage(message);
-    setInfoDialogVisible(true);
-  };
-
-  const showConfirmDialog = (title: string, description: string, onConfirm: () => void, confirmText: string = 'Confirmar') => {
-    setConfirmDialogConfig({ title, description, onConfirm, confirmText });
-    setConfirmDialogVisible(true);
-  };
-
   const handleLogout = () => {
-    setLogoutDialogVisible(true);
-  };
-
-  const confirmLogout = () => {
-    setLogoutDialogVisible(false);
-    logout();
+    Alert.alert(
+      'Confirmar Logout',
+      'Ao sair, todos os dados não sincronizados serão deletados. Deseja continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Sair', style: 'destructive', onPress: logout }
+      ]
+    );
   };
 
   const handleQuickChecklistCreate = async () => {
@@ -134,14 +114,13 @@ export default function HomeScreen() {
       const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
 
       if (!dataSynced) {
-        showConfirmDialog(
-          '📊 Dados não sincronizados',
+        Alert.alert(
+          'Dados não sincronizados',
           'É necessário sincronizar os dados antes de criar um checklist. Deseja ir para a tela de sincronização?',
-          () => {
-            setConfirmDialogVisible(false);
-            router.push('/sync-data');
-          },
-          'Sincronizar'
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            { text: 'Sincronizar', onPress: () => router.push('/sync-data') }
+          ]
         );
         return;
       }
@@ -151,14 +130,13 @@ export default function HomeScreen() {
         const hasTurno = await turnoDb.hasTodayTurno();
 
         if (!hasTurno) {
-          showConfirmDialog(
-            '⏰ Turno não iniciado',
+          Alert.alert(
+            'Turno não iniciado',
             'É necessário abrir o turno do dia antes de criar um checklist. Deseja abrir o turno agora?',
-            () => {
-              setConfirmDialogVisible(false);
-              router.push('/turno-equipe/create');
-            },
-            'Abrir Turno'
+            [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Abrir Turno', onPress: () => router.push('/turno-equipe/create') }
+            ]
           );
           return;
         }
@@ -168,7 +146,7 @@ export default function HomeScreen() {
       router.push('/checklist/create');
     } catch (error) {
       console.error('Erro ao validar requisitos:', error);
-      showInfoDialog('❌ Erro\n\nOcorreu um erro ao validar os requisitos. Tente novamente.');
+      Alert.alert('Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
     }
   };
 
@@ -291,34 +269,6 @@ export default function HomeScreen() {
         style={styles.fabButton}
         size={40}
         onPress={handleQuickChecklistCreate}
-      />
-
-      {/* Dialogs */}
-      <ConfirmDialog
-        visible={logoutDialogVisible}
-        title="🚪 Confirmar Logout"
-        description="Ao sair, todos os dados não sincronizados serão deletados. Deseja continuar?"
-        onConfirm={confirmLogout}
-        onDismiss={() => setLogoutDialogVisible(false)}
-        confirmText="Sair"
-        cancelText="Cancelar"
-        confirmColor="#e74c3c"
-      />
-
-      <ConfirmDialog
-        visible={confirmDialogVisible}
-        title={confirmDialogConfig.title}
-        description={confirmDialogConfig.description}
-        onConfirm={confirmDialogConfig.onConfirm}
-        onDismiss={() => setConfirmDialogVisible(false)}
-        confirmText={confirmDialogConfig.confirmText}
-        cancelText="Cancelar"
-      />
-
-      <InfoDialog
-        visible={infoDialogVisible}
-        description={infoDialogMessage}
-        onDismiss={() => setInfoDialogVisible(false)}
       />
     </View>
   );
