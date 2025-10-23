@@ -28,7 +28,7 @@ export default function ChecklistListScreen() {
     const [confirmDialogConfig, setConfirmDialogConfig] = useState({
         title: '',
         description: '',
-        onConfirm: () => {},
+        onConfirm: () => { },
         confirmText: 'Confirmar',
     });
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -159,6 +159,12 @@ export default function ChecklistListScreen() {
         router.push(`/checklist/${selectedChecklist.id}`);
     };
 
+    const handleDuplicateChecklist = () => {
+        if (!selectedChecklist) return;
+        setIsShowEditDialog(false);
+        router.push(`/checklist/duplicate/${selectedChecklist.id}`);
+    };
+
     const handleDeleteChecklist = async () => {
         if (!selectedChecklist) return;
         try {
@@ -264,29 +270,37 @@ export default function ChecklistListScreen() {
                     <Dialog.Title style={styles.dialogTitle}>⚠️ Atenção</Dialog.Title>
                     <Dialog.Content>
                         <Text variant="bodyLarge" style={styles.dialogContent}>
-                            Este registro já foi finalizado. Para editar, clique em "Editar".
+                            Este registro já foi finalizado.
                         </Text>
                         <Text variant="bodySmall" style={styles.dialogContentDescprition}>
                             Para excluir, toque e segure o registro na lista.
                         </Text>
                     </Dialog.Content>
                     <Dialog.Actions>
-                        <View style={styles.containerButtons}>
-                            <Button
-                                mode="outlined"
-                                onPress={() => setIsShowEditDialog(false)}
-                                style={styles.dialogButton}
-                                textColor="#666"
-                            >
-                                Cancelar
-                            </Button>
+                        <View style={styles.containerButtonsVertical}>
                             <Button
                                 mode="contained"
                                 buttonColor="#667eea"
                                 onPress={handleEditChecklist}
-                                style={styles.dialogButton}
+                                style={styles.dialogButtonFull}
                             >
                                 Editar
+                            </Button>
+                            <Button
+                                mode="contained"
+                                buttonColor="#f39c12"
+                                onPress={handleDuplicateChecklist}
+                                style={styles.dialogButtonFull}
+                            >
+                                Duplicar
+                            </Button>
+                            <Button
+                                mode="outlined"
+                                onPress={() => setIsShowEditDialog(false)}
+                                style={styles.dialogButtonFull}
+                                textColor="#666"
+                            >
+                                Cancelar
                             </Button>
                         </View>
                     </Dialog.Actions>
@@ -452,11 +466,25 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         marginHorizontal: 4,
     },
-
+    dialogButtonSmall: {
+        flex: 1,
+        borderRadius: 20,
+        marginHorizontal: 2,
+    },
+    dialogButtonFull: {
+        borderRadius: 25,
+        marginVertical: 4,
+    },
     containerButtons: {
         flexDirection: 'row',
         gap: 8,
         paddingHorizontal: 8,
+    },
+    containerButtonsVertical: {
+        flexDirection: 'column',
+        gap: 4,
+        paddingHorizontal: 8,
+        width: '100%',
     },
     buttonAdd: {
         position: 'absolute',

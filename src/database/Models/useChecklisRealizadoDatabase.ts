@@ -2,6 +2,7 @@ import { useSQLiteContext } from "expo-sqlite"
 import { useChecklisRealizadoItemsDatabase } from "./useChecklisRealizadoItemsDatabase"
 import { useChecklisEstruturaItemsDatabase } from "./useChecklisEstruturaItemsDatabase"
 import { useChecklistRealizadoFuncionarioDatabase } from "./useChecklistRealizadoFuncionarioDatabase"
+import { ChecklistEstruturaDatabase } from "./useChecklistEstruturaDatabase"
 
 export type ChecklistRealizadoDatabase = {
   id: number
@@ -317,6 +318,81 @@ export const useChecklisRealizadoDatabase = () => {
     }
   }
 
+  const duplicate = async (originalChecklistId: number, newChecklistEstrutura: ChecklistEstruturaDatabase) => {
+    try {
+      const originalChecklist = await show(originalChecklistId);
+      if (!originalChecklist) {
+        throw new Error('Checklist original não encontrado');
+      }
+
+      let newChecklistId: string | undefined;
+      await database.withTransactionAsync(async () => {
+        const statement = await database.prepareAsync(
+          `INSERT INTO checklist_realizados
+          (checklist_grupo_id, checklist_estrutura_id, centro_custo_id,
+          localidade_cidade_id, equipe_id, veiculo_id, area, date,
+          encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf, created_at)
+          VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
+                  $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
+                  NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
+                  NULLIF($gerente_cpf, ''), datetime('now'))`
+        );
+
+        try {
+          const result = await statement.executeAsync({
+            $checklist_grupo_id: newChecklistEstrutura.checklist_grupo_id,
+            $checklist_estrutura_id: newChecklistEstrutura.id,
+            $centro_custo_id: originalChecklist.centro_custo_id,
+            $localidade_cidade_id: originalChecklist.localidade_cidade_id,
+            $equipe_id: originalChecklist.equipe_id,
+            $veiculo_id: originalChecklist.veiculo_id,
+            $area: originalChecklist.area,
+            $date: new Date().toISOString(),
+            $encarregado_cpf: originalChecklist.encarregado_cpf,
+            $supervisor_cpf: originalChecklist.supervisor_cpf,
+            $coordenador_cpf: originalChecklist.coordenador_cpf,
+            $gerente_cpf: originalChecklist.gerente_cpf,
+          });
+
+          newChecklistId = result.lastInsertRowId.toLocaleString();
+
+          const newEstruturaItems = await checklisEstruturaItemsDb.getItemsByEstruturaId(newChecklistEstrutura.id);
+
+          for (const item of newEstruturaItems) {
+            await checklistRealizadoItemsDb.create({
+              checklist_estrutura_item_id: item.id,
+              checklist_realizado_id: parseInt(newChecklistId),
+              checklist_item_id: item.checklist_item_id,
+              is_respondido: false,
+              is_inconforme: false,
+            });
+          }
+
+          const funcionariosQuery = `
+            SELECT funcionario_cpf
+            FROM checklist_realizado_funcionarios
+            WHERE checklist_realizado_id = ?
+          `;
+          const funcionarios = await database.getAllAsync<{ funcionario_cpf: string }>(funcionariosQuery, [originalChecklistId]);
+
+          for (const func of funcionarios) {
+            await checklistFuncionarioDb.create(
+              parseInt(newChecklistId),
+              func.funcionario_cpf
+            );
+          }
+        } finally {
+          await statement.finalizeAsync();
+        }
+      });
+
+      return { success: true, newChecklistId: parseInt(newChecklistId!) };
+    } catch (error) {
+      console.error('Error duplicating checklist:', error);
+      throw error;
+    }
+  }
+
   return {
     create,
     getAll,
@@ -326,6 +402,7 @@ export const useChecklisRealizadoDatabase = () => {
     updateLideranca,
     updateFinished,
     updatedUnfinished,
-    remove
+    remove,
+    duplicate
   }
 }

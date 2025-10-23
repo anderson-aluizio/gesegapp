@@ -24,6 +24,20 @@ export const useChecklistEstruturaDatabase = () => {
     }
   }
 
+  const getByCentroCustoId = async (params: { centro_custo_id: string }) => {
+    try {
+      const query = `SELECT * FROM checklist_estruturas WHERE centro_custo_id = ? ORDER BY modelo ASC`;
+
+      const response = await database.getAllAsync<ChecklistEstruturaDatabase>(query, [
+        params.centro_custo_id
+      ]);
+
+      return response
+    } catch (error) {
+      throw error
+    }
+  }
+
   const getByParams = async (params: { centro_custo_id: string, grupo_id: number, query: string }) => {
     try {
       const query = `SELECT * FROM checklist_estruturas WHERE centro_custo_id = ? AND checklist_grupo_id = ? AND modelo LIKE ? ORDER BY modelo LIMIT 10`;
@@ -40,5 +54,5 @@ export const useChecklistEstruturaDatabase = () => {
     }
   }
 
-  return { getAll, getByParams }
+  return { getAll, getByCentroCustoId, getByParams }
 }
