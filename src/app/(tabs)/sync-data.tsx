@@ -50,7 +50,7 @@ export default function SyncDataScreen() {
 
     return (
         <View style={styles.container}>
-            <SyncHeader onBack={() => router.back()} />
+            <SyncHeader onBack={() => router.replace('/(tabs)/home')} />
 
             <ScrollView
                 style={styles.scrollContainer}

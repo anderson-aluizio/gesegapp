@@ -2,19 +2,16 @@ import { FlatList, StyleSheet, View, StatusBar, Animated, Platform, Image } from
 import { Button, Dialog, Portal, Text, Surface, FAB, Searchbar, IconButton, ActivityIndicator } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
 import { ChecklistRealizado } from '@/components/ChecklistRealizado';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
-import { useCentroCustosRefresh } from '@/hooks/useCentroCustosRefresh';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
 import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
 
 export default function ChecklistListScreen() {
     const router = useRouter();
-    const insets = useSafeAreaInsets();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [checklistRealizados, setChecklistRealizados] = useState<ChecklistRealizadoDatabase[]>([]);
     const [filteredChecklists, setFilteredChecklists] = useState<ChecklistRealizadoDatabase[]>([]);
@@ -38,8 +35,6 @@ export default function ChecklistListScreen() {
     const centroCustoDb = useCentroCustoDatabase();
     const turnoDb = useEquipeTurnoDatabase();
     const { user } = useAuth();
-
-    // useCentroCustosRefresh();
 
     const showInfoDialog = (message: string) => {
         setInfoDialogMessage(message);
@@ -191,7 +186,7 @@ export default function ChecklistListScreen() {
                         icon="arrow-left"
                         iconColor="#fff"
                         size={24}
-                        onPress={() => router.back()}
+                        onPress={() => router.replace('/(tabs)/home')}
                         style={styles.backButton}
                     />
                     <Text style={styles.headerTitle}>Checklists</Text>
