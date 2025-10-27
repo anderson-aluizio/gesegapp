@@ -83,6 +83,18 @@ export class ApiClientWrapper {
         }
     }
 
+    async postWithFiles<T>(endpoint: string, data: any): Promise<T> {
+        try {
+            return await apiClient.postWithFiles<T>(endpoint, data);
+        } catch (error) {
+            if (error instanceof UpdateRequiredError && error.updateInfo) {
+                showUpdateAlert(error.updateInfo);
+                throw new UpdateRequiredHandledError();
+            }
+            throw error;
+        }
+    }
+
     /**
      * Enables or disables automatic update checking on API requests.
      */

@@ -1,9 +1,10 @@
 import { memo, useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Button, RadioButton, Text, TextInput } from 'react-native-paper';
+import { RadioButton, Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoItemsDatabaseWithItem } from '@/database/Models/useChecklisRealizadoItemsDatabase';
 import { ChecklistRealizadoFuncionarioDatabase } from '@/database/Models/useChecklistRealizadoFuncionarioDatabase';
 import AutocompleteSearchDropdown from '@/components/AutocompleteSearchDropdown';
+import PhotoPicker from '@/components/PhotoPicker';
 
 export interface ChecklistItemProps {
     item: ChecklistRealizadoItemsDatabaseWithItem;
@@ -12,6 +13,8 @@ export interface ChecklistItemProps {
     onFuncionarioSelection: (itemId: number, selectedFuncionarios: string[]) => void;
     onDescricaoInput: (itemId: number, value: string) => void;
     onClearResponse: (itemId: number) => void;
+    onPhotoSelect: (itemId: number, fotoPath: string) => void;
+    onPhotoRemove: (itemId: number) => void;
 }
 
 const ChecklistItem = memo(({
@@ -20,7 +23,9 @@ const ChecklistItem = memo(({
     onAlternativaSelect,
     onFuncionarioSelection,
     onDescricaoInput,
-    onClearResponse
+    onClearResponse,
+    onPhotoSelect,
+    onPhotoRemove
 }: ChecklistItemProps) => {
     const isInconforme = useMemo(() =>
         Boolean(item.is_gera_nao_conformidade &&
@@ -68,6 +73,14 @@ const ChecklistItem = memo(({
     const handleClear = useCallback(() => {
         onClearResponse(item.id);
     }, [item.id, onClearResponse]);
+
+    const handlePhotoSelect = useCallback((fotoPath: string) => {
+        onPhotoSelect(item.id, fotoPath);
+    }, [item.id, onPhotoSelect]);
+
+    const handlePhotoRemove = useCallback(() => {
+        onPhotoRemove(item.id);
+    }, [item.id, onPhotoRemove]);
 
     return (
         <View style={[
@@ -158,6 +171,12 @@ const ChecklistItem = memo(({
                             numberOfLines={3}
                         />
                     )}
+                <PhotoPicker
+                    fotoPath={item.foto_path}
+                    onPhotoSelect={handlePhotoSelect}
+                    onPhotoRemove={handlePhotoRemove}
+                    isFotoObrigatoria={item.is_foto_obrigatoria}
+                />
             </View>
         </View>
     );

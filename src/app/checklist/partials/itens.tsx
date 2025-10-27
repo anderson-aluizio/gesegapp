@@ -20,6 +20,7 @@ export default function ItensScreen(props: {
     const [checklistEstruturaItems, setChecklistEstruturaItems] = useState<ChecklistRealizadoItemsDatabaseWithItem[]>([]);
     const [funcionarios, setFuncionarios] = useState<ChecklistRealizadoFuncionarioDatabase[]>([]);
     const [dialogDesc, setDialogDesc] = useState<string>('');
+    const [modifiedItemIds, setModifiedItemIds] = useState<Set<number>>(new Set());
 
     const isMountedRef = useRef(true);
     const lastChecklistIdRef = useRef<number | null>(null);
@@ -31,6 +32,7 @@ export default function ItensScreen(props: {
         setIsLoading(true);
         setFuncionarios([]);
         setChecklistEstruturaItems([]);
+        setModifiedItemIds(new Set());
         props.setReloadList(false);
 
         if (!checklistRealizado.id) {
@@ -73,6 +75,7 @@ export default function ItensScreen(props: {
 
     const handleAlternativaSelect = useCallback((itemId: number, resposta: string) => {
         setIsFormDirty(true);
+        setModifiedItemIds(prev => new Set(prev).add(itemId));
 
         setChecklistEstruturaItems(prevItems => {
             return prevItems.map(item => {
@@ -104,7 +107,9 @@ export default function ItensScreen(props: {
                     isInconforme,
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
-                    isDescricaoFilled
+                    isDescricaoFilled,
+                    Boolean(updatedItem.is_foto_obrigatoria),
+                    updatedItem.foto_path
                 );
 
                 return updatedItem;
@@ -114,6 +119,7 @@ export default function ItensScreen(props: {
 
     const handleFuncionarioSelection = useCallback((itemId: number, selectedFuncionarios: string[]) => {
         setIsFormDirty(true);
+        setModifiedItemIds(prev => new Set(prev).add(itemId));
 
         setChecklistEstruturaItems(prevItems => {
             return prevItems.map(item => {
@@ -138,7 +144,9 @@ export default function ItensScreen(props: {
                     isInconforme,
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
-                    isDescricaoFilled
+                    isDescricaoFilled,
+                    Boolean(updatedItem.is_foto_obrigatoria),
+                    updatedItem.foto_path
                 );
 
                 return updatedItem;
@@ -148,6 +156,7 @@ export default function ItensScreen(props: {
 
     const handleDescricaoInput = useCallback((itemId: number, value: string) => {
         setIsFormDirty(true);
+        setModifiedItemIds(prev => new Set(prev).add(itemId));
 
         setChecklistEstruturaItems(prevItems => {
             return prevItems.map(item => {
@@ -172,7 +181,9 @@ export default function ItensScreen(props: {
                     isInconforme,
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
-                    isDescricaoFilled
+                    isDescricaoFilled,
+                    Boolean(updatedItem.is_foto_obrigatoria),
+                    updatedItem.foto_path
                 );
 
                 return updatedItem;
@@ -182,6 +193,7 @@ export default function ItensScreen(props: {
 
     const handleClearResponse = useCallback((itemId: number) => {
         setIsFormDirty(true);
+        setModifiedItemIds(prev => new Set(prev).add(itemId));
 
         setChecklistEstruturaItems(prevItems => {
             return prevItems.map(item => {
@@ -191,10 +203,85 @@ export default function ItensScreen(props: {
                     ...item,
                     resposta: '',
                     descricao: '',
+                    foto_path: undefined,
                     inconformidade_funcionarios_array: undefined,
                     is_respondido: false,
                     is_inconforme: false
                 };
+            });
+        });
+    }, []);
+
+    const handlePhotoSelect = useCallback((itemId: number, fotoPath: string) => {
+        setIsFormDirty(true);
+        setModifiedItemIds(prev => new Set(prev).add(itemId));
+
+        setChecklistEstruturaItems(prevItems => {
+            return prevItems.map(item => {
+                if (item.id !== itemId) return item;
+
+                const isInconforme = Boolean(
+                    item.is_gera_nao_conformidade &&
+                    item.alternativa_inconformidades_array?.length &&
+                    item.alternativa_inconformidades_array.includes(item.resposta || '')
+                );
+
+                const updatedItem = {
+                    ...item,
+                    foto_path: fotoPath,
+                    is_inconforme: isInconforme
+                };
+
+                const funcionariosFilled = Boolean(updatedItem.inconformidade_funcionarios_array?.length);
+                const isDescricaoFilled = Boolean(updatedItem.descricao?.trim());
+
+                updatedItem.is_respondido = validateItemIsRespondido(
+                    isInconforme,
+                    funcionariosFilled,
+                    Boolean(updatedItem.is_desc_nconf_required),
+                    isDescricaoFilled,
+                    Boolean(updatedItem.is_foto_obrigatoria),
+                    fotoPath
+                );
+
+                return updatedItem;
+            });
+        });
+    }, []);
+
+    const handlePhotoRemove = useCallback((itemId: number) => {
+        setIsFormDirty(true);
+        setModifiedItemIds(prev => new Set(prev).add(itemId));
+
+        setChecklistEstruturaItems(prevItems => {
+            return prevItems.map(item => {
+                if (item.id !== itemId) return item;
+
+                const isInconforme = Boolean(
+                    item.is_gera_nao_conformidade &&
+                    item.alternativa_inconformidades_array?.length &&
+                    item.alternativa_inconformidades_array.includes(item.resposta || '')
+                );
+
+                const updatedItem = {
+                    ...item,
+                    foto_path: undefined,
+                    is_inconforme: isInconforme
+                };
+
+                const funcionariosFilled = Boolean(updatedItem.inconformidade_funcionarios_array?.length);
+                const isDescricaoFilled = Boolean(updatedItem.descricao?.trim());
+
+                updatedItem.is_respondido = validateItemIsRespondido(
+                    isInconforme,
+                    funcionariosFilled,
+                    Boolean(updatedItem.is_desc_nconf_required),
+                    isDescricaoFilled,
+                    Boolean(updatedItem.is_foto_obrigatoria),
+                    undefined
+                );
+
+                return updatedItem;
             });
         });
     }, []);
@@ -206,22 +293,26 @@ export default function ItensScreen(props: {
         }
 
         setIsLoading(true);
-        const checklistEstruturaItemsRespondidos = checklistEstruturaItems.filter(item => item.is_respondido);
 
-        if (checklistEstruturaItemsRespondidos.length === 0) {
-            await useChecklisRealizadoItemsDb.clearByChecklistRealizadoId(checklistRealizado.id);
+        const checklistEstruturaItemsToUpdate = checklistEstruturaItems.filter(item =>
+            modifiedItemIds.has(item.id)
+        );
+
+        if (checklistEstruturaItemsToUpdate.length === 0) {
             setIsLoading(false);
+            setIsFormDirty(false);
             return;
         }
 
         try {
-            for (const item of checklistEstruturaItemsRespondidos) {
+            for (const item of checklistEstruturaItemsToUpdate) {
                 const itemToUpdate = { ...item };
                 itemToUpdate.inconformidade_funcionarios = item.inconformidade_funcionarios_array?.length ?
                     item.inconformidade_funcionarios_array.join(',') : '';
                 await useChecklisRealizadoItemsDb.update(itemToUpdate);
             }
             setIsFormDirty(false);
+            setModifiedItemIds(new Set());
             props.formUpdated();
             setDialogDesc('Respostas atualizadas com sucesso!');
         } catch (error) {
@@ -229,7 +320,7 @@ export default function ItensScreen(props: {
             setDialogDesc('Erro ao atualizar as respostas. Tente novamente.');
         }
         setIsLoading(false);
-    }, [checklistEstruturaItems, useChecklisRealizadoItemsDb, checklistRealizado.id, props.formUpdated]);
+    }, [checklistEstruturaItems, modifiedItemIds, useChecklisRealizadoItemsDb, checklistRealizado.id, props.formUpdated]);
 
     return (
         <>
@@ -255,6 +346,8 @@ export default function ItensScreen(props: {
                                         onFuncionarioSelection={handleFuncionarioSelection}
                                         onDescricaoInput={handleDescricaoInput}
                                         onClearResponse={handleClearResponse}
+                                        onPhotoSelect={handlePhotoSelect}
+                                        onPhotoRemove={handlePhotoRemove}
                                     />
                                 ))
                             )}

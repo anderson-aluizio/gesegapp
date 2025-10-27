@@ -55,9 +55,30 @@ const SendChecklistRealizado = () => {
                 try {
                     const funcionarios = await checklistFuncionarios.getByChecklistRealizadoId(checklist.id);
                     const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
-                    const checklistData = { ...checklist, funcionarios, items };
 
-                    await apiClientWrapper.post('/store-checklist-realizado', checklistData);
+                    const hasPhotos = items.some(item => item.foto_path);
+
+                    const checklistData: any = { ...checklist, funcionarios, items: [] };
+
+                    const itemsWithPhotos = items.map(item => {
+                        if (item.foto_path && item.foto_path.startsWith('file://')) {
+                            return {
+                                ...item,
+                                foto: { uri: item.foto_path }
+                            };
+                        }
+                        return item;
+                    });
+
+                    checklistData.items = itemsWithPhotos;
+
+                    // Usa postWithFiles se houver fotos, senão usa post normal
+                    if (hasPhotos) {
+                        await apiClientWrapper.postWithFiles('/store-checklist-realizado', checklistData);
+                    } else {
+                        await apiClientWrapper.post('/store-checklist-realizado', checklistData);
+                    }
+
                     await checklistDb.remove(checklist.id);
                     successCount++;
                 } catch (error) {

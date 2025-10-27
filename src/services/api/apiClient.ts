@@ -54,6 +54,19 @@ export class ApiClient {
         return headers;
     }
 
+    private async getAuthHeadersWithoutContentType(): Promise<Record<string, string>> {
+        const authToken = await AsyncStorage.getItem('authToken');
+        const headers: Record<string, string> = {
+            'Accept': 'application/json',
+        };
+
+        if (authToken) {
+            headers['Authorization'] = `Bearer ${authToken}`;
+        }
+
+        return headers;
+    }
+
     /**
      * Interceptor that checks if an app update is required before making API requests.
      * Throws UpdateRequiredError if an update is needed.
@@ -134,6 +147,101 @@ export class ApiClient {
 
             const data = await response.json();
             return data;
+        } catch (error) {
+            // Don't log validation errors (422) to console as they are expected user input errors
+            if (isValidationError(error)) {
+                throw error;
+            }
+            console.error(`API Error for POST ${endpoint}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * Uploads data with file attachments using multipart/form-data.
+     * Handles photo uploads for checklist items.
+     */
+    async postWithFiles<T>(endpoint: string, data: any): Promise<T> {
+        const fullUrl = `${this.baseURL}${endpoint}`;
+        await this.checkUpdateBeforeRequest();
+        try {
+            const headers = await this.getAuthHeadersWithoutContentType();
+            const formData = new FormData();
+
+            // Função auxiliar para adicionar dados ao FormData
+            const appendToFormData = (key: string, value: any) => {
+                if (value === null || value === undefined) {
+                    return;
+                }
+
+                if (Array.isArray(value)) {
+                    value.forEach((item, index) => {
+                        if (typeof item === 'object' && item !== null) {
+                            Object.keys(item).forEach(subKey => {
+                                const fullKey = `${key}[${index}][${subKey}]`;
+                                appendToFormData(fullKey, item[subKey]);
+                            });
+                        } else {
+                            formData.append(`${key}[${index}]`, item);
+                        }
+                    });
+                } else if (typeof value === 'object' && value !== null && !value.uri) {
+                    Object.keys(value).forEach(subKey => {
+                        appendToFormData(`${key}[${subKey}]`, value[subKey]);
+                    });
+                } else if (typeof value === 'object' && value.uri) {
+                    // É um arquivo (foto)
+                    const uriParts = value.uri.split('.');
+                    const fileType = uriParts[uriParts.length - 1];
+                    formData.append(key, {
+                        uri: value.uri,
+                        name: `photo_${Date.now()}.${fileType}`,
+                        type: `image/${fileType}`,
+                    } as any);
+                } else {
+                    formData.append(key, String(value));
+                }
+            };
+
+            Object.keys(data).forEach(key => {
+                appendToFormData(key, data[key]);
+            });
+
+            const response = await fetch(fullUrl, {
+                method: 'POST',
+                headers,
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const responseText = await response.text();
+
+                if (response.status === 422) {
+                    const errorData = JSON.parse(responseText);
+                    const errorMessage = errorData && typeof errorData === 'object' && 'message' in errorData && errorData.message
+                        ? String(errorData.message)
+                        : 'Erro desconhecido';
+                    const validationError: ValidationError = {
+                        status: 422,
+                        message: errorMessage,
+                        isValidationError: true
+                    };
+                    throw validationError;
+                }
+                console.error(`HTTP Error Response Body:`, responseText);
+                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}. Response: ${responseText.substring(0, 200)}...`);
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const responseText = await response.text();
+                console.error('Expected JSON but received:', contentType);
+                console.error('Response body:', responseText);
+                throw new Error(`Server returned non-JSON response. Content-Type: ${contentType}. Response: ${responseText.substring(0, 200)}...`);
+            }
+
+            const responseData = await response.json();
+            return responseData;
         } catch (error) {
             // Don't log validation errors (422) to console as they are expected user input errors
             if (isValidationError(error)) {
