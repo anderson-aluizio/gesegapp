@@ -81,7 +81,15 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
-apply from: new File(["node", "--print", "require.resolve('@sentry/react-native/package.json')"].execute().text.trim(), "../sentry.gradle")
+// Apply Sentry gradle script only when a Sentry auth token is available.
+// This avoids failing local/CI builds when SENTRY_AUTH_TOKEN isn't set.
+def sentryPkgPath = ["node", "--print", "require.resolve('@sentry/react-native/package.json')"].execute().text.trim()
+def sentryAuth = System.getenv("SENTRY_AUTH_TOKEN") ?: (findProperty('sentryAuthToken') ?: null)
+if (sentryAuth != null && sentryAuth.toString().trim()) {
+    apply from: new File(sentryPkgPath, "../sentry.gradle")
+} else {
+    println "Sentry upload disabled: no SENTRY_AUTH_TOKEN found. To enable, set the SENTRY_AUTH_TOKEN environment variable or gradle property 'sentryAuthToken'."
+}
 android {
     ndkVersion rootProject.ext.ndkVersion
 
