@@ -29,10 +29,8 @@ const SendChecklistRealizado = () => {
     const handleSendChecklist = async () => {
         setLoading(true);
         try {
-            // Verificar conexão de rede
             try {
-                const networkInfo = await checkNetworkConnection();
-                console.log('Network connection:', networkInfo);
+                await checkNetworkConnection();
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
                 showDialog(errorMessage);
@@ -55,7 +53,6 @@ const SendChecklistRealizado = () => {
                 try {
                     const funcionarios = await checklistFuncionarios.getByChecklistRealizadoId(checklist.id);
                     const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
-
                     const hasPhotos = items.some(item => item.foto_path);
 
                     const checklistData: any = { ...checklist, funcionarios, items: [] };
@@ -72,7 +69,6 @@ const SendChecklistRealizado = () => {
 
                     checklistData.items = itemsWithPhotos;
 
-                    // Usa postWithFiles se houver fotos, senão usa post normal
                     if (hasPhotos) {
                         await apiClientWrapper.postWithFiles('/store-checklist-realizado', checklistData);
                     } else {

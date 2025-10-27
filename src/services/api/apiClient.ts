@@ -168,7 +168,6 @@ export class ApiClient {
             const headers = await this.getAuthHeadersWithoutContentType();
             const formData = new FormData();
 
-            // Função auxiliar para adicionar dados ao FormData
             const appendToFormData = (key: string, value: any) => {
                 if (value === null || value === undefined) {
                     return;
@@ -190,7 +189,6 @@ export class ApiClient {
                         appendToFormData(`${key}[${subKey}]`, value[subKey]);
                     });
                 } else if (typeof value === 'object' && value.uri) {
-                    // É um arquivo (foto)
                     const uriParts = value.uri.split('.');
                     const fileType = uriParts[uriParts.length - 1];
                     formData.append(key, {
@@ -198,6 +196,8 @@ export class ApiClient {
                         name: `photo_${Date.now()}.${fileType}`,
                         type: `image/${fileType}`,
                     } as any);
+                } else if (typeof value === 'boolean') {
+                    formData.append(key, value ? '1' : '0');
                 } else {
                     formData.append(key, String(value));
                 }
@@ -207,11 +207,13 @@ export class ApiClient {
                 appendToFormData(key, data[key]);
             });
 
+
             const response = await fetch(fullUrl, {
                 method: 'POST',
                 headers,
                 body: formData,
             });
+            console.log(formData);
 
             if (!response.ok) {
                 const responseText = await response.text();
