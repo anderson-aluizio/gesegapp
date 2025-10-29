@@ -20,7 +20,7 @@ export default function RootRedirect() {
     return (
         <View style={styles.container}>
             <ActivityIndicator size="large" />
-            <Text style={styles.text}>Loading...</Text>
+            <Text style={styles.text}>Carregando...</Text>
         </View>
     );
 }
