@@ -5,10 +5,11 @@ import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/data
 import { useEquipeDatabase } from '@/database/Models/useEquipeDatabase';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/AutocompleteSearchDropdown';
 
-export default function DadosGeraisScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void }) {
+export default function DadosGeraisScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void; isUserOperacao: boolean }) {
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
+    const isUserOperacao = props.isUserOperacao;
 
     useEffect(() => {
         setChecklistRealizado(props.checklistRealizado);
@@ -160,19 +161,21 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                     <AutocompleteSearchDropdown
                         listName="equipes"
                         label="Equipe"
-                        placeholder="Digite o nome da equipe"
+                        placeholder={isUserOperacao ? "Equipe bloqueada (usuário operação)" : "Digite o nome da equipe"}
                         extraParam={{ centro_custo_id: checklistRealizado.centro_custo_id || '' }}
                         value={selectedEquipe}
                         onValueChange={handleChangeEquipe}
-                        initialItems={equipeInitialItem} />
+                        initialItems={equipeInitialItem}
+                        disable={isUserOperacao} />
                     <AutocompleteSearchDropdown
                         listName="veiculos"
                         initialSearch={checklistRealizado?.veiculo_id || ''}
                         label="Veiculo"
-                        placeholder="Digite o ID do veículo"
+                        placeholder={isUserOperacao ? "Veículo bloqueado (usuário operação)" : "Digite o ID do veículo"}
                         value={selectedVeiculo}
                         onValueChange={handleChangeVeiculo}
-                        initialItems={veiculoInitialItem} />
+                        initialItems={veiculoInitialItem}
+                        disable={isUserOperacao} />
                     <AutocompleteSearchDropdown
                         label="Area"
                         placeholder="Digite o nome do município"

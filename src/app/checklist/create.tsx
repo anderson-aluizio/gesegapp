@@ -7,7 +7,11 @@ import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/Mo
 import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import { useEquipeDatabase } from '@/database/Models/useEquipeDatabase';
 import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
+import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
+import { useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
+import { useChecklistRealizadoFuncionarioDatabase } from '@/database/Models/useChecklistRealizadoFuncionarioDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function CreateChecklistRealizadoScreen() {
     const [grupos, setGrupos] = useState<AutocompleteDropdownOption[]>([]);
@@ -20,10 +24,16 @@ export default function CreateChecklistRealizadoScreen() {
     const [selectedVeiculo, setSelectedVeiculo] = useState<string | null>(null);
     const [selectedArea, setSelectedArea] = useState<string | null>(null);
     const [dialogDesc, setDialogDesc] = useState('');
+    const [isFromTurno, setIsFromTurno] = useState(false);
+    const [turnoId, setTurnoId] = useState<number | null>(null);
     const grupoDb = useChecklistGrupoDatabase();
     const centroCustoDb = useCentroCustoDatabase();
     const equipeDb = useEquipeDatabase();
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
+    const equipeTurnoDb = useEquipeTurnoDatabase();
+    const equipeTurnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
+    const checklistRealizadoFuncionarioDb = useChecklistRealizadoFuncionarioDatabase();
+    const { user } = useAuth();
 
     const areas: AutocompleteDropdownOption[] = [
         { id: 'URBANA', title: 'URBANA' },
@@ -52,9 +62,27 @@ export default function CreateChecklistRealizadoScreen() {
         }));
         setCentroCustos(formatted);
     }
+
+    const loadTurnoData = async () => {
+        if (user?.is_operacao) {
+            try {
+                const todayTurno = await equipeTurnoDb.getTodayTurno();
+                if (todayTurno) {
+                    setSelectedEquipe(String(todayTurno.equipe_id));
+                    setSelectedVeiculo(String(todayTurno.veiculo_id));
+                    setTurnoId(todayTurno.id);
+                    setIsFromTurno(true);
+                }
+            } catch (error) {
+                console.error('Error loading turno data:', error);
+            }
+        }
+    }
+
     useEffect(() => {
         loadGrupos();
         loadCentroCustos();
+        loadTurnoData();
     }, []);
 
     const handleChangeGrupo = (value: string | object | null) => {
@@ -134,6 +162,25 @@ export default function CreateChecklistRealizadoScreen() {
                 setDialogDesc('Erro ao criar registro. Tente novamente.');
                 return;
             }
+
+            // If user is_operacao and we have a turno, load and create funcionarios
+            if (user?.is_operacao && turnoId && lastChecklistRealizado.insertedRowId) {
+                try {
+                    const turnoFuncionarios = await equipeTurnoFuncionarioDb.getByEquipeTurnoId(turnoId);
+                    if (turnoFuncionarios && turnoFuncionarios.length > 0) {
+                        for (const funcionario of turnoFuncionarios) {
+                            await checklistRealizadoFuncionarioDb.create(
+                                Number(lastChecklistRealizado.insertedRowId),
+                                funcionario.funcionario_cpf
+                            );
+                        }
+                    }
+                } catch (funcionarioError) {
+                    console.error('Error creating checklist funcionarios:', funcionarioError);
+                    // Continue anyway, funcionarios can be added manually
+                }
+            }
+
             router.replace(`/checklist/${lastChecklistRealizado.insertedRowId}`)
         } catch (error) {
             console.error('Error creating checklist:', error);
@@ -179,21 +226,21 @@ export default function CreateChecklistRealizadoScreen() {
                                 disable={!selectedEstrutura}
                                 onValueChange={handleChangeMunicipio}
                             />
-                            <AutocompleteSearchDropdown
+                            { !isFromTurno ? <AutocompleteSearchDropdown
                                 listName="equipes"
                                 label="Equipe"
                                 extraParam={{ centro_custo_id: selectedCentroCusto || '' }}
                                 value={selectedEquipe}
                                 placeholder="Digite para pesquisar equipe"
                                 onValueChange={handleChangeEquipe}
-                            />
-                            <AutocompleteSearchDropdown
+                            /> : null }
+                            { !isFromTurno ? <AutocompleteSearchDropdown
                                 listName="veiculos"
                                 label="Veiculo"
                                 value={selectedVeiculo}
                                 placeholder="Digite para pesquisar veículo"
                                 onValueChange={handleChangeVeiculo}
-                            />
+                            /> : null }
                             <AutocompleteSearchDropdown
                                 label="Area"
                                 placeholder="Digite o nome do município"

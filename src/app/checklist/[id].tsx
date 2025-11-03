@@ -14,15 +14,21 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function EditChecklistRealizado() {
+  const { user } = useAuth();
   const [index, setIndex] = useState(0);
-  const [routes] = useState([
+
+  const allRoutes = [
     { key: 'dadosGerais', title: 'Dados Gerais', focusedIcon: 'file-document-edit', unfocusedIcon: 'file-document-edit-outline' },
     { key: 'lideranca', title: 'Liderança', focusedIcon: 'account-supervisor', unfocusedIcon: 'account-supervisor-outline' },
     { key: 'colaborador', title: 'Colaboradores', focusedIcon: 'account-group', unfocusedIcon: 'account-group-outline' },
     { key: 'itens', title: 'Itens', focusedIcon: 'clipboard-list', unfocusedIcon: 'clipboard-list-outline' },
-  ]);
+  ];
 
-  const { user } = useAuth();
+  const [routes] = useState(
+    user?.is_operacao
+      ? allRoutes.filter(route => route.key !== 'colaborador')
+      : allRoutes
+  );
   const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabaseWithRelations>({} as ChecklistRealizadoDatabaseWithRelations);
   const [isChecklistRealizadoTipoObservacao, setIsChecklistRealizadoTipoObservacao] = useState<boolean>(false);
   const checklistRealizadoDb = useChecklisRealizadoDatabase();
@@ -61,7 +67,7 @@ export default function EditChecklistRealizado() {
 
     switch (route.key) {
       case 'dadosGerais':
-        return <DadosGeraisScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
+        return <DadosGeraisScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} isUserOperacao={user?.is_operacao || false} />;
       case 'lideranca':
         return <LiderancaScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
       case 'colaborador':
