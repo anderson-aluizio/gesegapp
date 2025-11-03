@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function CreateChecklistRealizadoScreen() {
     const [grupos, setGrupos] = useState<AutocompleteDropdownOption[]>([]);
+    const [allGrupos, setAllGrupos] = useState<ChecklistGrupoDatabase[]>([]);
     const [selectedGrupo, setSelectedGrupo] = useState<string | null>(null);
     const [centroCustos, setCentroCustos] = useState<AutocompleteDropdownOption[]>([]);
     const [selectedCentroCusto, setSelectedCentroCusto] = useState<string | null>(null);
@@ -45,6 +46,7 @@ export default function CreateChecklistRealizadoScreen() {
         if (!res || res.length === 0) {
             return [];
         }
+        setAllGrupos(res);
         let formatted = res.map((item: ChecklistGrupoDatabase) => ({
             id: String(item.id),
             title: String(item.nome),
@@ -134,6 +136,19 @@ export default function CreateChecklistRealizadoScreen() {
             setDialogDesc('Preencha todos os campos.');
             return;
         }
+
+        // Check if user is_operacao and trying to create a non-auto-checklist
+        if (user?.is_operacao) {
+            const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
+            if (selectedGrupoData && selectedGrupoData.nome_interno !== 'checklist_auto_checklist') {
+                const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
+                if (!hasAutoChecklist) {
+                    setDialogDesc('Você deve criar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
+                    return;
+                }
+            }
+        }
+
         const equipe = await equipeDb.show(Number(selectedEquipe));
         if (!equipe) {
             setDialogDesc('Equipe não encontrada.');
