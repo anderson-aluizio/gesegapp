@@ -3,11 +3,15 @@ import { EquipeDatabase, useEquipeDatabase } from '@/database/Models/useEquipeDa
 import { FuncionarioDatabase, useFuncionarioDatabase } from '@/database/Models/useFuncionarioDatabase';
 import { LocalidadeCidadeDatabase, useLocalidadeCidadeDatabase } from '@/database/Models/useLocalidadeCidadeDatabase';
 import { useVeiculoDatabase, VeiculoDatabase } from '@/database/Models/useVeiculoDatabase';
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { AutocompleteDropdown, type AutocompleteDropdownItem } from 'react-native-autocomplete-dropdown';
 
 export type AutocompleteDropdownOption = AutocompleteDropdownItem;
+
+export interface AutocompleteSearchDropdownRef {
+    clear: () => void;
+}
 
 type AutocompleteSearchDropdownProps = {
     listName?: string;
@@ -24,7 +28,7 @@ type AutocompleteSearchDropdownProps = {
     onValueChange: (value: string | object | null | Array<string | object>) => void;
 }
 
-const AutocompleteSearchDropdown = (props: AutocompleteSearchDropdownProps) => {
+const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, AutocompleteSearchDropdownProps>((props, ref) => {
     const localidadeCidadeDb = useLocalidadeCidadeDatabase();
     const funcionarioDb = useFuncionarioDatabase();
     const veiculoDb = useVeiculoDatabase();
@@ -39,6 +43,31 @@ const AutocompleteSearchDropdown = (props: AutocompleteSearchDropdownProps) => {
     const [loading, setLoading] = useState(false);
     const [isPropsLoading, setIsPropsLoading] = useState(true);
     const [isInitialized, setIsInitialized] = useState(false);
+
+    const handleClear = useCallback(() => {
+        if (props.isMultiple) {
+            setSelectedItems([]);
+            setSuggestionsList(props.initialItems || []);
+            if (isInitialized) {
+                props.onValueChange([]);
+            }
+        } else {
+            setSelectedItem(null);
+            setSuggestionsList([]);
+            if (isInitialized) {
+                props.onValueChange(null);
+            }
+        }
+        // Also clear the autocomplete input
+        if (autocompleteRef.current?.clear) {
+            autocompleteRef.current.clear();
+        }
+    }, [props.isMultiple, props.initialItems, isInitialized, props.onValueChange]);
+
+    // Expose handleClear via ref
+    useImperativeHandle(ref, () => ({
+        clear: handleClear
+    }), [handleClear]);
 
     useEffect(() => {
         if (props.initialItems) {
@@ -301,23 +330,6 @@ const AutocompleteSearchDropdown = (props: AutocompleteSearchDropdownProps) => {
         }
     };
 
-    const handleClear = () => {
-        if (props.isMultiple) {
-            setSelectedItems([]);
-            // Reset suggestions to show all initial items when clearing in multiple mode
-            setSuggestionsList(props.initialItems || []);
-            if (isInitialized) {
-                props.onValueChange([]);
-            }
-        } else {
-            setSelectedItem(null);
-            setSuggestionsList([]);
-            if (isInitialized) {
-                props.onValueChange(null);
-            }
-        }
-    };
-
     return (
         <View style={[
             styles.container,
@@ -401,7 +413,9 @@ const AutocompleteSearchDropdown = (props: AutocompleteSearchDropdownProps) => {
             )}
         </View>
     );
-};
+});
+
+AutocompleteSearchDropdown.displayName = 'AutocompleteSearchDropdown';
 
 export default AutocompleteSearchDropdown;
 

@@ -139,7 +139,11 @@ export default function CreateTurnoEquipeScreen() {
                 });
             }
 
-            router.replace('/turno-equipe');
+            if (user?.is_operacao){
+                router.replace('/checklist/create');
+            } else {
+                router.replace('/turno-equipe');
+            }
         } catch (error) {
             console.error('Erro ao criar turno:', error);
             setDialogDesc('Erro ao criar turno. Tente novamente.');

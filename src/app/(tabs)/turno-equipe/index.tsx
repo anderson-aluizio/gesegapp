@@ -6,6 +6,7 @@ import { EquipeTurnoDatabaseWithRelations, useEquipeTurnoDatabase } from '@/data
 import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
 import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { isBeforeToday } from '@/utils/dateUtils';
 import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
@@ -33,6 +34,7 @@ export default function TurnoEquipeScreen() {
     const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
     const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
     const centroCustoDb = useCentroCustoDatabase();
+    const checklistRealizadoDb = useChecklisRealizadoDatabase();
 
     const showInfoDialog = (message: string) => {
         setInfoDialogMessage(message);
@@ -99,6 +101,16 @@ export default function TurnoEquipeScreen() {
         setIsShowDeleteDialog(false);
 
         try {
+            // Check if there are checklists created for this turno's date
+            const turnoDate = new Date(selectedTurno.date).toISOString().split('T')[0];
+            const hasChecklists = await checklistRealizadoDb.hasChecklistsByDate(turnoDate);
+
+            if (hasChecklists) {
+                showInfoDialog('⚠️ Atenção\n\nVocê deve excluir todos os checklists criados nesta data antes de remover o turno.');
+                setSelectedTurno(null);
+                return;
+            }
+
             await turnoDb.remove(selectedTurno.id);
             showInfoDialog('✅ Sucesso\n\nTurno removido com sucesso.');
             await list();

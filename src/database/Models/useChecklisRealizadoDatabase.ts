@@ -337,6 +337,21 @@ export const useChecklisRealizadoDatabase = () => {
     }
   }
 
+  const hasChecklistsByDate = async (date: string) => {
+    try {
+      const query = `
+        SELECT COUNT(*) as count
+        FROM checklist_realizados
+        WHERE DATE(date) = DATE(?)
+      `;
+
+      const response = await database.getFirstAsync<{ count: number }>(query, [date]);
+      return response ? response.count > 0 : false;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   const duplicate = async (originalChecklistId: number, newChecklistEstrutura: ChecklistEstruturaDatabase) => {
     try {
       const originalChecklist = await show(originalChecklistId);
@@ -423,6 +438,7 @@ export const useChecklisRealizadoDatabase = () => {
     updatedUnfinished,
     remove,
     hasAutoChecklistToday,
+    hasChecklistsByDate,
     duplicate
   }
 }

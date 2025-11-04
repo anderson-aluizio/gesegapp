@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/AutocompleteSearchDropdown';
+import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
 import { Button, Dialog, Portal, Text } from 'react-native-paper';
 import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/Models/useChecklistGrupoDatabase';
@@ -27,6 +27,13 @@ export default function CreateChecklistRealizadoScreen() {
     const [dialogDesc, setDialogDesc] = useState('');
     const [isFromTurno, setIsFromTurno] = useState(false);
     const [turnoId, setTurnoId] = useState<number | null>(null);
+
+    // Refs for clearing dependent dropdowns
+    const centroCustoRef = useRef<AutocompleteSearchDropdownRef>(null);
+    const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
+    const municipioRef = useRef<AutocompleteSearchDropdownRef>(null);
+    const equipeRef = useRef<AutocompleteSearchDropdownRef>(null);
+    const veiculoRef = useRef<AutocompleteSearchDropdownRef>(null);
     const grupoDb = useChecklistGrupoDatabase();
     const centroCustoDb = useCentroCustoDatabase();
     const equipeDb = useEquipeDatabase();
@@ -96,6 +103,11 @@ export default function CreateChecklistRealizadoScreen() {
         setSelectedCentroCusto(null);
         setSelectedEstrutura(null);
         setSelectedMunicipio(null);
+
+        // Clear dependent dropdowns
+        centroCustoRef.current?.clear();
+        estruturaRef.current?.clear();
+        municipioRef.current?.clear();
     };
 
     const handleChangeCentroCusto = (value: string | object | null) => {
@@ -106,6 +118,10 @@ export default function CreateChecklistRealizadoScreen() {
         }
         setSelectedEstrutura(null);
         setSelectedMunicipio(null);
+
+        // Clear dependent dropdowns
+        estruturaRef.current?.clear();
+        municipioRef.current?.clear();
     };
     const changeEstrutura = (value: string | object | null) => {
         setSelectedEstrutura(String(value));
@@ -137,12 +153,13 @@ export default function CreateChecklistRealizadoScreen() {
             return;
         }
 
-        // Check if user is_operacao and trying to create a non-auto-checklist
         if (user?.is_operacao) {
             const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
             if (selectedGrupoData && selectedGrupoData.nome_interno !== 'checklist_auto_checklist') {
                 const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
-                if (!hasAutoChecklist) {
+                const itsAutoChecklistGroup = selectedGrupoData.nome_interno === 'checklist_auto_checklist';
+                console.log(selectedGrupoData.nome_interno);
+                if (!hasAutoChecklist || !itsAutoChecklistGroup) {
                     setDialogDesc('Você deve criar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
                     return;
                 }
@@ -178,7 +195,6 @@ export default function CreateChecklistRealizadoScreen() {
                 return;
             }
 
-            // If user is_operacao and we have a turno, load and create funcionarios
             if (user?.is_operacao && turnoId && lastChecklistRealizado.insertedRowId) {
                 try {
                     const turnoFuncionarios = await equipeTurnoFuncionarioDb.getByEquipeTurnoId(turnoId);
@@ -192,7 +208,9 @@ export default function CreateChecklistRealizadoScreen() {
                     }
                 } catch (funcionarioError) {
                     console.error('Error creating checklist funcionarios:', funcionarioError);
-                    // Continue anyway, funcionarios can be added manually
+                    await checklistRealizadoDb.remove(Number(lastChecklistRealizado.insertedRowId));
+                    setDialogDesc('Erro ao associar funcionários ao checklist. Tente novamente.');
+                    return;
                 }
             }
 
@@ -217,6 +235,7 @@ export default function CreateChecklistRealizadoScreen() {
                                 onValueChange={handleChangeGrupo}
                                 initialItems={grupos} />
                             <AutocompleteSearchDropdown
+                                ref={centroCustoRef}
                                 label="Centro de Custo"
                                 value={selectedCentroCusto}
                                 onValueChange={handleChangeCentroCusto}
@@ -224,21 +243,23 @@ export default function CreateChecklistRealizadoScreen() {
                                 disable={!selectedGrupo}
                                 initialItems={centroCustos} />
                             <AutocompleteSearchDropdown
+                                ref={estruturaRef}
                                 label="Estrutura Modelo"
                                 listName="estruturas"
                                 extraParam={{ centro_custo_id: selectedCentroCusto || '', grupo_id: selectedGrupo || '' }}
                                 value={selectedEstrutura}
-                                placeholder={!selectedCentroCusto ? 'Selecione uma estrutura modelo primeiro' : 'Digite para pesquisar'}
+                                placeholder={!selectedCentroCusto ? 'Selecione um centro de custo primeiro' : 'Digite para pesquisar'}
                                 disable={!selectedCentroCusto}
                                 onValueChange={changeEstrutura}
                             />
                             <AutocompleteSearchDropdown
+                                ref={municipioRef}
                                 listName="cidades"
                                 extraParam={{ centro_custo_id: selectedCentroCusto || '' }}
                                 label="Município"
                                 value={selectedMunicipio}
-                                placeholder={!selectedEstrutura ? 'Selecione uma estrutura modelo primeiro' : 'Digite para pesquisar'}
-                                disable={!selectedEstrutura}
+                                placeholder={!selectedCentroCusto ? 'Selecione uma estrutura modelo primeiro' : 'Digite para pesquisar'}
+                                disable={!selectedCentroCusto}
                                 onValueChange={handleChangeMunicipio}
                             />
                             { !isFromTurno ? <AutocompleteSearchDropdown
