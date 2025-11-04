@@ -155,14 +155,13 @@ export default function CreateChecklistRealizadoScreen() {
 
         if (user?.is_operacao) {
             const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
-            if (selectedGrupoData && selectedGrupoData.nome_interno !== 'checklist_auto_checklist') {
-                const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
-                const itsAutoChecklistGroup = selectedGrupoData.nome_interno === 'checklist_auto_checklist';
-                console.log(selectedGrupoData.nome_interno);
-                if (!hasAutoChecklist || !itsAutoChecklistGroup) {
-                    setDialogDesc('Você deve criar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
-                    return;
-                }
+            const isAutoChecklistGroup = selectedGrupoData?.nome_interno === 'checklist_auto_checklist';
+            const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
+
+            // If trying to create a non-auto-checklist, check if auto-checklist exists and is finalized
+            if (!isAutoChecklistGroup && !hasAutoChecklist) {
+                setDialogDesc('Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
+                return;
             }
         }
 

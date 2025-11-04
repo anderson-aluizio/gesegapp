@@ -327,6 +327,7 @@ export const useChecklisRealizadoDatabase = () => {
         INNER JOIN checklist_grupos cg ON cr.checklist_grupo_id = cg.id
         WHERE cg.nome_interno = 'checklist_auto_checklist'
         AND DATE(cr.date) = DATE(?)
+        AND cr.is_finalizado = 1
         LIMIT 1
       `;
 
