@@ -34,7 +34,6 @@ export default function DuplicateChecklistScreen() {
         try {
             setIsLoading(true);
 
-            // Get the original checklist to get its centro_custo_id
             const originalChecklist = await checklistDb.show(parseInt(id as string));
 
             if (!originalChecklist) {
@@ -43,10 +42,8 @@ export default function DuplicateChecklistScreen() {
                 return;
             }
 
-            // Get all estruturas
             const allEstruturas = await estruturaDb.getByCentroCustoId({ centro_custo_id: originalChecklist.centro_custo_id });
 
-            // Filter estruturas by centro_custo_id
             const filteredData = allEstruturas.filter(
                 estrutura => estrutura.centro_custo_id === originalChecklist.centro_custo_id
             );

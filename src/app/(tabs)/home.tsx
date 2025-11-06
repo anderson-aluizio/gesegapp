@@ -102,7 +102,7 @@ export default function HomeScreen() {
 
   const handleModulePress = (route: string) => {
     if (route === '#') {
-      return; // Módulo não disponível ainda
+      return;
     }
     router.push(route as any);
   };
@@ -128,7 +128,6 @@ export default function HomeScreen() {
 
   const handleQuickChecklistCreate = async () => {
     try {
-      // 1. Check if data is synced
       const hasChecklistEstruturaItem = await checklistEstruturaItemsDb.getOneRow();
       const hasCentroCustoSynced = await centroCustoDb.getWithChecklistEstrutura();
       const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
@@ -146,7 +145,6 @@ export default function HomeScreen() {
         return;
       }
 
-      // 2. Check if user is operational and if today's turno exists
       if (user?.is_operacao) {
         const hasTurno = await turnoDb.hasTodayTurno();
 
@@ -164,7 +162,6 @@ export default function HomeScreen() {
         }
       }
 
-      // 3. All validations passed, proceed to create checklist
       router.push('/checklist/create');
     } catch (error) {
       console.error('Erro ao validar requisitos:', error);

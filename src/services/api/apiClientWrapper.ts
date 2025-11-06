@@ -63,7 +63,6 @@ export class ApiClientWrapper {
         } catch (error) {
             if (error instanceof UpdateRequiredError && error.updateInfo) {
                 showUpdateAlert(error.updateInfo);
-                // Throw a different error type to indicate the update alert was shown
                 throw new UpdateRequiredHandledError();
             }
             throw error;
@@ -76,7 +75,6 @@ export class ApiClientWrapper {
         } catch (error) {
             if (error instanceof UpdateRequiredError && error.updateInfo) {
                 showUpdateAlert(error.updateInfo);
-                // Throw a different error type to indicate the update alert was shown
                 throw new UpdateRequiredHandledError();
             }
             throw error;

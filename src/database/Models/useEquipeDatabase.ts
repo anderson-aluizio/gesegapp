@@ -45,7 +45,6 @@ export const useEquipeDatabase = () => {
 
   const getByParams = async (centroCustoId = '', paramQuery: string) => {
     try {
-      // Build query conditionally: if centroCustoId is empty, omit the centro_custo_id filter
       let query: string
       let params: Array<string | number>
 

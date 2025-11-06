@@ -37,7 +37,6 @@ const SendEquipeTurno = () => {
     const handleSendTurnos = async () => {
         setLoading(true);
         try {
-            // Verificar conexão de rede
             try {
                 const networkInfo = await checkNetworkConnection();
                 console.log('Network connection:', networkInfo);

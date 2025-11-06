@@ -57,9 +57,6 @@ const ResetDataScreen = () => {
     }
   };
 
-  // A subtle, non-obvious status line shown in the admin dialog. It looks like a
-  // normal "Última sincronização" message to regular users but gives an admin
-  // the day/month/hour clues needed to assemble the dynamic password.
   const subtleAdminHint = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');

@@ -33,7 +33,6 @@ export default function LoginScreen() {
         setDialogVisible(true);
     };
 
-    // Load stored credentials (if any) when the screen mounts
     useEffect(() => {
         const loadStoredCredentials = async () => {
             try {
@@ -74,7 +73,6 @@ export default function LoginScreen() {
             const success = await login(email, password);
 
             if (success) {
-                // Persist or remove credentials based on the "remember" toggle.
                 try {
                     if (remember) {
                         await AsyncStorage.setItem(
@@ -93,8 +91,6 @@ export default function LoginScreen() {
                 showDialog('❌ Erro\n\nCredenciais inválidas. Por favor, tente novamente.');
             }
         } catch (error) {
-            // If it's an UpdateRequiredHandledError, the alert was already shown
-            // Don't show additional error messages
             if (error instanceof UpdateRequiredHandledError) {
                 console.log('Update required - alert already shown to user');
                 return;

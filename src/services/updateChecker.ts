@@ -15,7 +15,7 @@ const LOCAL_VERSION = process.env.EXPO_PUBLIC_LOCAL_VERSION || '0.0.1';
 
 let lastCheckTime = 0;
 let cachedResult: UpdateCheckResult | null = null;
-const CHECK_INTERVAL = 5 * 60 * 1000; // Check every 5 minutes
+const CHECK_INTERVAL = 5 * 60 * 1000;
 
 export async function checkForUpdate() {
     try {

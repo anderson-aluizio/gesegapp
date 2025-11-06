@@ -70,7 +70,6 @@ export default function TurnoEquipeScreen() {
 
     const handleAddButton = async () => {
         try {
-            // Check if data is synced before allowing turno creation
             const hasChecklistEstruturaItem = await checklistEstruturaItemsDb.getOneRow();
             const hasCentroCustoSynced = await centroCustoDb.getWithChecklistEstrutura();
             const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
@@ -88,7 +87,6 @@ export default function TurnoEquipeScreen() {
                 return;
             }
 
-            // All validations passed, proceed to create turno
             router.push('/turno-equipe/create');
         } catch (error) {
             console.error('Erro ao validar requisitos:', error);
@@ -101,7 +99,6 @@ export default function TurnoEquipeScreen() {
         setIsShowDeleteDialog(false);
 
         try {
-            // Check if there are checklists created for this turno's date
             const turnoDate = new Date(selectedTurno.date).toISOString().split('T')[0];
             const hasChecklists = await checklistRealizadoDb.hasChecklistsByDate(turnoDate);
 

@@ -148,7 +148,6 @@ export class ApiClient {
             const data = await response.json();
             return data;
         } catch (error) {
-            // Don't log validation errors (422) to console as they are expected user input errors
             if (isValidationError(error)) {
                 throw error;
             }
@@ -245,7 +244,6 @@ export class ApiClient {
             const responseData = await response.json();
             return responseData;
         } catch (error) {
-            // Don't log validation errors (422) to console as they are expected user input errors
             if (isValidationError(error)) {
                 throw error;
             }

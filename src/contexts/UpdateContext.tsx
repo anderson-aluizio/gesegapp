@@ -32,7 +32,6 @@ export const UpdateProvider: React.FC<UpdateProviderProps> = ({ children }) => {
         setUpdateInfo(undefined);
     }, []);
 
-    // Register the global handler on mount
     useEffect(() => {
         registerUpdateModalHandler(showUpdateModal);
     }, [showUpdateModal]);

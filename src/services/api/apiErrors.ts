@@ -14,21 +14,6 @@ export type ValidationError = {
     isValidationError: true;
 }
 
-/**
- * Type guard to check if an error is a ValidationError
- *
- * @param error - Unknown error to check
- * @returns True if error is a ValidationError with proper structure
- *
- * @example
- * try {
- *   await apiClient.post('/endpoint', data);
- * } catch (error) {
- *   if (isValidationError(error)) {
- *     console.log(error.message); // TypeScript knows error.message exists
- *   }
- * }
- */
 export const isValidationError = (error: unknown): error is ValidationError => {
     return (
         typeof error === 'object' &&
@@ -57,21 +42,17 @@ export const isValidationError = (error: unknown): error is ValidationError => {
  * }
  */
 export const getErrorMessage = (error: unknown): string => {
-    // Handle validation errors from API (422 status)
     if (isValidationError(error)) {
         return error.message;
     }
 
-    // Handle standard Error instances
     if (error instanceof Error) {
         return error.message;
     }
 
-    // Handle string errors
     if (typeof error === 'string') {
         return error;
     }
 
-    // Fallback for unknown error types
     return 'Erro desconhecido';
 }

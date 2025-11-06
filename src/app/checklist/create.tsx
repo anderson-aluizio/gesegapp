@@ -28,12 +28,9 @@ export default function CreateChecklistRealizadoScreen() {
     const [isFromTurno, setIsFromTurno] = useState(false);
     const [turnoId, setTurnoId] = useState<number | null>(null);
 
-    // Refs for clearing dependent dropdowns
     const centroCustoRef = useRef<AutocompleteSearchDropdownRef>(null);
     const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
     const municipioRef = useRef<AutocompleteSearchDropdownRef>(null);
-    const equipeRef = useRef<AutocompleteSearchDropdownRef>(null);
-    const veiculoRef = useRef<AutocompleteSearchDropdownRef>(null);
     const grupoDb = useChecklistGrupoDatabase();
     const centroCustoDb = useCentroCustoDatabase();
     const equipeDb = useEquipeDatabase();
@@ -104,7 +101,6 @@ export default function CreateChecklistRealizadoScreen() {
         setSelectedEstrutura(null);
         setSelectedMunicipio(null);
 
-        // Clear dependent dropdowns
         centroCustoRef.current?.clear();
         estruturaRef.current?.clear();
         municipioRef.current?.clear();
@@ -119,7 +115,6 @@ export default function CreateChecklistRealizadoScreen() {
         setSelectedEstrutura(null);
         setSelectedMunicipio(null);
 
-        // Clear dependent dropdowns
         estruturaRef.current?.clear();
         municipioRef.current?.clear();
     };
@@ -158,7 +153,6 @@ export default function CreateChecklistRealizadoScreen() {
             const isAutoChecklistGroup = selectedGrupoData?.nome_interno === 'checklist_auto_checklist';
             const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
 
-            // If trying to create a non-auto-checklist, check if auto-checklist exists and is finalized
             if (!isAutoChecklistGroup && !hasAutoChecklist) {
                 setDialogDesc('Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
                 return;

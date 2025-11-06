@@ -48,9 +48,9 @@ export function useUpdateChecker() {
     const handleApiError = useCallback((error: any) => {
         if (error instanceof UpdateRequiredError && error.updateInfo) {
             handleUpdateRequired(error.updateInfo);
-            return true; // Error was handled
+            return true;
         }
-        return false; // Error was not handled
+        return false;
     }, [handleUpdateRequired]);
 
     return { handleApiError, handleUpdateRequired };

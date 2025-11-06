@@ -88,7 +88,6 @@ export default function ChecklistListScreen() {
 
     const handleAddButton = async () => {
         try {
-            // 1. Check if data is synced
             const hasChecklistEstruturaItem = await checklistEstruturaItemsDb.getOneRow();
             const hasCentroCustoSynced = await centroCustoDb.getWithChecklistEstrutura();
             const dataSynced = !!(hasChecklistEstruturaItem && hasCentroCustoSynced && hasCentroCustoSynced.length > 0);
@@ -106,7 +105,6 @@ export default function ChecklistListScreen() {
                 return;
             }
 
-            // 2. Check if user is operational and if today's turno exists
             if (user?.is_operacao) {
                 const hasTurno = await turnoDb.hasTodayTurno();
 
@@ -124,7 +122,6 @@ export default function ChecklistListScreen() {
                 }
             }
 
-            // 3. All validations passed, proceed to create checklist
             router.push('/checklist/create');
         } catch (error) {
             console.error('Erro ao validar requisitos:', error);

@@ -105,7 +105,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 return false;
             }
         } catch (error) {
-            // Re-throw UpdateRequiredHandledError so the login screen can handle it
             if (error instanceof UpdateRequiredHandledError) {
                 throw error;
             }

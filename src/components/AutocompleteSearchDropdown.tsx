@@ -58,13 +58,11 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
                 props.onValueChange(null);
             }
         }
-        // Also clear the autocomplete input
         if (autocompleteRef.current?.clear) {
             autocompleteRef.current.clear();
         }
     }, [props.isMultiple, props.initialItems, isInitialized, props.onValueChange]);
 
-    // Expose handleClear via ref
     useImperativeHandle(ref, () => ({
         clear: handleClear
     }), [handleClear]);
@@ -72,11 +70,9 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
     useEffect(() => {
         if (props.initialItems) {
             if (props.isMultiple) {
-                // For multiple selection, initialize with provided selected items or empty array
                 const initialSelected = props.initialSelectedItems || [];
                 setSelectedItems(initialSelected);
 
-                // Filter out selected items from suggestions
                 const filteredSuggestions = props.initialItems.filter(item =>
                     !initialSelected.some(selected => selected.id === item.id)
                 );
@@ -177,7 +173,6 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
         if (filterToken.length < 2) {
             let initialSuggestions = props.initialItems || [];
 
-            // Filter out selected items in multiple mode
             if (props.isMultiple) {
                 initialSuggestions = initialSuggestions.filter(item =>
                     !selectedItems.some(selected => selected.id === item.id)
@@ -194,7 +189,6 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
                     item.title?.toLowerCase().includes(filterToken)
                 );
 
-                // Filter out selected items in multiple mode
                 if (props.isMultiple) {
                     filtered = filtered.filter(item =>
                         !selectedItems.some(selected => selected.id === item.id)
@@ -235,7 +229,6 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
                     results = [];
             }
 
-            // Filter out selected items in multiple mode
             if (props.isMultiple) {
                 results = results.filter(item =>
                     !selectedItems.some(selected => selected.id === item.id)
@@ -263,38 +256,31 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
 
             let newSelectedItems: AutocompleteDropdownOption[];
             if (isAlreadySelected) {
-                // Remove item if already selected
                 newSelectedItems = selectedItems.filter(selectedItem => selectedItem.id !== item.id);
             } else {
-                // Add item if not selected
                 newSelectedItems = [...selectedItems, item];
             }
 
             setSelectedItems(newSelectedItems);
 
-            // Update suggestions list to exclude selected items
             const updatedSuggestions = suggestionsList.filter(suggestion =>
                 !newSelectedItems.some(selected => selected.id === suggestion.id)
             );
             setSuggestionsList(updatedSuggestions);
 
-            // Return array of values based on returnObject prop
             if (props.returnObject) {
                 props.onValueChange(newSelectedItems);
             } else {
                 props.onValueChange(newSelectedItems.map(selectedItem => selectedItem.id));
             }
 
-            // Clear the input after selection in multiple mode
             setSelectedItem(null);
-            // Force clear the input text by calling clear method
             setTimeout(() => {
                 if (autocompleteRef.current?.clear) {
                     autocompleteRef.current.clear();
                 }
             }, 100);
         } else {
-            // Single selection logic (existing behavior)
             setSelectedItem(item);
 
             if (!item) {
@@ -312,12 +298,11 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
     };
 
     const removeSelectedItem = (itemToRemove: AutocompleteDropdownOption) => {
-        if (!props.isMultiple) return; // Only allow removal in multiple mode
+        if (!props.isMultiple) return;
 
         const newSelectedItems = selectedItems.filter(item => item.id !== itemToRemove.id);
         setSelectedItems(newSelectedItems);
 
-        // Add the removed item back to suggestions list if it's not already there
         const isInSuggestions = suggestionsList.some(suggestion => suggestion.id === itemToRemove.id);
         if (!isInSuggestions) {
             setSuggestionsList(prevSuggestions => [...prevSuggestions, itemToRemove]);

@@ -31,10 +31,8 @@ export async function handleApiError<T>(promise: Promise<T>): Promise<T> {
             } else {
                 console.warn('Update modal handler not registered. Cannot show update modal.');
             }
-            // Don't re-throw UpdateRequiredError, as it's been handled
             throw error;
         }
-        // Re-throw other errors
         throw error;
     }
 }
