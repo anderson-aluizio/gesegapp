@@ -25,8 +25,6 @@ function isVersionLower(localVersion: string, remoteVersion: string): boolean {
 
     const local = parseVersion(localVersion);
     const remote = parseVersion(remoteVersion);
-    console.log(local, remote);
-
 
     for (let i = 0; i < Math.max(local.length, remote.length); i++) {
         const localPart = local[i] || 0;
