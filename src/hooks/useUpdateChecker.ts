@@ -8,11 +8,15 @@ import type { UpdateInfo } from '@/services/updateChecker';
  */
 export function useUpdateChecker() {
     const handleUpdateRequired = useCallback((updateInfo: UpdateInfo) => {
-        const { description, url, versionName } = updateInfo;
+        const { description, url, versionName, localVersion } = updateInfo;
+
+        const versionMessage = localVersion
+            ? `Versão atual: ${localVersion}\nNova versão: ${versionName}`
+            : `Nova versão: ${versionName}`;
 
         Alert.alert(
             '📱 Atualização Necessária',
-            `Uma nova versão (${versionName}) está disponível e é necessária para continuar usando o aplicativo.\n\n${description || 'Por favor, atualize para a versão mais recente.'}`,
+            `${versionMessage}\n\nUma atualização é necessária para continuar usando o aplicativo.\n\n${description || 'Por favor, atualize para a versão mais recente.'}`,
             [
                 {
                     text: 'Cancelar',
