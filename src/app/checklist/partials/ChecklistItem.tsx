@@ -99,7 +99,7 @@ const ChecklistItem = memo(({
                     </View>
                 )}
                 <Text variant="labelSmall" style={styles.subGrupoBadge}>
-                    {item.checklist_sub_grupo}
+                    {item.checklist_sub_grupo ?? 'N/A'}
                 </Text>
                 <Text variant="labelLarge" style={[
                     styles.questionTitle,

@@ -29,7 +29,7 @@ export async function initializeDatabase(database: SQLiteDatabase) {
       id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
       checklist_estrutura_id integer NOT NULL,
       checklist_grupo_id integer NOT NULL,
-      checklist_sub_grupo text NOT NULL,
+      checklist_sub_grupo text NULL,
       checklist_item_id integer NOT NULL,
       checklist_item_nome text NOT NULL,
       checklist_alternativa_id integer,

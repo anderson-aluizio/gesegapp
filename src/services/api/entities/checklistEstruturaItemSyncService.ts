@@ -6,7 +6,7 @@ export interface ChecklistEstruturaItem {
     id: number;
     checklist_estrutura_id: number;
     checklist_grupo_id: number;
-    checklist_sub_grupo: string;
+    checklist_sub_grupo: string | null;
     checklist_item_id: number;
     checklist_item_nome: string;
     checklist_alternativa_id: number | null;
