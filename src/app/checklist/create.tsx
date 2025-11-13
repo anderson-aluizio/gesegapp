@@ -232,8 +232,7 @@ export default function CreateChecklistRealizadoScreen() {
                                 label="Centro de Custo"
                                 value={selectedCentroCusto}
                                 onValueChange={handleChangeCentroCusto}
-                                placeholder={!selectedGrupo ? 'Selecione um grupo primeiro' : 'Digite para pesquisar'}
-                                disable={!selectedGrupo}
+                                placeholder="Selecione"
                                 initialItems={centroCustos} />
                             <AutocompleteSearchDropdown
                                 ref={estruturaRef}
