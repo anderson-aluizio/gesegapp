@@ -139,7 +139,11 @@ export default function CreateTurnoEquipeScreen() {
                 });
             }
 
-            if (user?.is_operacao){
+            // Check if selected date is today
+            const today = new Date();
+            const isToday = selectedDate.toDateString() === today.toDateString();
+
+            if (isToday) {
                 router.replace('/checklist/create');
             } else {
                 router.replace('/turno-equipe');

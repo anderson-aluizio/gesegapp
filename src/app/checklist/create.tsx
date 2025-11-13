@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
-import { Button, Dialog, Portal, Text } from 'react-native-paper';
+import { Button, Dialog, Portal, Text, IconButton } from 'react-native-paper';
 import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/Models/useChecklistGrupoDatabase';
 import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import { useEquipeDatabase } from '@/database/Models/useEquipeDatabase';
 import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
+import { EquipeTurnoDatabase, useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
+import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
 import { useChecklistRealizadoFuncionarioDatabase } from '@/database/Models/useChecklistRealizadoFuncionarioDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
@@ -26,7 +26,8 @@ export default function CreateChecklistRealizadoScreen() {
     const [selectedArea, setSelectedArea] = useState<string | null>(null);
     const [dialogDesc, setDialogDesc] = useState('');
     const [isFromTurno, setIsFromTurno] = useState(false);
-    const [turnoId, setTurnoId] = useState<number | null>(null);
+    const [todayTurno, setTodayTurno] = useState<EquipeTurnoDatabase | null>(null);
+    const [todayEquipeTurnoFuncionarios, setTodayEquipeTurnoFuncionarios] = useState<EquipeTurnoFuncionarioDatabaseWithRelations[] | null>(null);
 
     const centroCustoRef = useRef<AutocompleteSearchDropdownRef>(null);
     const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
@@ -39,6 +40,7 @@ export default function CreateChecklistRealizadoScreen() {
     const equipeTurnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
     const checklistRealizadoFuncionarioDb = useChecklistRealizadoFuncionarioDatabase();
     const { user } = useAuth();
+    const isUserOperacao = user?.is_operacao;
 
     const areas: AutocompleteDropdownOption[] = [
         { id: 'URBANA', title: 'URBANA' },
@@ -70,13 +72,15 @@ export default function CreateChecklistRealizadoScreen() {
     }
 
     const loadTurnoData = async () => {
-        if (user?.is_operacao) {
+        if (isUserOperacao) {
             try {
                 const todayTurno = await equipeTurnoDb.getTodayTurno();
                 if (todayTurno) {
+                    const turnoFuncionarios = await equipeTurnoFuncionarioDb.getByEquipeTurnoId(todayTurno.id);
                     setSelectedEquipe(String(todayTurno.equipe_id));
                     setSelectedVeiculo(String(todayTurno.veiculo_id));
-                    setTurnoId(todayTurno.id);
+                    setTodayTurno(todayTurno);
+                    setTodayEquipeTurnoFuncionarios(turnoFuncionarios);
                     setIsFromTurno(true);
                 }
             } catch (error) {
@@ -148,7 +152,7 @@ export default function CreateChecklistRealizadoScreen() {
             return;
         }
 
-        if (user?.is_operacao) {
+        if (isUserOperacao) {
             const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
             const isAutoChecklistGroup = selectedGrupoData?.nome_interno === 'checklist_auto_checklist';
             const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
@@ -188,11 +192,10 @@ export default function CreateChecklistRealizadoScreen() {
                 return;
             }
 
-            if (user?.is_operacao && turnoId && lastChecklistRealizado.insertedRowId) {
+            if (isUserOperacao && todayTurno && lastChecklistRealizado.insertedRowId) {
                 try {
-                    const turnoFuncionarios = await equipeTurnoFuncionarioDb.getByEquipeTurnoId(turnoId);
-                    if (turnoFuncionarios && turnoFuncionarios.length > 0) {
-                        for (const funcionario of turnoFuncionarios) {
+                    if (todayEquipeTurnoFuncionarios && todayEquipeTurnoFuncionarios.length > 0) {
+                        for (const funcionario of todayEquipeTurnoFuncionarios) {
                             await checklistRealizadoFuncionarioDb.create(
                                 Number(lastChecklistRealizado.insertedRowId),
                                 funcionario.funcionario_cpf
@@ -217,7 +220,24 @@ export default function CreateChecklistRealizadoScreen() {
     return (
         <ProtectedRoute>
             <View style={styles.container}>
-                <Stack.Screen options={{ title: 'Adicionar' }} />
+                <Stack.Screen
+                    options={{
+                        title: 'Adicionar',
+                        headerLeft: () => (
+                            <IconButton
+                                icon="arrow-left"
+                                size={24}
+                                onPress={() => {
+                                    if (router.canGoBack()) {
+                                        router.back();
+                                    } else {
+                                        router.replace('/checklist-list');
+                                    }
+                                }}
+                            />
+                        ),
+                    }}
+                />
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.formCard}>
                         <View style={styles.inner}>
