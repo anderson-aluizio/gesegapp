@@ -1,7 +1,7 @@
 import { Animated, View, StyleSheet } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
 import { CentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
-import { CentroCustoCard } from './CentroCustoCard';
+import CentroCustoCard from './CentroCustoCard';
 
 interface CentroCustoListProps {
     centroCustos: CentroCustoDatabase[];
@@ -12,7 +12,7 @@ interface CentroCustoListProps {
     slideAnim: Animated.Value;
 }
 
-export function CentroCustoList({
+export default function CentroCustoList({
     centroCustos,
     isLoading,
     isSyncing,

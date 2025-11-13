@@ -9,7 +9,8 @@ import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase
 import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { isBeforeToday } from '@/utils/dateUtils';
-import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
+import InfoDialog from '@/components/InfoDialog';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function TurnoEquipeScreen() {
     const router = useRouter();

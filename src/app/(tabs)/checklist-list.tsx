@@ -8,7 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
 import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
+import InfoDialog from '@/components/InfoDialog';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function ChecklistListScreen() {
     const router = useRouter();

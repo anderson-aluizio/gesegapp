@@ -7,7 +7,7 @@ interface InfoDialogProps {
     onDismiss: () => void;
 }
 
-export function InfoDialog({ visible, description, onDismiss }: InfoDialogProps) {
+export default function InfoDialog({ visible, description, onDismiss }: InfoDialogProps) {
     return (
         <Portal>
             <Dialog visible={visible} onDismiss={onDismiss} style={styles.dialog}>

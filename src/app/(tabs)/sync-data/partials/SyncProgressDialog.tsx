@@ -10,7 +10,7 @@ interface SyncProgressDialogProps {
     fadeAnim: Animated.Value;
 }
 
-export function SyncProgressDialog({
+export default function SyncProgressDialog({
     visible,
     progress,
     percentage,

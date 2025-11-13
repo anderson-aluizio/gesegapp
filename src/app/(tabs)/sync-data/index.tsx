@@ -6,13 +6,11 @@ import { useDialog } from '@/hooks/useDialog';
 import { useSyncProgress } from '@/hooks/useSyncProgress';
 import { useAnimations } from '@/hooks/useAnimations';
 import { useCentroCustoSync } from '@/hooks/useCentroCustoSync';
-import {
-    SyncHeader,
-    CentroCustoList,
-    InfoDialog,
-    SyncProgressDialog,
-    CustomSnackbar,
-} from '@/components/sync-data';
+import SyncHeader from './partials/SyncHeader';
+import CentroCustoList from './partials/CentroCustoList';
+import InfoDialog from '@/components/InfoDialog';
+import SyncProgressDialog from './partials/SyncProgressDialog';
+import CustomSnackbar from '@/components/CustomSnackbar';
 import SendChecklistRealizado from '@/components/SendChecklistRealizado';
 import SendEquipeTurno from '@/components/SendEquipeTurno';
 

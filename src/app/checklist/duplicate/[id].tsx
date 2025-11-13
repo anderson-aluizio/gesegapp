@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useChecklistEstruturaDatabase, ChecklistEstruturaDatabase } from '@/database/Models/useChecklistEstruturaDatabase';
 import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import { InfoDialog } from '@/components/sync-data';
+import InfoDialog from '@/components/InfoDialog';
 
 export default function DuplicateChecklistScreen() {
     const router = useRouter();

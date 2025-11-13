@@ -9,7 +9,7 @@ interface CustomSnackbarProps {
     onDismiss: () => void;
 }
 
-export function CustomSnackbar({ visible, message, type, onDismiss }: CustomSnackbarProps) {
+export default function CustomSnackbar({ visible, message, type, onDismiss }: CustomSnackbarProps) {
     const getBackgroundColor = () => {
         switch (type) {
             case 'success':

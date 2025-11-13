@@ -11,7 +11,7 @@ interface CentroCustoCardProps {
     slideAnim: Animated.Value;
 }
 
-export function CentroCustoCard({
+export default function CentroCustoCard({
     centroCusto,
     onSync,
     disabled = false,

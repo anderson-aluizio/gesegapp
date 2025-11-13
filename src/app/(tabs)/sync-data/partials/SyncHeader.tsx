@@ -5,7 +5,7 @@ interface SyncHeaderProps {
     onBack: () => void;
 }
 
-export function SyncHeader({ onBack }: SyncHeaderProps) {
+export default function SyncHeader({ onBack }: SyncHeaderProps) {
     return (
         <>
             <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />

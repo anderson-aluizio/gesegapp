@@ -6,7 +6,7 @@ import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
-import { InfoDialog } from "@/components/sync-data";
+import InfoDialog from "@/components/InfoDialog";
 import { checkNetworkConnection } from "@/hooks";
 
 const SendChecklistRealizado = () => {

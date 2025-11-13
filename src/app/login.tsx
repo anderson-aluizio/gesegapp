@@ -14,7 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/ResetData';
 import { UpdateRequiredHandledError } from '@/services';
-import { InfoDialog } from '@/components/sync-data';
+import InfoDialog from '@/components/InfoDialog';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState<string>('');

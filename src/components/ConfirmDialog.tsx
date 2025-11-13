@@ -13,7 +13,7 @@ interface ConfirmDialogProps {
     cancelColor?: string;
 }
 
-export function ConfirmDialog({
+export default function ConfirmDialog({
     visible,
     title,
     description,

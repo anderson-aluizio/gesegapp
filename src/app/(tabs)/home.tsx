@@ -8,7 +8,8 @@ import { Animated } from 'react-native';
 import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
 import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
 import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
-import { InfoDialog, ConfirmDialog } from '@/components/sync-data';
+import InfoDialog from '@/components/InfoDialog';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 const { width } = Dimensions.get('window');
 const CARD_SPACING = 12;
