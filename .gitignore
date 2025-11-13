@@ -43,3 +43,5 @@ expo-env.d.ts
 
 apk
 .env.local
+
+.env.local
