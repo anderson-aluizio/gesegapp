@@ -68,6 +68,9 @@ export default function CreateChecklistRealizadoScreen() {
             id: String(item.id),
             title: String(item.nome),
         }));
+        if (formatted.length == 1){
+            setSelectedCentroCusto(formatted[0].id)
+        }
         setCentroCustos(formatted);
     }
 
@@ -248,11 +251,10 @@ export default function CreateChecklistRealizadoScreen() {
                                 onValueChange={handleChangeGrupo}
                                 initialItems={grupos} />
                             <AutocompleteSearchDropdown
-                                ref={centroCustoRef}
                                 label="Centro de Custo"
+                                placeholder="Digite o centro de custo"
                                 value={selectedCentroCusto}
                                 onValueChange={handleChangeCentroCusto}
-                                placeholder="Selecione"
                                 initialItems={centroCustos} />
                             <AutocompleteSearchDropdown
                                 ref={estruturaRef}
@@ -291,7 +293,7 @@ export default function CreateChecklistRealizadoScreen() {
                             /> : null }
                             <AutocompleteSearchDropdown
                                 label="Area"
-                                placeholder="Digite o nome do município"
+                                placeholder="Digite a área"
                                 value={selectedArea}
                                 onValueChange={handleChangeArea}
                                 initialItems={areas} />
