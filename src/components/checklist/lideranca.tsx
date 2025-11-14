@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Dialog, Portal, Text } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
 
 export default function LiderancaScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void }) {
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
+    const equipeDb = useEquipeDatabase();
 
     useEffect(() => {
         setChecklistRealizado(props.checklistRealizado);
@@ -103,10 +105,27 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
             coordenador_cpf: selectedCoordenador,
             gerente_cpf: selectedGerente
         };
-        await checklistRealizadoDb.updateLideranca(updatedChecklist);
-        setDialogDesc('Dados atualizados com sucesso.');
-        setIsFormDirty(false);
-        props.formUpdated();
+
+        try {
+            await checklistRealizadoDb.updateLideranca(updatedChecklist);
+
+            if (checklistRealizado.equipe_id) {
+                await equipeDb.updateLideranca(
+                    checklistRealizado.equipe_id,
+                    selectedEncarregado,
+                    selectedSupervisor,
+                    selectedCoordenador,
+                    selectedGerente
+                );
+            }
+
+            setDialogDesc('Dados atualizados com sucesso.');
+            setIsFormDirty(false);
+            props.formUpdated();
+        } catch (error) {
+            console.error('Erro ao atualizar liderança:', error);
+            setDialogDesc('Erro ao atualizar os dados. Tente novamente.');
+        }
     }
     return (
         <View style={styles.container}>

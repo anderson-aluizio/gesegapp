@@ -64,5 +64,37 @@ export const useEquipeDatabase = () => {
     }
   }
 
-  return { getAll, show, getByParams }
+  const updateLideranca = async (
+    equipeId: number,
+    encarregadoCpf: string,
+    supervisorCpf: string,
+    coordenadorCpf: string,
+    gerenteCpf: string,
+  ) => {
+    try {
+      const query = `
+        UPDATE equipes
+        SET
+          encarregado_cpf = ?,
+          supervisor_cpf = ?,
+          coordenador_cpf = ?,
+          gerente_cpf = ?
+        WHERE id = ?
+      `;
+
+      await database.runAsync(query, [
+        encarregadoCpf,
+        supervisorCpf,
+        coordenadorCpf,
+        gerenteCpf,
+        equipeId,
+      ]);
+
+      return true;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  return { getAll, show, getByParams, updateLideranca }
 }
