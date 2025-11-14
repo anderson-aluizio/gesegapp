@@ -2,14 +2,14 @@ import { FlatList, StyleSheet, View, StatusBar, Animated, Platform, Image } from
 import { Button, Dialog, Portal, Text, Surface, FAB, Searchbar, IconButton, ActivityIndicator } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
-import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import { ChecklistRealizado } from '@/components/ChecklistRealizado';
+import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import { ChecklistRealizado } from '@/components/checklist/ChecklistRealizado';
 import { useAuth } from '@/contexts/AuthContext';
-import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
-import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
-import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import InfoDialog from '@/components/InfoDialog';
-import ConfirmDialog from '@/components/ConfirmDialog';
+import { useChecklisEstruturaItemsDatabase } from '@/database/models/useChecklisEstruturaItemsDatabase';
+import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
+import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 
 export default function ChecklistListScreen() {
     const router = useRouter();

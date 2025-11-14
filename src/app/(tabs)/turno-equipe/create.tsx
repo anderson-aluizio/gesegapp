@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/AutocompleteSearchDropdown';
+import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
 import { Button, Dialog, Portal, Text, Chip, Surface, IconButton } from 'react-native-paper';
-import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
+import { useEquipeTurnoFuncionarioDatabase } from '@/database/models/useEquipeTurnoFuncionarioDatabase';
+import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
 type FuncionarioSelected = {

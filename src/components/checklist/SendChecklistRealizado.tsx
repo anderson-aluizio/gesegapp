@@ -1,12 +1,12 @@
-import { useChecklisRealizadoDatabase } from "@/database/Models/useChecklisRealizadoDatabase";
-import { useChecklisRealizadoItemsDatabase } from "@/database/Models/useChecklisRealizadoItemsDatabase";
-import { useChecklistRealizadoFuncionarioDatabase } from "@/database/Models/useChecklistRealizadoFuncionarioDatabase";
+import { useChecklisRealizadoDatabase } from "@/database/models/useChecklisRealizadoDatabase";
+import { useChecklisRealizadoItemsDatabase } from "@/database/models/useChecklisRealizadoItemsDatabase";
+import { useChecklistRealizadoFuncionarioDatabase } from "@/database/models/useChecklistRealizadoFuncionarioDatabase";
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
-import InfoDialog from "@/components/InfoDialog";
+import InfoDialog from "@/components/ui/dialogs/InfoDialog";
 import { checkNetworkConnection } from "@/hooks";
 
 const SendChecklistRealizado = () => {

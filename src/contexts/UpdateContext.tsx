@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import { UpdateModal } from '@/components/UpdateModal';
+import { UpdateModal } from '@/components/ui/modals/UpdateModal';
 import type { UpdateInfo } from '@/services/updateChecker';
 import { registerUpdateModalHandler } from '@/utils/apiErrorHandler';
 

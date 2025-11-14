@@ -5,11 +5,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import { Animated } from 'react-native';
-import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
-import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
-import InfoDialog from '@/components/InfoDialog';
-import ConfirmDialog from '@/components/ConfirmDialog';
+import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
+import { useChecklisEstruturaItemsDatabase } from '@/database/models/useChecklisEstruturaItemsDatabase';
+import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 
 const { width } = Dimensions.get('window');
 const CARD_SPACING = 12;

@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/AutocompleteSearchDropdown';
+import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
 import { Button, Dialog, Portal, Text, IconButton } from 'react-native-paper';
-import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/Models/useChecklistGrupoDatabase';
-import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
-import { useEquipeDatabase } from '@/database/Models/useEquipeDatabase';
-import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import { EquipeTurnoDatabase, useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
-import { useChecklistRealizadoFuncionarioDatabase } from '@/database/Models/useChecklistRealizadoFuncionarioDatabase';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/models/useChecklistGrupoDatabase';
+import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
+import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
+import { useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import { EquipeTurnoDatabase, useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
+import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/models/useEquipeTurnoFuncionarioDatabase';
+import { useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
+import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function CreateChecklistRealizadoScreen() {
@@ -41,6 +41,7 @@ export default function CreateChecklistRealizadoScreen() {
     const checklistRealizadoFuncionarioDb = useChecklistRealizadoFuncionarioDatabase();
     const { user } = useAuth();
     const isUserOperacao = user?.is_operacao;
+    console.log(selectedCentroCusto);
 
     const areas: AutocompleteDropdownOption[] = [
         { id: 'URBANA', title: 'URBANA' },
@@ -104,7 +105,6 @@ export default function CreateChecklistRealizadoScreen() {
         } else {
             setSelectedGrupo(String(value));
         }
-        setSelectedCentroCusto(null);
         setSelectedEstrutura(null);
         setSelectedMunicipio(null);
 
@@ -262,8 +262,8 @@ export default function CreateChecklistRealizadoScreen() {
                                 listName="estruturas"
                                 extraParam={{ centro_custo_id: selectedCentroCusto || '', grupo_id: selectedGrupo || '' }}
                                 value={selectedEstrutura}
-                                placeholder={!selectedCentroCusto ? 'Selecione um centro de custo primeiro' : 'Digite para pesquisar'}
-                                disable={!selectedCentroCusto}
+                                placeholder={(!selectedCentroCusto) ? 'Selecione um centro de custo primeiro' : 'Digite para pesquisar'}
+                                disable={!selectedGrupo || !selectedCentroCusto}
                                 onValueChange={changeEstrutura}
                             />
                             <AutocompleteSearchDropdown

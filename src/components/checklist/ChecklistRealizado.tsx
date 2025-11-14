@@ -1,6 +1,6 @@
 import { Pressable, PressableProps, StyleSheet, Text, View } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
-import { ChecklistRealizadoDatabase } from "@/database/Models/useChecklisRealizadoDatabase"
+import { ChecklistRealizadoDatabase } from "@/database/models/useChecklisRealizadoDatabase"
 
 type Props = PressableProps & {
     data: ChecklistRealizadoDatabase

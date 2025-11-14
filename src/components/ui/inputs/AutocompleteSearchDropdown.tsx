@@ -1,8 +1,8 @@
-import { ChecklistEstruturaDatabase, useChecklistEstruturaDatabase } from '@/database/Models/useChecklistEstruturaDatabase';
-import { EquipeDatabase, useEquipeDatabase } from '@/database/Models/useEquipeDatabase';
-import { FuncionarioDatabase, useFuncionarioDatabase } from '@/database/Models/useFuncionarioDatabase';
-import { LocalidadeCidadeDatabase, useLocalidadeCidadeDatabase } from '@/database/Models/useLocalidadeCidadeDatabase';
-import { useVeiculoDatabase, VeiculoDatabase } from '@/database/Models/useVeiculoDatabase';
+import { ChecklistEstruturaDatabase, useChecklistEstruturaDatabase } from '@/database/models/useChecklistEstruturaDatabase';
+import { EquipeDatabase, useEquipeDatabase } from '@/database/models/useEquipeDatabase';
+import { FuncionarioDatabase, useFuncionarioDatabase } from '@/database/models/useFuncionarioDatabase';
+import { LocalidadeCidadeDatabase, useLocalidadeCidadeDatabase } from '@/database/models/useLocalidadeCidadeDatabase';
+import { useVeiculoDatabase, VeiculoDatabase } from '@/database/models/useVeiculoDatabase';
 import React, { useCallback, useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { AutocompleteDropdown, type AutocompleteDropdownItem } from 'react-native-autocomplete-dropdown';
@@ -316,10 +316,7 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
     };
 
     return (
-        <View style={[
-            styles.container,
-            props.disable && styles.containerDisabled
-        ]}>
+        <View style={styles.container}>
             <Text style={[
                 styles.label,
                 props.disable && styles.labelDisabled
@@ -331,8 +328,15 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
                 <View style={[styles.cardPropsLoading]}>
                     <Text style={{ fontSize: 14, color: '#666' }}>Carregando...</Text>
                 </View>
+            ) : props.disable ? (
+                <View style={[styles.disabledContainer]}>
+                    <Text style={styles.disabledText}>
+                        {selectedItem?.title || props.placeholder || 'Campo desabilitado'}
+                    </Text>
+                </View>
             ) : (
                 <AutocompleteDropdown
+                    key={`autocomplete-${props.label}-${props.disable ? 'disabled' : 'enabled'}`}
                     ref={autocompleteRef}
                     clearOnFocus={true}
                     closeOnBlur={true}
@@ -347,22 +351,19 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
                         autoCorrect: false,
                         autoCapitalize: 'none',
                         style: [
-                            styles.textInput,
-                            props.disable && styles.textInputDisabled
+                            styles.textInput
                         ],
-                        editable: !props.disable,
                     }}
                     rightButtonsContainerStyle={styles.rightButtonsContainer}
                     inputContainerStyle={[
-                        styles.inputContainer,
-                        props.disable && styles.inputContainerDisabled
+                        styles.inputContainer
                     ]}
                     suggestionsListContainerStyle={styles.suggestionsList}
                     containerStyle={styles.autocompleteContainer}
                     loading={loading}
                     useFilter={false}
                     showChevron={false}
-                    showClear={true}
+                    showClear={false}
                     debounce={600}
                     EmptyResultComponent={
                         <View style={styles.emptyContainer}>
@@ -418,6 +419,20 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.07,
         shadowRadius: 8,
+    },
+    disabledContainer: {
+        padding: 12,
+        backgroundColor: '#f0f1f3',
+        borderRadius: 10,
+        borderWidth: 1.2,
+        borderColor: '#e0e7ef',
+        minHeight: 48,
+        justifyContent: 'center',
+    },
+    disabledText: {
+        fontSize: 14,
+        color: '#b0b0b0',
+        fontWeight: '500',
     },
     containerDisabled: {
         opacity: 0.6,

@@ -12,9 +12,9 @@ import { Button, TextInput, Checkbox } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
-import ResetData from '@/components/ResetData';
+import ResetData from '@/components/admin/ResetData';
 import { UpdateRequiredHandledError } from '@/services';
-import InfoDialog from '@/components/InfoDialog';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState<string>('');

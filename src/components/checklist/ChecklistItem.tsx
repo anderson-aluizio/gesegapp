@@ -1,10 +1,10 @@
 import { memo, useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { RadioButton, Text, TextInput } from 'react-native-paper';
-import { ChecklistRealizadoItemsDatabaseWithItem } from '@/database/Models/useChecklisRealizadoItemsDatabase';
-import { ChecklistRealizadoFuncionarioDatabase } from '@/database/Models/useChecklistRealizadoFuncionarioDatabase';
-import AutocompleteSearchDropdown from '@/components/AutocompleteSearchDropdown';
-import PhotoPicker from '@/components/PhotoPicker';
+import { ChecklistRealizadoItemsDatabaseWithItem } from '@/database/models/useChecklisRealizadoItemsDatabase';
+import { ChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
+import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import PhotoPicker from '@/components/ui/inputs/PhotoPicker';
 
 export interface ChecklistItemProps {
     item: ChecklistRealizadoItemsDatabaseWithItem;

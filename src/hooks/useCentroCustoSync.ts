@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import { createDatabaseSyncService, type SyncProgress } from '@/services';
 import { checkNetworkConnection } from './useNetworkConnection';
 

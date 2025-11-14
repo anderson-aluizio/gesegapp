@@ -2,9 +2,9 @@ import { View, StyleSheet, FlatList, StatusBar } from 'react-native';
 import { Text, Surface, Card, IconButton, ActivityIndicator, Searchbar, Button } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
-import { useChecklistEstruturaDatabase, ChecklistEstruturaDatabase } from '@/database/Models/useChecklistEstruturaDatabase';
-import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import InfoDialog from '@/components/InfoDialog';
+import { useChecklistEstruturaDatabase, ChecklistEstruturaDatabase } from '@/database/models/useChecklistEstruturaDatabase';
+import { useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function DuplicateChecklistScreen() {
     const router = useRouter();

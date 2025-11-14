@@ -2,15 +2,15 @@ import { FlatList, StyleSheet, View, Animated, StatusBar } from 'react-native';
 import { Button, Dialog, Portal, Text, Surface, IconButton, ActivityIndicator, Card, Chip, List, Divider } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef } from 'react';
-import { EquipeTurnoDatabaseWithRelations, useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/Models/useEquipeTurnoFuncionarioDatabase';
-import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
-import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
-import { useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { EquipeTurnoDatabaseWithRelations, useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
+import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/models/useEquipeTurnoFuncionarioDatabase';
+import { useChecklisEstruturaItemsDatabase } from '@/database/models/useChecklisEstruturaItemsDatabase';
+import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
+import { useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { isBeforeToday } from '@/utils/dateUtils';
-import InfoDialog from '@/components/InfoDialog';
-import ConfirmDialog from '@/components/ConfirmDialog';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 
 export default function TurnoEquipeScreen() {
     const router = useRouter();

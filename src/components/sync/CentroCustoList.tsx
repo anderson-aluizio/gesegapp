@@ -1,6 +1,6 @@
 import { Animated, View, StyleSheet } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
-import { CentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { CentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import CentroCustoCard from './CentroCustoCard';
 
 interface CentroCustoListProps {

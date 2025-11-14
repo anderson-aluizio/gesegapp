@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClientWrapper, UpdateRequiredHandledError } from '@/services';
-import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import { useSQLiteContext } from 'expo-sqlite';
 import { clearTables } from '@/database/databaseSchema';
 

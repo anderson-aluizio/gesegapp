@@ -3,9 +3,9 @@ import { useRouter, usePathname } from 'expo-router';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEquipeTurnoDatabase } from '@/database/Models/useEquipeTurnoDatabase';
-import { useChecklisEstruturaItemsDatabase } from '@/database/Models/useChecklisEstruturaItemsDatabase';
-import { useCentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
+import { useChecklisEstruturaItemsDatabase } from '@/database/models/useChecklisEstruturaItemsDatabase';
+import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 
 type TurnoGuardProps = {
   children: React.ReactNode;

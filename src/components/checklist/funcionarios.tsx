@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Dialog, IconButton, Portal, Text } from 'react-native-paper';
-import { ChecklistRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/AutocompleteSearchDropdown';
-import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/Models/useChecklistRealizadoFuncionarioDatabase';
+import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useChecklisRealizadoItemsDatabase } from '@/database/Models/useChecklisRealizadoItemsDatabase';
+import { useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
 
 export default function FuncionariosScreen(props: {
     checklistRealizado: ChecklistRealizadoDatabase;

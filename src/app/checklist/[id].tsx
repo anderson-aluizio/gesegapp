@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { BottomNavigation, Button, Dialog, Portal, Text, ActivityIndicator, MD2Colors } from 'react-native-paper';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import DadosGeraisScreen from './partials/dadosGerais';
-import LiderancaScreen from './partials/lideranca';
+import DadosGeraisScreen from '@/components/checklist/dadosGerais';
+import LiderancaScreen from '@/components/checklist/lideranca';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { ChecklistRealizadoDatabaseWithRelations, useChecklisRealizadoDatabase } from '@/database/Models/useChecklisRealizadoDatabase';
-import FuncionariosScreen from './partials/funcionarios';
-import ItensScreen from './partials/itens';
+import { ChecklistRealizadoDatabaseWithRelations, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import FuncionariosScreen from '@/components/checklist/funcionarios';
+import ItensScreen from '@/components/checklist/itens';
 import Checkbox from 'expo-checkbox';
-import { useChecklistRealizadoFuncionarioDatabase } from '@/database/Models/useChecklistRealizadoFuncionarioDatabase';
-import { useChecklisRealizadoItemsDatabase } from '@/database/Models/useChecklisRealizadoItemsDatabase';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
+import { useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
+import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function EditChecklistRealizado() {

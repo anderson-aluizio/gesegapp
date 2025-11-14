@@ -1,7 +1,7 @@
 import { Animated, StyleSheet } from 'react-native';
 import { Card, Text, IconButton } from 'react-native-paper';
 import { View } from 'react-native';
-import { CentroCustoDatabase } from '@/database/Models/useCentroCustoDatabase';
+import { CentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 
 interface CentroCustoCardProps {
     centroCusto: CentroCustoDatabase;

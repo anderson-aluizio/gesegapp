@@ -1,11 +1,11 @@
-import { useEquipeTurnoDatabase } from "@/database/Models/useEquipeTurnoDatabase";
-import { useEquipeTurnoFuncionarioDatabase } from "@/database/Models/useEquipeTurnoFuncionarioDatabase";
+import { useEquipeTurnoDatabase } from "@/database/models/useEquipeTurnoDatabase";
+import { useEquipeTurnoFuncionarioDatabase } from "@/database/models/useEquipeTurnoFuncionarioDatabase";
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
-import InfoDialog from "@/components/InfoDialog";
+import InfoDialog from "@/components/ui/dialogs/InfoDialog";
 import { checkNetworkConnection } from "@/hooks";
 
 export type EquipeTurnoFormatted = {

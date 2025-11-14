@@ -1,6 +1,6 @@
 import { Stack, Redirect } from 'expo-router';
 import React from 'react';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function AuthenticatedLayout() {
