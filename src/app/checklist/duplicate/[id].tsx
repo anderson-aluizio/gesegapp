@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { useChecklistEstruturaDatabase, ChecklistEstruturaDatabase } from '@/database/models/useChecklistEstruturaDatabase';
 import { useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
+import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function DuplicateChecklistScreen() {
@@ -15,20 +16,14 @@ export default function DuplicateChecklistScreen() {
     const [filteredEstruturas, setFilteredEstruturas] = useState<ChecklistEstruturaDatabase[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedEstrutura, setSelectedEstrutura] = useState<ChecklistEstruturaDatabase | null>(null);
-    const [dialogVisible, setDialogVisible] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState('');
 
+    const dialog = useDialog();
     const estruturaDb = useChecklistEstruturaDatabase();
     const checklistDb = useChecklisRealizadoDatabase();
 
     useEffect(() => {
         loadEstruturas();
     }, []);
-
-    const showDialog = (message: string) => {
-        setDialogMessage(message);
-        setDialogVisible(true);
-    };
 
     const loadEstruturas = async () => {
         try {
@@ -37,7 +32,7 @@ export default function DuplicateChecklistScreen() {
             const originalChecklist = await checklistDb.show(parseInt(id as string));
 
             if (!originalChecklist) {
-                showDialog('❌ Erro\n\nChecklist original não encontrado.');
+                dialog.show('❌ Erro\n\nChecklist original não encontrado.');
                 setIsLoading(false);
                 return;
             }
@@ -52,7 +47,7 @@ export default function DuplicateChecklistScreen() {
             setFilteredEstruturas(filteredData);
         } catch (error) {
             console.error('Error loading estruturas:', error);
-            showDialog('❌ Erro\n\nNão foi possível carregar as estruturas de checklist.');
+            dialog.show('❌ Erro\n\nNão foi possível carregar as estruturas de checklist.');
         } finally {
             setIsLoading(false);
         }
@@ -76,7 +71,7 @@ export default function DuplicateChecklistScreen() {
 
     const handleDuplicate = async () => {
         if (!selectedEstrutura) {
-            showDialog('⚠️ Atenção\n\nSelecione uma estrutura de checklist para continuar.');
+            dialog.show('⚠️ Atenção\n\nSelecione uma estrutura de checklist para continuar.');
             return;
         }
 
@@ -85,7 +80,7 @@ export default function DuplicateChecklistScreen() {
             const result = await checklistDb.duplicate(parseInt(id as string), selectedEstrutura);
 
             if (result.success) {
-                showDialog('✅ Sucesso\n\nChecklist duplicado com sucesso!');
+                dialog.show('✅ Sucesso\n\nChecklist duplicado com sucesso!');
                 setTimeout(() => {
                     router.replace(`/checklist/${result.newChecklistId}`);
                 }, 1500);
@@ -93,7 +88,7 @@ export default function DuplicateChecklistScreen() {
         } catch (error) {
             console.error('Error duplicating checklist:', error);
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            showDialog(`❌ Erro\n\nNão foi possível duplicar o checklist.\n\n${errorMessage}`);
+            dialog.show(`❌ Erro\n\nNão foi possível duplicar o checklist.\n\n${errorMessage}`);
         } finally {
             setIsDuplicating(false);
         }
@@ -208,9 +203,9 @@ export default function DuplicateChecklistScreen() {
             </Surface>
 
             <InfoDialog
-                visible={dialogVisible}
-                description={dialogMessage}
-                onDismiss={() => setDialogVisible(false)}
+                visible={dialog.visible}
+                description={dialog.description}
+                onDismiss={dialog.hide}
             />
         </View>
     );

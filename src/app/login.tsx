@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/admin/ResetData';
 import { UpdateRequiredHandledError } from '@/services';
+import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function LoginScreen() {
@@ -22,16 +23,10 @@ export default function LoginScreen() {
     const [remember, setRemember] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [dialogVisible, setDialogVisible] = useState<boolean>(false);
-    const [dialogMessage, setDialogMessage] = useState<string>('');
     const { login } = useAuth();
+    const dialog = useDialog();
 
     const CREDENTIALS_KEY = '@geseg:credentials';
-
-    const showDialog = (message: string) => {
-        setDialogMessage(message);
-        setDialogVisible(true);
-    };
 
     useEffect(() => {
         const loadStoredCredentials = async () => {
@@ -53,17 +48,17 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            showDialog('⚠️ Atenção\n\nPreencha todos os campos');
+            dialog.show('⚠️ Atenção\n\nPreencha todos os campos');
             return;
         }
 
         if (!email.includes('@dinamo.srv.br')) {
-            showDialog('⚠️ Atenção\n\nPor favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
+            dialog.show('⚠️ Atenção\n\nPor favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
             return;
         }
 
         if (password.length < 6) {
-            showDialog('⚠️ Atenção\n\nA senha deve ter pelo menos 6 caracteres');
+            dialog.show('⚠️ Atenção\n\nA senha deve ter pelo menos 6 caracteres');
             return;
         }
 
@@ -88,7 +83,7 @@ export default function LoginScreen() {
 
                 router.replace('/(tabs)/home');
             } else {
-                showDialog('❌ Erro\n\nCredenciais inválidas. Por favor, tente novamente.');
+                dialog.show('❌ Erro\n\nCredenciais inválidas. Por favor, tente novamente.');
             }
         } catch (error) {
             if (error instanceof UpdateRequiredHandledError) {
@@ -97,7 +92,7 @@ export default function LoginScreen() {
             }
 
             console.error('Erro ao fazer login:', error);
-            showDialog('❌ Erro\n\nOcorreu um erro durante o login');
+            dialog.show('❌ Erro\n\nOcorreu um erro durante o login');
         } finally {
             setLoading(false);
         }
@@ -179,9 +174,9 @@ export default function LoginScreen() {
             </View>
 
             <InfoDialog
-                visible={dialogVisible}
-                description={dialogMessage}
-                onDismiss={() => setDialogVisible(false)}
+                visible={dialog.visible}
+                description={dialog.description}
+                onDismiss={dialog.hide}
             />
         </KeyboardAvoidingView>
     );

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
-import { Button, Dialog, Portal, Text, IconButton } from 'react-native-paper';
+import { Button, IconButton } from 'react-native-paper';
 import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/models/useChecklistGrupoDatabase';
 import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
@@ -12,6 +12,8 @@ import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioD
 import { useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDialog } from '@/hooks/useDialog';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function CreateChecklistRealizadoScreen() {
     const [grupos, setGrupos] = useState<AutocompleteDropdownOption[]>([]);
@@ -24,7 +26,6 @@ export default function CreateChecklistRealizadoScreen() {
     const [selectedEquipe, setSelectedEquipe] = useState<string | null>(null);
     const [selectedVeiculo, setSelectedVeiculo] = useState<string | null>(null);
     const [selectedArea, setSelectedArea] = useState<string | null>(null);
-    const [dialogDesc, setDialogDesc] = useState('');
     const [isFromTurno, setIsFromTurno] = useState(false);
     const [todayTurno, setTodayTurno] = useState<EquipeTurnoDatabase | null>(null);
     const [todayEquipeTurnoFuncionarios, setTodayEquipeTurnoFuncionarios] = useState<EquipeTurnoFuncionarioDatabaseWithRelations[] | null>(null);
@@ -32,6 +33,7 @@ export default function CreateChecklistRealizadoScreen() {
     const centroCustoRef = useRef<AutocompleteSearchDropdownRef>(null);
     const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
     const municipioRef = useRef<AutocompleteSearchDropdownRef>(null);
+    const dialog = useDialog();
     const grupoDb = useChecklistGrupoDatabase();
     const centroCustoDb = useCentroCustoDatabase();
     const equipeDb = useEquipeDatabase();
@@ -150,7 +152,7 @@ export default function CreateChecklistRealizadoScreen() {
 
     const handleNext = async () => {
         if (!selectedGrupo || !selectedCentroCusto || !selectedEstrutura || !selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
-            setDialogDesc('Preencha todos os campos.');
+            dialog.show('Preencha todos os campos.');
             return;
         }
 
@@ -160,14 +162,14 @@ export default function CreateChecklistRealizadoScreen() {
             const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
 
             if (!isAutoChecklistGroup && !hasAutoChecklist) {
-                setDialogDesc('Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
+                dialog.show('Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
                 return;
             }
         }
 
         const equipe = await equipeDb.show(Number(selectedEquipe));
         if (!equipe) {
-            setDialogDesc('Equipe não encontrada.');
+            dialog.show('Equipe não encontrada.');
             return;
         }
         const createdChecklist = {
@@ -190,7 +192,7 @@ export default function CreateChecklistRealizadoScreen() {
         try {
             const lastChecklistRealizado = await checklistRealizadoDb.create(createdChecklist);
             if (!lastChecklistRealizado) {
-                setDialogDesc('Erro ao criar registro. Tente novamente.');
+                dialog.show('Erro ao criar registro. Tente novamente.');
                 return;
             }
 
@@ -207,7 +209,7 @@ export default function CreateChecklistRealizadoScreen() {
                 } catch (funcionarioError) {
                     console.error('Error creating checklist funcionarios:', funcionarioError);
                     await checklistRealizadoDb.remove(Number(lastChecklistRealizado.insertedRowId));
-                    setDialogDesc('Erro ao associar funcionários ao checklist. Tente novamente.');
+                    dialog.show('Erro ao associar funcionários ao checklist. Tente novamente.');
                     return;
                 }
             }
@@ -215,7 +217,7 @@ export default function CreateChecklistRealizadoScreen() {
             router.replace(`/checklist/${lastChecklistRealizado.insertedRowId}`)
         } catch (error) {
             console.error('Error creating checklist:', error);
-            setDialogDesc('Erro ao criar o registro. Tente novamente.');
+            dialog.show('Erro ao criar o registro. Tente novamente.');
         }
     }
 
@@ -298,20 +300,14 @@ export default function CreateChecklistRealizadoScreen() {
                                 initialItems={areas} />
                         </View>
                     </View>
-                    <Portal>
-                        <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
-                            <Dialog.Title>Atenção</Dialog.Title>
-                            <Dialog.Content>
-                                <Text variant="bodyMedium">
-                                    {dialogDesc}
-                                </Text>
-                            </Dialog.Content>
-                            <Dialog.Actions>
-                                <Button onPress={() => setDialogDesc('')}>Fechar</Button>
-                            </Dialog.Actions>
-                        </Dialog>
-                    </Portal>
                 </ScrollView>
+
+                <InfoDialog
+                    visible={dialog.visible}
+                    description={dialog.description}
+                    onDismiss={dialog.hide}
+                />
+
                 <View style={styles.stickyButtonContainer}>
                     <Button mode="contained" onPress={handleNext} buttonColor="#0439c9" style={styles.btnNext}>
                         CADASTRAR

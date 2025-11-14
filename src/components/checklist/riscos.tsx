@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Card, Checkbox, Text, ActivityIndicator, Portal, Dialog } from 'react-native-paper';
+import { Button, Card, Checkbox, Text, ActivityIndicator } from 'react-native-paper';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useChecklisEstruturaRiscosDatabase, ChecklistEstruturaRiscosDatabase } from '@/database/models/useChecklisEstruturaRiscosDatabase';
 import { useChecklisEstruturaControleRiscosDatabase, ChecklistEstruturaControleRiscosDatabase } from '@/database/models/useChecklisEstruturaControleRiscosDatabase';
 import { useChecklisRealizadoRiscosDatabase } from '@/database/models/useChecklisRealizadoRiscosDatabase';
 import { useChecklisRealizadoControleRiscosDatabase } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
+import { useDialog } from '@/hooks/useDialog';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 type RiscoWithControles = {
     risco: ChecklistEstruturaRiscosDatabase;
@@ -24,8 +26,8 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [riscos, setRiscos] = useState<RiscoWithControles[]>([]);
     const [expandedRiscos, setExpandedRiscos] = useState<Set<number>>(new Set());
-    const [dialogDesc, setDialogDesc] = useState<string>('');
 
+    const dialog = useDialog();
     const estruturaRiscosDb = useChecklisEstruturaRiscosDatabase();
     const estruturaControlesDb = useChecklisEstruturaControleRiscosDatabase();
     const realizadoRiscosDb = useChecklisRealizadoRiscosDatabase();
@@ -152,10 +154,10 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
             setIsFormDirty(false);
             props.formUpdated();
             await loadRiscos();
-            setDialogDesc('Dados atualizados com sucesso.');
+            dialog.show('Dados atualizados com sucesso.');
         } catch (error) {
             console.error('Erro ao salvar riscos:', error);
-            setDialogDesc('Erro ao atualizar os dados. Tente novamente.');
+            dialog.show('Erro ao atualizar os dados. Tente novamente.');
         } finally {
             setIsSaving(false);
         }
@@ -245,20 +247,13 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
                         );
                     })}
                 </View>
-                <Portal>
-                    <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
-                        <Dialog.Title>Atenção</Dialog.Title>
-                        <Dialog.Content>
-                            <Text variant="bodyMedium">
-                                {dialogDesc}
-                            </Text>
-                        </Dialog.Content>
-                        <Dialog.Actions>
-                            <Button onPress={() => setDialogDesc('')}>Fechar</Button>
-                        </Dialog.Actions>
-                    </Dialog>
-                </Portal>
             </ScrollView>
+
+            <InfoDialog
+                visible={dialog.visible}
+                description={dialog.description}
+                onDismiss={dialog.hide}
+            />
 
             {isFormDirty && (
                 <Button

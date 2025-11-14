@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Dialog, Portal, Text } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import { useDialog } from '@/hooks/useDialog';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function LiderancaScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void }) {
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
+    const dialog = useDialog();
 
     useEffect(() => {
         setChecklistRealizado(props.checklistRealizado);
@@ -19,7 +22,6 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
     const [selectedSupervisor, setSelectedSupervisor] = useState<string | null>();
     const [selectedCoordenador, setSelectedCoordenador] = useState<string | null>();
     const [selectedGerente, setSelectedGerente] = useState<string | null>();
-    const [dialogDesc, setDialogDesc] = useState<string>('');
 
     useEffect(() => {
         setSelectedEncarregado(
@@ -95,7 +97,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
 
     const handleNext = async () => {
         if (!selectedEncarregado || !selectedSupervisor || !selectedCoordenador || !selectedGerente) {
-            setDialogDesc('Preencha todos os campos obrigatórios.');
+            dialog.show('Preencha todos os campos obrigatórios.');
             return;
         }
         const updatedChecklist = {
@@ -119,12 +121,12 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
                 );
             }
 
-            setDialogDesc('Dados atualizados com sucesso.');
+            dialog.show('Dados atualizados com sucesso.');
             setIsFormDirty(false);
             props.formUpdated();
         } catch (error) {
             console.error('Erro ao atualizar liderança:', error);
-            setDialogDesc('Erro ao atualizar os dados. Tente novamente.');
+            dialog.show('Erro ao atualizar os dados. Tente novamente.');
         }
     }
     return (
@@ -160,20 +162,14 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
                         onValueChange={handleChangeGerente}
                         initialItems={gerenteInitialItem} />
                 </View>
-                <Portal>
-                    <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
-                        <Dialog.Title>Atenção</Dialog.Title>
-                        <Dialog.Content>
-                            <Text variant="bodyMedium">
-                                {dialogDesc}
-                            </Text>
-                        </Dialog.Content>
-                        <Dialog.Actions>
-                            <Button onPress={() => setDialogDesc('')}>Fechar</Button>
-                        </Dialog.Actions>
-                    </Dialog>
-                </Portal>
             </ScrollView>
+
+            <InfoDialog
+                visible={dialog.visible}
+                description={dialog.description}
+                onDismiss={dialog.hide}
+            />
+
             {isFormDirty ? (
                 <Button mode="contained" onPress={handleNext} buttonColor="#0439c9" style={styles.btnNext}>
                     ATUALIZAR
