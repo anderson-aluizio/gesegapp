@@ -47,6 +47,20 @@ export async function initializeDatabase(database: SQLiteDatabase) {
     CREATE INDEX IF NOT EXISTS cei_checklist_alternativa_id_idx ON checklist_estrutura_items (checklist_alternativa_id);
     CREATE INDEX IF NOT EXISTS cei_equipamento_id_idx ON checklist_estrutura_items (equipamento_id);
     CREATE INDEX IF NOT EXISTS cei_num_ordem_idx ON checklist_estrutura_items (num_ordem);
+    CREATE TABLE IF NOT EXISTS checklist_estrutura_riscos (
+      id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      checklist_estrutura_id integer NOT NULL,
+      nome text NULL
+    );
+    CREATE INDEX IF NOT EXISTS cei_checklist_estrutura_id_idx ON checklist_estrutura_riscos (checklist_estrutura_id);
+    CREATE TABLE IF NOT EXISTS checklist_estrutura_controle_riscos (
+      id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      checklist_estrutura_id integer NOT NULL,
+      checklist_estrutura_risco_id integer NOT NULL,
+      nome text NULL
+    );
+    CREATE INDEX IF NOT EXISTS cei_checklist_estrutura_id_idx ON checklist_estrutura_controle_riscos (checklist_estrutura_id);
+    CREATE INDEX IF NOT EXISTS cei_checklist_estrutura_risco_id_idx ON checklist_estrutura_controle_riscos (checklist_estrutura_risco_id);
     CREATE TABLE IF NOT EXISTS checklist_grupos (
       id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
       nome text NOT NULL,
@@ -177,6 +191,8 @@ export async function dropTables(database: SQLiteDatabase) {
     DROP TABLE IF EXISTS centro_custos;
     DROP TABLE IF EXISTS checklist_estruturas;
     DROP TABLE IF EXISTS checklist_estrutura_items;
+    DROP TABLE IF EXISTS checklist_estrutura_riscos;
+    DROP TABLE IF EXISTS checklist_estrutura_controle_riscos;
     DROP TABLE IF EXISTS checklist_grupos;
     DROP TABLE IF EXISTS checklist_realizados;
     DROP TABLE IF EXISTS checklist_realizado_funcionarios;
@@ -195,6 +211,8 @@ export async function clearTables(database: SQLiteDatabase) {
     DELETE FROM centro_custos;
     DELETE FROM checklist_estruturas;
     DELETE FROM checklist_estrutura_items;
+    DELETE FROM checklist_estrutura_riscos;
+    DELETE FROM checklist_estrutura_controle_riscos;
     DELETE FROM checklist_grupos;
     DELETE FROM checklist_realizados;
     DELETE FROM checklist_realizado_funcionarios;

@@ -5,10 +5,12 @@ import type {
     CentroCustoEstrutura,
     ChecklistEstrutura,
     ChecklistEstruturaItem,
+    ChecklistEstruturaRisco,
     LocalidadeCidade,
     Equipe,
     Veiculo,
 } from '../api/syncService';
+import { ChecklistEstruturaControleRisco } from '../api/entities';
 
 export interface SyncProgress {
     step: string;
@@ -117,6 +119,51 @@ export class DatabaseSyncService {
         );
     }
 
+    private async insertChecklistEstruturaRiscos(data: ChecklistEstruturaRisco[]) {
+        for (const item of data) {
+            await this.database.runAsync(
+                `INSERT OR REPLACE INTO checklist_estrutura_riscos (
+                    id, checklist_estrutura_id, nome
+                ) VALUES (?, ?, ?)`,
+                [
+                    item.id,
+                    item.checklist_estrutura_id,
+                    item.nome
+                ]
+            );
+        }
+    }
+
+    async clearChecklistEstruturaRiscos(centroCustoId: string) {
+        await this.database.runAsync(
+            `DELETE FROM checklist_estrutura_riscos WHERE checklist_estrutura_id IN (SELECT id FROM checklist_estruturas WHERE centro_custo_id = ?)`,
+            [centroCustoId]
+        );
+    }
+
+    private async insertChecklistEstruturaControleRiscos(data: ChecklistEstruturaControleRisco[]) {
+        for (const item of data) {
+            await this.database.runAsync(
+                `INSERT OR REPLACE INTO checklist_estrutura_controle_riscos (
+                    id, checklist_estrutura_id, checklist_estrutura_risco_id, nome
+                ) VALUES (?, ?, ?, ?)`,
+                [
+                    item.id,
+                    item.checklist_estrutura_id,
+                    item.checklist_estrutura_risco_id,
+                    item.nome
+                ]
+            );
+        }
+    }
+
+    async clearChecklistEstruturaControleRiscos(centroCustoId: string) {
+        await this.database.runAsync(
+            `DELETE FROM checklist_estrutura_controle_riscos WHERE checklist_estrutura_id IN (SELECT id FROM checklist_estruturas WHERE centro_custo_id = ?)`,
+            [centroCustoId]
+        );
+    }
+
     private async insertLocalidadeCidades(data: LocalidadeCidade[]) {
         for (const item of data) {
             await this.database.runAsync(
@@ -193,6 +240,14 @@ export class DatabaseSyncService {
         await this.insertChecklistEstruturaItems(data);
     }
 
+    async insertChecklistEstruturaRiscosPage(data: ChecklistEstruturaRisco[]) {
+        await this.insertChecklistEstruturaRiscos(data);
+    }
+
+    async insertChecklistEstruturaControleRiscosPage(data: ChecklistEstruturaControleRisco[]) {
+        await this.insertChecklistEstruturaControleRiscos(data);
+    }
+
     async insertLocalidadeCidadesPage(data: LocalidadeCidade[]) {
         await this.insertLocalidadeCidades(data);
     }
@@ -226,6 +281,8 @@ export class DatabaseSyncService {
                 { name: 'Estruturas do Centro de Custo', fn: () => syncService.syncCentroCustoEstruturas(this, centroCustoId) },
                 { name: 'Estruturas do Checklist', fn: () => syncService.syncChecklistEstruturas(this, centroCustoId) },
                 { name: 'Itens da Estrutura', fn: () => syncService.syncChecklistEstruturaItems(this, centroCustoId) },
+                { name: 'Riscos ou Perigos', fn: () => syncService.syncChecklistEstruturaRiscos(this, centroCustoId) },
+                { name: 'Controle de Riscos/Perigos', fn: () => syncService.syncChecklistEstruturaControleRiscos(this, centroCustoId) },
                 { name: 'Cidades', fn: () => syncService.syncLocalidadeCidades(this, centroCustoId) },
                 { name: 'Equipes', fn: () => syncService.syncEquipes(this, centroCustoId) },
                 { name: 'Veículos', fn: () => syncService.syncVeiculos(this, centroCustoId) },

@@ -5,6 +5,8 @@ import {
     centroCustoEstruturaSyncService,
     checklistEstruturaSyncService,
     checklistEstruturaItemSyncService,
+    checklistEstruturaRiscoSyncService,
+    checklistEstruturaControleRiscoSyncService,
     localidadeCidadeSyncService,
     equipeSyncService,
     veiculoSyncService,
@@ -16,6 +18,8 @@ export type {
     CentroCustoEstrutura,
     ChecklistEstrutura,
     ChecklistEstruturaItem,
+    ChecklistEstruturaRisco,
+    ChecklistEstruturaControleRisco,
     LocalidadeCidade,
     Equipe,
     Veiculo,
@@ -41,6 +45,14 @@ export class SyncService {
 
     async syncChecklistEstruturaItems(dbService: DatabaseSyncService, centroCustoId: string): Promise<number> {
         return await checklistEstruturaItemSyncService.syncChecklistEstruturaItems(dbService, centroCustoId);
+    }
+
+    async syncChecklistEstruturaRiscos(dbService: DatabaseSyncService, centroCustoId: string): Promise<number> {
+        return await checklistEstruturaRiscoSyncService.syncChecklistEstruturaRiscos(dbService, centroCustoId);
+    }
+
+    async syncChecklistEstruturaControleRiscos(dbService: DatabaseSyncService, centroCustoId: string): Promise<number> {
+        return await checklistEstruturaControleRiscoSyncService.syncChecklistEstruturaControleRiscos(dbService, centroCustoId);
     }
 
     async syncLocalidadeCidades(dbService: DatabaseSyncService, centroCustoId: string): Promise<number> {

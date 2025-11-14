@@ -4,6 +4,8 @@ export * from './checklistGrupoSyncService';
 export * from './centroCustoEstruturaSyncService';
 export * from './checklistEstruturaSyncService';
 export * from './checklistEstruturaItemSyncService';
+export * from './checklistEstruturaRiscoSyncService';
+export * from './checklistEstruturaControleRiscoSyncService';
 export * from './localidadeCidadeSyncService';
 export * from './equipeSyncService';
 export * from './veiculoSyncService';

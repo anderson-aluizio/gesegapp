@@ -5,6 +5,8 @@ export const API_ENDPOINTS = {
     CENTRO_CUSTO_ESTRUTURAS: '/centro-custo-estruturas',
     CHECKLIST_ESTRUTURAS: '/checklist-estruturas',
     CHECKLIST_ESTRUTURA_ITEMS: '/checklist-estrutura-items',
+    CHECKLIST_ESTRUTURA_RISCOS: '/checklist-estrutura-riscos',
+    CHECKLIST_ESTRUTURA_CONTROLE_RISCOS: '/checklist-estrutura-controle-riscos',
     LOCALIDADE_CIDADES: '/localidade-cidades',
     EQUIPES: '/equipes',
     VEICULOS: '/veiculos',
