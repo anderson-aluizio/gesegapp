@@ -212,7 +212,6 @@ export class ApiClient {
                 headers,
                 body: formData,
             });
-            console.log(formData);
 
             if (!response.ok) {
                 const responseText = await response.text();

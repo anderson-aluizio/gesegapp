@@ -92,7 +92,7 @@ export default function LoginScreen() {
             }
         } catch (error) {
             if (error instanceof UpdateRequiredHandledError) {
-                console.log('Update required - alert already shown to user');
+                console.warn('Update required - alert already shown to user');
                 return;
             }
 

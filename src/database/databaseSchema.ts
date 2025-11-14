@@ -215,7 +215,7 @@ export async function safeInitializeDatabase(database: SQLiteDatabase) {
   try {
     await initializeDatabase(database);
   } catch (error) {
-    console.log('Database initialization failed, attempting reset...', error);
+    console.error('Database initialization failed, attempting reset...', error);
 
     const errorMessage = error instanceof Error ? error.message : String(error);
     const isSchemaError = errorMessage.includes('no such column') ||
@@ -228,7 +228,7 @@ export async function safeInitializeDatabase(database: SQLiteDatabase) {
       errorMessage.includes('rejected');
 
     if (isSchemaError) {
-      console.log('Schema error detected, resetting database...');
+      console.error('Schema error detected, resetting database...');
       await resetDatabase(database);
       console.log('Database reset completed successfully');
     } else {

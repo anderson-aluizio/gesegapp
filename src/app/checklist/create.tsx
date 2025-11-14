@@ -41,7 +41,6 @@ export default function CreateChecklistRealizadoScreen() {
     const checklistRealizadoFuncionarioDb = useChecklistRealizadoFuncionarioDatabase();
     const { user } = useAuth();
     const isUserOperacao = user?.is_operacao;
-    console.log(selectedCentroCusto);
 
     const areas: AutocompleteDropdownOption[] = [
         { id: 'URBANA', title: 'URBANA' },
