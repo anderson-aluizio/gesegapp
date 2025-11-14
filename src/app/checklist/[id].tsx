@@ -3,6 +3,7 @@ import { BottomNavigation, Button, Dialog, Portal, Text, ActivityIndicator, MD2C
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DadosGeraisScreen from '@/components/checklist/dadosGerais';
 import LiderancaScreen from '@/components/checklist/lideranca';
+import RiscosScreen from '@/components/checklist/riscos';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ChecklistRealizadoDatabaseWithRelations, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import FuncionariosScreen from '@/components/checklist/funcionarios';
@@ -22,6 +23,7 @@ export default function EditChecklistRealizado() {
     { key: 'lideranca', title: 'Liderança', focusedIcon: 'account-supervisor', unfocusedIcon: 'account-supervisor-outline' },
     { key: 'colaborador', title: 'Colaboradores', focusedIcon: 'account-group', unfocusedIcon: 'account-group-outline' },
     { key: 'itens', title: 'Itens', focusedIcon: 'clipboard-list', unfocusedIcon: 'clipboard-list-outline' },
+    { key: 'riscos', title: 'Riscos', focusedIcon: 'account-supervisor', unfocusedIcon: 'account-supervisor-outline' },
   ];
 
   const [routes] = useState(
@@ -70,11 +72,13 @@ export default function EditChecklistRealizado() {
         return <DadosGeraisScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} isUserOperacao={user?.is_operacao || false} />;
       case 'lideranca':
         return <LiderancaScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
-      case 'colaborador':
-        return <FuncionariosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} setReloadList={setisReloadList} />;
-      case 'itens':
-        return <ItensScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado}
-          isActive={isActive} reloadList={isReloadList} setReloadList={setisReloadList} />;
+        case 'colaborador':
+          return <FuncionariosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} setReloadList={setisReloadList} />;
+        case 'itens':
+          return <ItensScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado}
+            isActive={isActive} reloadList={isReloadList} setReloadList={setisReloadList} />;
+        case 'riscos':
+          return <RiscosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
       default:
         return null;
     }

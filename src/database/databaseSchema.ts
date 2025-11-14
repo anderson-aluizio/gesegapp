@@ -126,6 +126,27 @@ export async function initializeDatabase(database: SQLiteDatabase) {
     CREATE INDEX IF NOT EXISTS cri_checklist_realizado_id_idx ON checklist_realizado_items (checklist_realizado_id);
     CREATE INDEX IF NOT EXISTS cri_checklist_item_id_idx ON checklist_realizado_items (checklist_item_id);
     CREATE INDEX IF NOT EXISTS cri_checklist_estrutura_item_id_idx ON checklist_realizado_items (checklist_estrutura_item_id);
+    CREATE TABLE IF NOT EXISTS checklist_realizado_apr_riscos (
+      id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      checklist_realizado_id integer NOT NULL,
+      checklist_estrutura_risco_id integer NOT NULL,
+      FOREIGN KEY (checklist_realizado_id) REFERENCES checklist_realizados(id) ON UPDATE no action ON DELETE no action,
+      FOREIGN KEY (checklist_estrutura_risco_id) REFERENCES checklist_estrutura_riscos(id) ON UPDATE no action ON DELETE no action
+    );
+    CREATE INDEX IF NOT EXISTS crr_checklist_realizado_id_idx ON checklist_realizado_apr_riscos (checklist_realizado_id);
+    CREATE INDEX IF NOT EXISTS crr_checklist_estrutura_risco_id_idx ON checklist_realizado_apr_riscos (checklist_estrutura_risco_id);
+    CREATE TABLE IF NOT EXISTS checklist_realizado_apr_controle_riscos (
+      id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+      checklist_realizado_id integer NOT NULL,
+      checklist_realizado_apr_risco_id integer NOT NULL,
+      checklist_estrutura_controle_risco_id integer NOT NULL,
+      FOREIGN KEY (checklist_realizado_id) REFERENCES checklist_realizados(id) ON UPDATE no action ON DELETE no action,
+      FOREIGN KEY (checklist_realizado_apr_risco_id) REFERENCES checklist_realizado_apr_riscos(id) ON UPDATE no action ON DELETE no action,
+      FOREIGN KEY (checklist_estrutura_controle_risco_id) REFERENCES checklist_estrutura_controle_riscos(id) ON UPDATE no action ON DELETE no action
+    );
+    CREATE INDEX IF NOT EXISTS crr_checklist_realizado_id_idx ON checklist_realizado_apr_controle_riscos (checklist_realizado_id);
+    CREATE INDEX IF NOT EXISTS crr_checklist_realizado_apr_risco_id_idx ON checklist_realizado_apr_controle_riscos (checklist_realizado_apr_risco_id);
+    CREATE INDEX IF NOT EXISTS crr_checklist_estrutura_controle_risco_id_idx ON checklist_realizado_apr_controle_riscos (checklist_estrutura_controle_risco_id);
     CREATE TABLE IF NOT EXISTS equipes (
       id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
       nome text NOT NULL,
@@ -197,6 +218,8 @@ export async function dropTables(database: SQLiteDatabase) {
     DROP TABLE IF EXISTS checklist_realizados;
     DROP TABLE IF EXISTS checklist_realizado_funcionarios;
     DROP TABLE IF EXISTS checklist_realizado_items;
+    DROP TABLE IF EXISTS checklist_realizado_apr_riscos;
+    DROP TABLE IF EXISTS checklist_realizado_apr_controle_riscos;
     DROP TABLE IF EXISTS equipes;
     DROP TABLE IF EXISTS funcionarios;
     DROP TABLE IF EXISTS localidade_cidades;
@@ -217,6 +240,8 @@ export async function clearTables(database: SQLiteDatabase) {
     DELETE FROM checklist_realizados;
     DELETE FROM checklist_realizado_funcionarios;
     DELETE FROM checklist_realizado_items;
+    DELETE FROM checklist_realizado_apr_riscos;
+    DELETE FROM checklist_realizado_apr_controle_riscos;
     DELETE FROM equipes;
     DELETE FROM funcionarios;
     DELETE FROM localidade_cidades;
