@@ -60,6 +60,21 @@ export default function CreateChecklistRealizadoScreen() {
             title: String(item.nome),
         }));
         setGrupos(formatted);
+
+        if (isUserOperacao) {
+            const todayAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
+            if (!todayAutoChecklist) {
+                const autoChecklistGrupo = res.find(g => g.nome_interno === 'checklist_auto_checklist');
+                if (autoChecklistGrupo) {
+                    setSelectedGrupo(String(autoChecklistGrupo.id));
+                }
+            } else {
+                const aprGrupo = res.find(g => g.nome_interno === 'checklist_apr');
+                if (aprGrupo) {
+                    setSelectedGrupo(String(aprGrupo.id));
+                }
+            }
+        }
     }
     const loadCentroCustos = async () => {
         const res = await centroCustoDb.getWithChecklistEstrutura();
@@ -87,6 +102,11 @@ export default function CreateChecklistRealizadoScreen() {
                     setTodayTurno(todayTurno);
                     setTodayEquipeTurnoFuncionarios(turnoFuncionarios);
                     setIsFromTurno(true);
+                } else {
+                    dialog.show('Você precisa criar um turno antes de prosseguir.');
+                    setTimeout(() => {
+                        router.replace('/(tabs)/turno-equipe/create');
+                    }, 4000);
                 }
             } catch (error) {
                 console.error('Error loading turno data:', error);
