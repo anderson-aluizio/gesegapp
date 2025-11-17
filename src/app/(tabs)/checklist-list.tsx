@@ -111,7 +111,7 @@ export default function ChecklistListScreen() {
 
                 if (!hasTurno) {
                     showConfirmDialog(
-                        '⏰ Turno não iniciado',
+                        'Turno não iniciado',
                         'É necessário abrir o turno do dia antes de criar um checklist. Deseja abrir o turno agora?',
                         () => {
                             setConfirmDialogVisible(false);
