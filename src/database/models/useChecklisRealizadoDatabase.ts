@@ -36,6 +36,8 @@ export type ChecklistRealizadoDatabase = {
   created_at?: Date
   finalizado_at?: Date
   finalizado_by?: number
+  latitude?: number
+  longitude?: number
 }
 
 export type ChecklistRealizadoDatabaseWithRelations = ChecklistRealizadoDatabase & {
@@ -54,11 +56,11 @@ export const useChecklisRealizadoDatabase = () => {
       `INSERT INTO checklist_realizados
       (checklist_grupo_id, checklist_estrutura_id, centro_custo_id,
       localidade_cidade_id, equipe_id, veiculo_id, area, date,
-      encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf, created_at)
+      encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf, created_at, latitude, longitude)
       VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
               $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
               NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
-              NULLIF($gerente_cpf, ''), datetime('now'))`
+              NULLIF($gerente_cpf, ''), datetime('now'), $latitude, $longitude)`
     );
 
     try {
@@ -80,6 +82,8 @@ export const useChecklisRealizadoDatabase = () => {
           $coordenador_cpf: data.coordenador_cpf,
           $gerente_cpf: data.gerente_cpf,
           $is_finalizado: data.is_finalizado ? 1 : 0,
+          $latitude: data.latitude || null,
+          $longitude: data.longitude || null,
         });
         insertedRowId = result.lastInsertRowId.toLocaleString();
         const items = await checklisEstruturaItemsDb.getItemsByEstruturaId(data.checklist_estrutura_id);
@@ -353,7 +357,7 @@ export const useChecklisRealizadoDatabase = () => {
     }
   }
 
-  const duplicate = async (originalChecklistId: number, newChecklistEstrutura: ChecklistEstruturaDatabase) => {
+  const duplicate = async (originalChecklistId: number, newChecklistEstrutura: ChecklistEstruturaDatabase, latitude?: number, longitude?: number) => {
     try {
       const originalChecklist = await show(originalChecklistId);
       if (!originalChecklist) {
@@ -366,11 +370,11 @@ export const useChecklisRealizadoDatabase = () => {
           `INSERT INTO checklist_realizados
           (checklist_grupo_id, checklist_estrutura_id, centro_custo_id,
           localidade_cidade_id, equipe_id, veiculo_id, area, date,
-          encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf, created_at)
+          encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf, created_at, latitude, longitude)
           VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
                   $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
                   NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
-                  NULLIF($gerente_cpf, ''), datetime('now'))`
+                  NULLIF($gerente_cpf, ''), datetime('now'), $latitude, $longitude)`
         );
 
         try {
@@ -387,6 +391,8 @@ export const useChecklisRealizadoDatabase = () => {
             $supervisor_cpf: originalChecklist.supervisor_cpf,
             $coordenador_cpf: originalChecklist.coordenador_cpf,
             $gerente_cpf: originalChecklist.gerente_cpf,
+            $latitude: latitude || null,
+            $longitude: longitude || null,
           });
 
           newChecklistId = result.lastInsertRowId.toLocaleString();

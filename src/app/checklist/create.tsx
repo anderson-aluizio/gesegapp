@@ -14,6 +14,7 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import { useLocation } from '@/hooks/useLocation';
 
 export default function CreateChecklistRealizadoScreen() {
     const [grupos, setGrupos] = useState<AutocompleteDropdownOption[]>([]);
@@ -43,6 +44,7 @@ export default function CreateChecklistRealizadoScreen() {
     const checklistRealizadoFuncionarioDb = useChecklistRealizadoFuncionarioDatabase();
     const { user } = useAuth();
     const isUserOperacao = user?.is_operacao;
+    const { getCurrentLocation } = useLocation();
 
     const areas: AutocompleteDropdownOption[] = [
         { id: 'URBANA', title: 'URBANA' },
@@ -85,7 +87,7 @@ export default function CreateChecklistRealizadoScreen() {
             id: String(item.id),
             title: String(item.nome),
         }));
-        if (formatted.length == 1){
+        if (formatted.length == 1) {
             setSelectedCentroCusto(formatted[0].id)
         }
         setCentroCustos(formatted);
@@ -192,24 +194,28 @@ export default function CreateChecklistRealizadoScreen() {
             dialog.show('Equipe não encontrada.');
             return;
         }
-        const createdChecklist = {
-            checklist_grupo_id: Number(selectedGrupo),
-            checklist_estrutura_id: Number(selectedEstrutura),
-            centro_custo_id: String(selectedCentroCusto),
-            localidade_cidade_id: Number(selectedMunicipio),
-            equipe_id: Number(selectedEquipe),
-            veiculo_id: String(selectedVeiculo),
-            area: selectedArea,
-            date: new Date(),
-            observacao: "",
-            encarregado_cpf: equipe.encarregado_cpf,
-            supervisor_cpf: equipe.supervisor_cpf || '',
-            coordenador_cpf: equipe.coordenador_cpf || '',
-            gerente_cpf: equipe.gerente_cpf || '',
-            is_finalizado: false,
-            is_user_declarou_conformidade: false,
-        }
+
         try {
+            const coords = await getCurrentLocation();
+            const createdChecklist = {
+                checklist_grupo_id: Number(selectedGrupo),
+                checklist_estrutura_id: Number(selectedEstrutura),
+                centro_custo_id: String(selectedCentroCusto),
+                localidade_cidade_id: Number(selectedMunicipio),
+                equipe_id: Number(selectedEquipe),
+                veiculo_id: String(selectedVeiculo),
+                area: selectedArea,
+                date: new Date(),
+                observacao: "",
+                encarregado_cpf: equipe.encarregado_cpf,
+                supervisor_cpf: equipe.supervisor_cpf || '',
+                coordenador_cpf: equipe.coordenador_cpf || '',
+                gerente_cpf: equipe.gerente_cpf || '',
+                is_finalizado: false,
+                is_user_declarou_conformidade: false,
+                latitude: coords?.latitude,
+                longitude: coords?.longitude,
+            }
             const lastChecklistRealizado = await checklistRealizadoDb.create(createdChecklist);
             if (!lastChecklistRealizado) {
                 dialog.show('Erro ao criar registro. Tente novamente.');
@@ -297,21 +303,21 @@ export default function CreateChecklistRealizadoScreen() {
                                 disable={!selectedCentroCusto}
                                 onValueChange={handleChangeMunicipio}
                             />
-                            { !isFromTurno ? <AutocompleteSearchDropdown
+                            {!isFromTurno ? <AutocompleteSearchDropdown
                                 listName="equipes"
                                 label="Equipe"
                                 extraParam={{ centro_custo_id: selectedCentroCusto || '' }}
                                 value={selectedEquipe}
                                 placeholder="Digite para pesquisar equipe"
                                 onValueChange={handleChangeEquipe}
-                            /> : null }
-                            { !isFromTurno ? <AutocompleteSearchDropdown
+                            /> : null}
+                            {!isFromTurno ? <AutocompleteSearchDropdown
                                 listName="veiculos"
                                 label="Veiculo"
                                 value={selectedVeiculo}
                                 placeholder="Digite para pesquisar veículo"
                                 onValueChange={handleChangeVeiculo}
-                            /> : null }
+                            /> : null}
                             <AutocompleteSearchDropdown
                                 label="Area"
                                 placeholder="Digite a área"

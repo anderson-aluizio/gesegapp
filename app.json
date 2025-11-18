@@ -54,7 +54,8 @@
           "project": "gesegapp",
           "organization": "dinamo-engenharia"
         }
-      ]
+      ],
+      "expo-location"
     ],
     "experiments": {
       "typedRoutes": true
