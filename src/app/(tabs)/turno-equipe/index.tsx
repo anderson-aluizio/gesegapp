@@ -77,7 +77,7 @@ export default function TurnoEquipeScreen() {
 
             if (!dataSynced) {
                 showConfirmDialog(
-                    '📊 Dados não sincronizados',
+                    'Dados não sincronizados',
                     'É necessário sincronizar os dados antes de criar um turno. Deseja ir para a tela de sincronização?',
                     () => {
                         setConfirmDialogVisible(false);

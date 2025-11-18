@@ -135,7 +135,7 @@ export default function HomeScreen() {
 
       if (!dataSynced) {
         showConfirmDialog(
-          '📊 Dados não sincronizados',
+          'Dados não sincronizados',
           'É necessário sincronizar os dados antes de criar um checklist. Deseja ir para a tela de sincronização?',
           () => {
             setConfirmDialogVisible(false);
