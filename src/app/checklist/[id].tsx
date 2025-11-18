@@ -13,6 +13,7 @@ import { useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useC
 import { useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import SignatureCapture from '@/components/ui/inputs/SignatureCapture';
 
 export default function EditChecklistRealizado() {
   const { user } = useAuth();
@@ -62,6 +63,8 @@ export default function EditChecklistRealizado() {
   const [isdialogFinishShow, setIsdialogFinishShow] = useState<boolean>(false);
   const [dialogDesc, setDialogDesc] = useState<string>('');
   const [isUserDeclarouConformidade, setIsUserDeclarouConformidade] = useState<boolean>(false);
+  const [isSignatureDialogVisible, setIsSignatureDialogVisible] = useState<boolean>(false);
+  const [signature, setSignature] = useState<string | undefined>(undefined);
 
   type Route = { key: string; title: string; focusedIcon: string; unfocusedIcon: string };
   const renderScene = ({ route }: { route: Route }) => {
@@ -171,7 +174,28 @@ export default function EditChecklistRealizado() {
       setDialogDesc('Usuário não autenticado. Por favor, faça login novamente.');
       return;
     }
-    checklistRealizadoDb.updateFinished(checklistRealizado.id, user.id, isUserDeclarouConformidade)
+
+    // Check if signature is required for APR checklist for operational users
+    const isAprChecklist = checklistRealizado.checklist_grupo_nome_interno === 'checklist_apr';
+    const isUserOperacao = user?.is_operacao;
+
+    if (isAprChecklist && isUserOperacao && !signature) {
+      setIsSignatureDialogVisible(true);
+      return;
+    }
+
+    finalizeChecklist();
+  };
+
+  const finalizeChecklist = (signatureData?: string) => {
+    if (!user || !user.id) {
+      setDialogDesc('Usuário não autenticado. Por favor, faça login novamente.');
+      return;
+    }
+
+    const finalSignature = signatureData || signature;
+
+    checklistRealizadoDb.updateFinished(checklistRealizado.id, user.id, isUserDeclarouConformidade, finalSignature)
       .then(() => {
         router.dismissAll();
         router.push('/checklist-list');
@@ -181,6 +205,16 @@ export default function EditChecklistRealizado() {
         setDialogDesc('Erro ao finalizar. Tente novamente mais tarde.');
       }
       );
+  };
+
+  const handleSignatureConfirm = (signatureData: string) => {
+    setSignature(signatureData);
+    setIsSignatureDialogVisible(false);
+    finalizeChecklist(signatureData);
+  };
+
+  const handleSignatureDismiss = () => {
+    setIsSignatureDialogVisible(false);
   };
 
   return (
@@ -248,6 +282,13 @@ export default function EditChecklistRealizado() {
                 </Dialog.Actions>
               </Dialog>
             </Portal>
+
+            <SignatureCapture
+              visible={isSignatureDialogVisible}
+              onConfirm={handleSignatureConfirm}
+              onDismiss={handleSignatureDismiss}
+              title="Assinatura APR"
+            />
           </View>
         )}
       </>

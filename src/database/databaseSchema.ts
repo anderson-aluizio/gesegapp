@@ -87,6 +87,7 @@ export async function initializeDatabase(database: SQLiteDatabase) {
       created_at text NOT NULL,
       finalizado_at text,
       finalizado_by integer,
+      assinatura text,
       FOREIGN KEY (checklist_grupo_id) REFERENCES checklist_grupos(id) ON UPDATE no action ON DELETE no action,
       FOREIGN KEY (checklist_estrutura_id) REFERENCES checklist_estruturas(id) ON UPDATE no action ON DELETE no action,
       FOREIGN KEY (centro_custo_id) REFERENCES centro_custos(id) ON UPDATE no action ON DELETE no action,
