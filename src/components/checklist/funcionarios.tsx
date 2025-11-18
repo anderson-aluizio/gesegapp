@@ -118,13 +118,16 @@ export default function FuncionariosScreen(props: {
                     </View>
                 ) : (
                     <View style={styles.inner}>
-                        <AutocompleteSearchDropdown
-                            listName="funcionarios"
-                            label="Colaborador"
-                            placeholder="Digite o nome do colaborador"
-                            returnObject={true}
-                            disable={isLoading}
-                            onValueChange={handleChangeFuncionario} />
+                        {checklistRealizado.checklist_grupo_nome_interno !== 'checklist_apr' &&
+                            checklistRealizado.checklist_grupo_nome_interno !== 'checklist_auto_checklist' && (
+                                <AutocompleteSearchDropdown
+                                    listName="funcionarios"
+                                    label="Colaborador"
+                                    placeholder="Digite o nome do colaborador"
+                                    returnObject={true}
+                                    disable={isLoading}
+                                    onValueChange={handleChangeFuncionario} />
+                            )}
                         <View>
                             {funcionarios.length === 0 ? (
                                 <Text>Nenhum colaborador adicionado.</Text>
@@ -173,15 +176,18 @@ export default function FuncionariosScreen(props: {
                                                 accessibilityLabel={colaborador.assinatura ? `Re-assinar ${colaborador.funcionario_nome}` : `Assinar ${colaborador.funcionario_nome}`}
                                                 disabled={isLoading}
                                             />
-                                            <IconButton
-                                                icon="trash-can-outline"
-                                                iconColor="#e74c3c"
-                                                size={26}
-                                                onPress={() => { setFuncionarioToDelete(colaborador.id); setIsDialogConfirmDeleteShow(true); }}
-                                                style={{ marginLeft: 4 }}
-                                                accessibilityLabel={`Remover ${colaborador.funcionario_nome}`}
-                                                disabled={isLoading}
-                                            />
+                                            {checklistRealizado.checklist_grupo_nome_interno !== 'checklist_apr' &&
+                                                checklistRealizado.checklist_grupo_nome_interno !== 'checklist_auto_checklist' && (
+                                                    <IconButton
+                                                        icon="trash-can-outline"
+                                                        iconColor="#e74c3c"
+                                                        size={26}
+                                                        onPress={() => { setFuncionarioToDelete(colaborador.id); setIsDialogConfirmDeleteShow(true); }}
+                                                        style={{ marginLeft: 4 }}
+                                                        accessibilityLabel={`Remover ${colaborador.funcionario_nome}`}
+                                                        disabled={isLoading}
+                                                    />
+                                                )}
                                         </View>
                                     ))}
                                 </View>

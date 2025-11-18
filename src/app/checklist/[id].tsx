@@ -23,7 +23,7 @@ export default function EditChecklistRealizado() {
     { key: 'lideranca', title: 'Liderança', focusedIcon: 'account-supervisor', unfocusedIcon: 'account-supervisor-outline' },
     { key: 'colaborador', title: 'Colaboradores', focusedIcon: 'account-group', unfocusedIcon: 'account-group-outline' },
     { key: 'itens', title: 'Itens', focusedIcon: 'clipboard-list', unfocusedIcon: 'clipboard-list-outline' },
-    { key: 'riscos', title: 'Riscos', focusedIcon: 'account-supervisor', unfocusedIcon: 'account-supervisor-outline' },
+    { key: 'riscos', title: 'Riscos', focusedIcon: 'alert', unfocusedIcon: 'alert-outline' },
   ];
 
   const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabaseWithRelations>({} as ChecklistRealizadoDatabaseWithRelations);
@@ -77,13 +77,13 @@ export default function EditChecklistRealizado() {
         return <DadosGeraisScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} isUserOperacao={user?.is_operacao || false} />;
       case 'lideranca':
         return <LiderancaScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
-        case 'colaborador':
-          return <FuncionariosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} setReloadList={setisReloadList} />;
-        case 'itens':
-          return <ItensScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado}
-            isActive={isActive} reloadList={isReloadList} setReloadList={setisReloadList} />;
-        case 'riscos':
-          return <RiscosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
+      case 'colaborador':
+        return <FuncionariosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} setReloadList={setisReloadList} />;
+      case 'itens':
+        return <ItensScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado}
+          isActive={isActive} reloadList={isReloadList} setReloadList={setisReloadList} />;
+      case 'riscos':
+        return <RiscosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
       default:
         return null;
     }
@@ -177,7 +177,6 @@ export default function EditChecklistRealizado() {
       return;
     }
 
-    // Check if all funcionários have signed for APR checklist
     const isAprChecklist = checklistRealizado.checklist_grupo_nome_interno === 'checklist_apr';
     const isUserOperacao = user?.is_operacao;
 
@@ -185,7 +184,7 @@ export default function EditChecklistRealizado() {
       const funcionarios = await checklistRealizadoFuncionarioDb.getByChecklistRealizadoId(checklistRealizado.id);
       const unsignedFuncionarios = funcionarios.filter(f => !f.assinatura);
       if (unsignedFuncionarios.length > 0) {
-        setDialogDesc('Todos os funcionários precisam assinar antes de finalizar o checklist APR.');
+        setDialogDesc('Todos os colaboradores precisam assinar antes de finalizar o checklist APR.');
         return;
       }
     }
@@ -239,7 +238,7 @@ export default function EditChecklistRealizado() {
               <Dialog visible={isdialogFinishShow} onDismiss={() => setIsdialogFinishShow(false)}>
                 <Dialog.Title>Finalizar Registro</Dialog.Title>
                 <Dialog.Content>
-                  <Text variant="bodySmall">
+                  <Text variant="bodySmall" style={{ textAlign: 'justify' }}>
                     Antes de finalizar confira se todas as informações estão corretas. Se o botão "Atualizar" estiver habilitado é porque
                     o formulário possui alterações não salvas.
                   </Text>
