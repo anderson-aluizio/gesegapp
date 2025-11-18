@@ -1,10 +1,9 @@
 import { useEquipeTurnoDatabase } from "@/database/models/useEquipeTurnoDatabase";
 import { useEquipeTurnoFuncionarioDatabase } from "@/database/models/useEquipeTurnoFuncionarioDatabase";
-import { useChecklisRealizadoDatabase } from "@/database/models/useChecklisRealizadoDatabase";
-import { useChecklisRealizadoItemsDatabase } from "@/database/models/useChecklisRealizadoItemsDatabase";
-import { useChecklistRealizadoFuncionarioDatabase } from "@/database/models/useChecklistRealizadoFuncionarioDatabase";
-import { useChecklisRealizadoRiscosDatabase } from '@/database/models/useChecklisRealizadoRiscosDatabase';
-import { useChecklisRealizadoControleRiscosDatabase } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
+import { useChecklisRealizadoDatabase, ChecklistRealizadoDatabase } from "@/database/models/useChecklisRealizadoDatabase";
+import { useChecklisRealizadoItemsDatabase, ChecklistRealizadoItemsDatabaseWithItem } from "@/database/models/useChecklisRealizadoItemsDatabase";
+import { useChecklistRealizadoFuncionarioDatabase, ChecklistRealizadoFuncionarioDatabase } from "@/database/models/useChecklistRealizadoFuncionarioDatabase";
+import { useChecklisRealizadoControleRiscosDatabase, ChecklistRealizadoControleRiscosDatabaseWithRelations } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
@@ -23,13 +22,22 @@ type EquipeTurnoFormatted = {
     }[];
 }
 
+type ChecklistRealizadoItemWithPhoto = ChecklistRealizadoItemsDatabaseWithItem & {
+    foto?: { uri: string };
+}
+
+type ChecklistRealizadoPayload = ChecklistRealizadoDatabase & {
+    funcionarios: ChecklistRealizadoFuncionarioDatabase[];
+    items: ChecklistRealizadoItemWithPhoto[];
+    controle_riscos: ChecklistRealizadoControleRiscosDatabaseWithRelations[];
+}
+
 const SendAllData = () => {
     const turnoDb = useEquipeTurnoDatabase();
     const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
     const checklistDb = useChecklisRealizadoDatabase();
     const checklistFuncionarios = useChecklistRealizadoFuncionarioDatabase();
     const checklistItemsDb = useChecklisRealizadoItemsDatabase();
-    const realizadoRiscosDb = useChecklisRealizadoRiscosDatabase();
     const realizadoControlesDb = useChecklisRealizadoControleRiscosDatabase();
 
     const [loading, setLoading] = useState(false);
@@ -98,9 +106,7 @@ const SendAllData = () => {
                 const hasPhotos = items.some(item => item.foto_path);
                 const controle_riscos = await realizadoControlesDb.getByChecklistRealizadoId(checklist.id);
 
-                const checklistData: any = { ...checklist, funcionarios, items: [], controle_riscos };
-
-                const itemsWithPhotos = items.map(item => {
+                const itemsWithPhotos: ChecklistRealizadoItemWithPhoto[] = items.map(item => {
                     if (item.foto_path && item.foto_path.startsWith('file://')) {
                         return {
                             ...item,
@@ -110,7 +116,12 @@ const SendAllData = () => {
                     return item;
                 });
 
-                checklistData.items = itemsWithPhotos;
+                const checklistData: ChecklistRealizadoPayload = {
+                    ...checklist,
+                    funcionarios,
+                    items: itemsWithPhotos,
+                    controle_riscos
+                };
 
                 if (hasPhotos) {
                     await apiClientWrapper.postWithFiles('/store-checklist-realizado', checklistData);
@@ -118,7 +129,7 @@ const SendAllData = () => {
                     await apiClientWrapper.post('/store-checklist-realizado', checklistData);
                 }
 
-                // await checklistDb.remove(checklist.id);
+                await checklistDb.remove(checklist.id);
                 successCount++;
             } catch (error) {
                 errorCount++;
@@ -141,8 +152,6 @@ const SendAllData = () => {
                 setLoading(false);
                 return;
             }
-            await handleSendChecklists();
-            return;
 
             const turnoResults = await handleSendTurnos();
 
@@ -168,12 +177,19 @@ const SendAllData = () => {
                 showDialog(`✅ Sucesso!\n\n${items} enviado(s) com sucesso!`);
             } else {
                 const errorList = allErrorDetails.join('\n\n');
-                showDialog(
-                    `⚠️ Envio ${totalSuccess > 0 ? 'Parcial' : 'com Erros'}\n\n` +
-                    `✅ ${totalSuccess} registro(s) enviado(s) com sucesso.\n` +
-                    `❌ ${totalErrors} registro(s) com erro.\n\n` +
-                    `Detalhes dos erros:\n${errorList}`
-                );
+                const messageParts = [`⚠️ Envio ${totalSuccess > 0 ? 'Parcial' : 'com Erros'}\n`];
+
+                if (totalSuccess > 0) {
+                    messageParts.push(`✅ ${totalSuccess} registro(s) enviado(s) com sucesso.\n`);
+                }
+
+                if (totalErrors > 0) {
+                    messageParts.push(`❌ ${totalErrors} registro(s) com erro.\n`);
+                }
+
+                messageParts.push(`\nDetalhes dos erros:\n${errorList}`);
+
+                showDialog(messageParts.join(''));
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
