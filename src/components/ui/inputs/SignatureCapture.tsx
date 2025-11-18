@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, Modal } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Button, Portal, Dialog, Text } from 'react-native-paper';
 import Signature from 'react-native-signature-canvas';
 
@@ -60,7 +60,7 @@ export default function SignatureCapture({
               ref={signatureRef}
               onOK={handleSignature}
               onBegin={handleBegin}
-              descriptionText=""
+              descriptionText="Assine aqui"
               clearText="Limpar"
               confirmText="Confirmar"
               webStyle={style}

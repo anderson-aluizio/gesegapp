@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { BottomNavigation, Button, Dialog, Portal, Text, ActivityIndicator, MD2Colors } from 'react-native-paper';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DadosGeraisScreen from '@/components/checklist/dadosGerais';
@@ -27,12 +27,18 @@ export default function EditChecklistRealizado() {
     { key: 'riscos', title: 'Riscos', focusedIcon: 'account-supervisor', unfocusedIcon: 'account-supervisor-outline' },
   ];
 
-  const [routes] = useState(
-    user?.is_operacao
-      ? allRoutes.filter(route => route.key !== 'colaborador')
-      : allRoutes
-  );
   const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabaseWithRelations>({} as ChecklistRealizadoDatabaseWithRelations);
+
+  const routes = useMemo(() => {
+    const isAprChecklist = checklistRealizado.checklist_grupo_nome_interno === 'checklist_apr';
+    const isUserOperacao = user?.is_operacao;
+
+    return allRoutes.filter(route => {
+      if (route.key === 'colaborador' && isUserOperacao) return false;
+      if (route.key === 'riscos' && (!isUserOperacao || !isAprChecklist)) return false;
+      return true;
+    });
+  }, [user?.is_operacao, checklistRealizado.checklist_grupo_nome_interno]);
   const [isChecklistRealizadoTipoObservacao, setIsChecklistRealizadoTipoObservacao] = useState<boolean>(false);
   const checklistRealizadoDb = useChecklisRealizadoDatabase();
   const checklistRealizadoFuncionarioDb = useChecklistRealizadoFuncionarioDatabase();
@@ -247,7 +253,7 @@ export default function EditChecklistRealizado() {
                 <Dialog.Content>
                   <Text variant="bodySmall">
                     Antes de finalizar confira se todas as informações estão corretas. Se o botão "Atualizar" estiver habilitado é porque
-                    o checklist possui alterações não salvas.
+                    o formulário possui alterações não salvas.
                   </Text>
                   {isChecklistRealizadoTipoObservacao && (
                     <View style={styles.section}>
