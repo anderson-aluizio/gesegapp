@@ -1,6 +1,5 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuth } from '@/contexts/AuthContext';
 import { useSnackbar } from '@/hooks/useSnackbar';
 import { useDialog } from '@/hooks/useDialog';
 import { useSyncProgress } from '@/hooks/useSyncProgress';
@@ -11,12 +10,10 @@ import CentroCustoList from '@/components/sync/CentroCustoList';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import SyncProgressDialog from '@/components/sync/SyncProgressDialog';
 import CustomSnackbar from '@/components/ui/feedback/CustomSnackbar';
-import SendChecklistRealizado from '@/components/checklist/SendChecklistRealizado';
-import SendEquipeTurno from '@/components/turno/SendEquipeTurno';
+import SendAllData from '@/components/sync/SendAllData';
 
 export default function SyncDataScreen() {
     const router = useRouter();
-    const { user } = useAuth();
     const snackbar = useSnackbar();
     const dialog = useDialog();
     const syncProgress = useSyncProgress();
@@ -39,8 +36,6 @@ export default function SyncDataScreen() {
         },
     });
 
-    const showTurnoEquipe = user?.is_operacao === true;
-
     const handleSync = async (centroCustoId: string) => {
         syncProgress.show();
         await syncCentroCusto(centroCustoId);
@@ -55,8 +50,7 @@ export default function SyncDataScreen() {
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
             >
-                <SendChecklistRealizado />
-                {showTurnoEquipe && <SendEquipeTurno />}
+                <SendAllData />
 
                 <CentroCustoList
                     centroCustos={centroCustos}

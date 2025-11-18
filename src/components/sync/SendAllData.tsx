@@ -1,0 +1,252 @@
+import { useEquipeTurnoDatabase } from "@/database/models/useEquipeTurnoDatabase";
+import { useEquipeTurnoFuncionarioDatabase } from "@/database/models/useEquipeTurnoFuncionarioDatabase";
+import { useChecklisRealizadoDatabase } from "@/database/models/useChecklisRealizadoDatabase";
+import { useChecklisRealizadoItemsDatabase } from "@/database/models/useChecklisRealizadoItemsDatabase";
+import { useChecklistRealizadoFuncionarioDatabase } from "@/database/models/useChecklistRealizadoFuncionarioDatabase";
+import { useChecklisRealizadoRiscosDatabase } from '@/database/models/useChecklisRealizadoRiscosDatabase';
+import { useChecklisRealizadoControleRiscosDatabase } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
+import { apiClientWrapper } from "@/services";
+import { getErrorMessage } from "@/services/api/apiErrors";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Button, Surface, Text } from "react-native-paper";
+import InfoDialog from "@/components/ui/dialogs/InfoDialog";
+import { checkNetworkConnection } from "@/hooks";
+
+type EquipeTurnoFormatted = {
+    equipe_id: number;
+    date: string;
+    veiculo_id: string;
+    funcionarios: {
+        funcionario_cpf: string;
+        is_lider: number;
+    }[];
+}
+
+const SendAllData = () => {
+    const turnoDb = useEquipeTurnoDatabase();
+    const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
+    const checklistDb = useChecklisRealizadoDatabase();
+    const checklistFuncionarios = useChecklistRealizadoFuncionarioDatabase();
+    const checklistItemsDb = useChecklisRealizadoItemsDatabase();
+    const realizadoRiscosDb = useChecklisRealizadoRiscosDatabase();
+    const realizadoControlesDb = useChecklisRealizadoControleRiscosDatabase();
+
+    const [loading, setLoading] = useState(false);
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState('');
+
+    const showDialog = (message: string) => {
+        setDialogMessage(message);
+        setDialogVisible(true);
+    };
+
+    const hideDialog = () => {
+        setDialogVisible(false);
+    };
+
+    const handleSendTurnos = async () => {
+        const turnos = await turnoDb.getAll();
+        if (turnos.length === 0) {
+            return { success: 0, error: 0, errorDetails: [] };
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+        const errorDetails: string[] = [];
+
+        for (const turno of turnos) {
+            try {
+                const funcionarios = await turnoFuncionarioDb.getByEquipeTurnoId(turno.id);
+                const turnoData: EquipeTurnoFormatted = {
+                    equipe_id: turno.equipe_id,
+                    date: turno.date,
+                    veiculo_id: turno.veiculo_id,
+                    funcionarios: funcionarios.map(func => ({
+                        funcionario_cpf: func.funcionario_cpf,
+                        is_lider: func.is_lider,
+                    })),
+                };
+
+                await apiClientWrapper.post('/store-equipe-turno', turnoData);
+                await turnoDb.remove(turno.id);
+                successCount++;
+            } catch (error) {
+                errorCount++;
+                const errorMessage = getErrorMessage(error);
+                errorDetails.push(`Turno ID ${turno.id}: ${errorMessage}`);
+            }
+        }
+
+        return { success: successCount, error: errorCount, errorDetails };
+    };
+
+    const handleSendChecklists = async () => {
+        const checklists = await checklistDb.getFinalizados();
+        if (checklists.length === 0) {
+            return { success: 0, error: 0, errorDetails: [] };
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+        const errorDetails: string[] = [];
+
+        for (const checklist of checklists) {
+            try {
+                const funcionarios = await checklistFuncionarios.getByChecklistRealizadoId(checklist.id);
+                const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
+                const hasPhotos = items.some(item => item.foto_path);
+                const controle_riscos = await realizadoControlesDb.getByChecklistRealizadoId(checklist.id);
+
+                const checklistData: any = { ...checklist, funcionarios, items: [], controle_riscos };
+
+                const itemsWithPhotos = items.map(item => {
+                    if (item.foto_path && item.foto_path.startsWith('file://')) {
+                        return {
+                            ...item,
+                            foto: { uri: item.foto_path }
+                        };
+                    }
+                    return item;
+                });
+
+                checklistData.items = itemsWithPhotos;
+
+                if (hasPhotos) {
+                    await apiClientWrapper.postWithFiles('/store-checklist-realizado', checklistData);
+                } else {
+                    await apiClientWrapper.post('/store-checklist-realizado', checklistData);
+                }
+
+                // await checklistDb.remove(checklist.id);
+                successCount++;
+            } catch (error) {
+                errorCount++;
+                const errorMessage = getErrorMessage(error);
+                errorDetails.push(`Checklist ID ${checklist.id}: ${errorMessage}`);
+            }
+        }
+
+        return { success: successCount, error: errorCount, errorDetails };
+    };
+
+    const handleSendAllData = async () => {
+        setLoading(true);
+        try {
+            try {
+                await checkNetworkConnection();
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
+                showDialog(errorMessage);
+                setLoading(false);
+                return;
+            }
+            await handleSendChecklists();
+            return;
+
+            const turnoResults = await handleSendTurnos();
+
+            const checklistResults = await handleSendChecklists();
+
+            const totalSuccess = turnoResults.success + checklistResults.success;
+            const totalErrors = turnoResults.error + checklistResults.error;
+            const allErrorDetails = [
+                ...turnoResults.errorDetails.map(e => `[Turno] ${e}`),
+                ...checklistResults.errorDetails.map(e => `[Checklist] ${e}`)
+            ];
+
+            if (totalSuccess === 0 && totalErrors === 0) {
+                showDialog("Não há dados finalizados para enviar.");
+                setLoading(false);
+                return;
+            }
+
+            if (totalErrors === 0) {
+                const turnoMsg = turnoResults.success > 0 ? `${turnoResults.success} turno(s)` : '';
+                const checklistMsg = checklistResults.success > 0 ? `${checklistResults.success} checklist(s)` : '';
+                const items = [turnoMsg, checklistMsg].filter(Boolean).join(' e ');
+                showDialog(`✅ Sucesso!\n\n${items} enviado(s) com sucesso!`);
+            } else {
+                const errorList = allErrorDetails.join('\n\n');
+                showDialog(
+                    `⚠️ Envio ${totalSuccess > 0 ? 'Parcial' : 'com Erros'}\n\n` +
+                    `✅ ${totalSuccess} registro(s) enviado(s) com sucesso.\n` +
+                    `❌ ${totalErrors} registro(s) com erro.\n\n` +
+                    `Detalhes dos erros:\n${errorList}`
+                );
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            showDialog(
+                `❌ Erro ao enviar\n\n` +
+                `Ocorreu um erro ao enviar os dados finalizados.\n\n` +
+                `Detalhes: ${errorMessage}\n\n` +
+                `Por favor, tente novamente.`
+            );
+            console.error("Erro ao enviar dados:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <>
+            <Surface style={styles.infoCard} elevation={2}>
+                <View style={styles.infoHeader}>
+                    <Text variant="titleMedium" style={styles.infoTitle}>
+                        Enviar Dados Finalizados
+                    </Text>
+                </View>
+                <Text variant="bodySmall" style={styles.infoDescription}>
+                    Envie todos os turnos e checklists finalizados para o servidor.
+                </Text>
+                <Button
+                    mode="contained"
+                    icon="send"
+                    onPress={handleSendAllData}
+                    style={{ marginTop: 10 }}
+                    buttonColor="#0439c9"
+                    disabled={loading}
+                    loading={loading}
+                >
+                    Enviar Dados
+                </Button>
+            </Surface>
+
+            <InfoDialog
+                visible={dialogVisible}
+                description={dialogMessage}
+                onDismiss={hideDialog}
+            />
+        </>
+    );
+};
+
+export default SendAllData;
+
+const styles = StyleSheet.create({
+    infoCard: {
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        padding: 10,
+        marginBottom: 14,
+    },
+    infoHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    infoTitle: {
+        fontWeight: '700',
+        color: "#222",
+        flex: 1,
+        flexWrap: "wrap",
+    },
+    infoDescription: {
+        color: '#6c7a89',
+        marginRight: 2,
+        flex: 1,
+        flexWrap: "wrap",
+    },
+});

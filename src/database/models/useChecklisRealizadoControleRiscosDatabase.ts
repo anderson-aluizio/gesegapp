@@ -8,6 +8,7 @@ export type ChecklistRealizadoControleRiscosDatabase = {
 }
 
 export type ChecklistRealizadoControleRiscosDatabaseWithRelations = ChecklistRealizadoControleRiscosDatabase & {
+  checklist_estrutura_risco_id: number
   nome: string
 }
 
@@ -23,9 +24,11 @@ export const useChecklisRealizadoControleRiscosDatabase = () => {
     const query = `
       SELECT
         crcr.*,
+        crar.checklist_estrutura_risco_id,
         cecr.nome
       FROM checklist_realizado_apr_controle_riscos as crcr
-      INNER JOIN checklist_estrutura_controle_riscos as cecr ON crcr.checklist_estrutura_controle_risco_id = cecr.id
+        INNER JOIN checklist_estrutura_controle_riscos as cecr ON crcr.checklist_estrutura_controle_risco_id = cecr.id
+        INNER JOIN checklist_realizado_apr_riscos as crar ON crcr.checklist_realizado_apr_risco_id = crar.id
       WHERE crcr.checklist_realizado_id = $checklistRealizadoId
       ORDER BY cecr.nome
     `;
