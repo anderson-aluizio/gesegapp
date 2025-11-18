@@ -4,6 +4,7 @@ export type ChecklistRealizadoFuncionarioDatabase = {
     id: number
     checklist_realizado_id: number
     funcionario_cpf: string
+    assinatura?: string
     funcionario_nome?: string
     funcionario_matricula?: string
     funcionario_cargo_nome?: string
@@ -67,5 +68,24 @@ export const useChecklistRealizadoFuncionarioDatabase = () => {
         }
     }
 
-    return { getByChecklistRealizadoId, create, remove, removeByChecklistRealizadoId }
+    const updateSignature = async (id: number, assinatura: string): Promise<void> => {
+        const statement = await database.prepareAsync(
+            `UPDATE checklist_realizado_funcionarios
+             SET assinatura = $assinatura
+             WHERE id = $id`
+        );
+
+        try {
+            await statement.executeAsync({
+                $id: id,
+                $assinatura: assinatura
+            });
+        } catch (error) {
+            throw error
+        } finally {
+            await statement.finalizeAsync()
+        }
+    }
+
+    return { getByChecklistRealizadoId, create, remove, removeByChecklistRealizadoId, updateSignature }
 }

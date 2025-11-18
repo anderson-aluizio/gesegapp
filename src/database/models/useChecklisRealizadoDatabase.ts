@@ -36,7 +36,6 @@ export type ChecklistRealizadoDatabase = {
   created_at?: Date
   finalizado_at?: Date
   finalizado_by?: number
-  assinatura?: string
 }
 
 export type ChecklistRealizadoDatabaseWithRelations = ChecklistRealizadoDatabase & {
@@ -259,7 +258,7 @@ export const useChecklisRealizadoDatabase = () => {
     }
   }
 
-  const updateFinished = async (id: number, user_id: number, is_user_declarou_conformidade: boolean, assinatura?: string) => {
+  const updateFinished = async (id: number, user_id: number, is_user_declarou_conformidade: boolean) => {
     const statement = await database.prepareAsync(
       `UPDATE checklist_realizados
         SET
@@ -267,8 +266,7 @@ export const useChecklisRealizadoDatabase = () => {
           is_finalizado = 1,
           date_fim = $date_fim,
           finalizado_at = datetime('now'),
-          finalizado_by = $user_id,
-          assinatura = $assinatura
+          finalizado_by = $user_id
         WHERE id = $id`
     )
 
@@ -277,7 +275,6 @@ export const useChecklisRealizadoDatabase = () => {
         $is_user_declarou_conformidade: is_user_declarou_conformidade ? 1 : 0,
         $date_fim: new Date().toISOString(),
         $user_id: user_id,
-        $assinatura: assinatura || null,
         $id: id
       })
     } catch (error) {

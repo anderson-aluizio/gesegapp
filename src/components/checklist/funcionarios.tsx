@@ -6,6 +6,7 @@ import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/compon
 import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
+import SignatureCapture from '@/components/ui/inputs/SignatureCapture';
 
 export default function FuncionariosScreen(props: {
     checklistRealizado: ChecklistRealizadoDatabase;
@@ -23,6 +24,8 @@ export default function FuncionariosScreen(props: {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [funcionarios, setFuncionarios] = useState<ChecklistRealizadoFuncionarioDatabase[]>([]);
     const [dialogDesc, setDialogDesc] = useState<string>('');
+    const [isSignatureDialogVisible, setIsSignatureDialogVisible] = useState<boolean>(false);
+    const [funcionarioToSign, setFuncionarioToSign] = useState<ChecklistRealizadoFuncionarioDatabase | null>(null);
 
     const checklistRealizadoFuncionarioDb = useChecklistRealizadoFuncionarioDatabase();
     const list = async () => {
@@ -79,6 +82,33 @@ export default function FuncionariosScreen(props: {
         await list();
         setIsLoading(false);
     }
+
+    const handleSignFuncionario = (funcionario: ChecklistRealizadoFuncionarioDatabase) => {
+        setFuncionarioToSign(funcionario);
+        setIsSignatureDialogVisible(true);
+    }
+
+    const handleSignatureConfirm = async (signatureData: string) => {
+        if (!funcionarioToSign) return;
+
+        setIsLoading(true);
+        try {
+            await checklistRealizadoFuncionarioDb.updateSignature(funcionarioToSign.id, signatureData);
+            await list();
+        } catch (error) {
+            console.error('Erro ao salvar assinatura:', error);
+            setDialogDesc('Erro ao salvar assinatura. Tente novamente.');
+        } finally {
+            setIsLoading(false);
+            setIsSignatureDialogVisible(false);
+            setFuncionarioToSign(null);
+        }
+    }
+
+    const handleSignatureDismiss = () => {
+        setIsSignatureDialogVisible(false);
+        setFuncionarioToSign(null);
+    }
     return (
         <View style={styles.container}>
             <ScrollView>
@@ -122,7 +152,27 @@ export default function FuncionariosScreen(props: {
                                                 <Text style={styles.cardDescriptionText}>
                                                     Matricula: {colaborador.funcionario_matricula}
                                                 </Text>
+                                                {colaborador.assinatura && (
+                                                    <View style={styles.signedBadge}>
+                                                        <IconButton
+                                                            icon="check-circle"
+                                                            iconColor="#27ae60"
+                                                            size={16}
+                                                            style={{ margin: 0 }}
+                                                        />
+                                                        <Text style={styles.signedText}>Assinado</Text>
+                                                    </View>
+                                                )}
                                             </View>
+                                            <IconButton
+                                                icon={colaborador.assinatura ? "pen" : "draw"}
+                                                iconColor={colaborador.assinatura ? "#3498db" : "#27ae60"}
+                                                size={26}
+                                                onPress={() => handleSignFuncionario(colaborador)}
+                                                style={{ marginLeft: 4 }}
+                                                accessibilityLabel={colaborador.assinatura ? `Re-assinar ${colaborador.funcionario_nome}` : `Assinar ${colaborador.funcionario_nome}`}
+                                                disabled={isLoading}
+                                            />
                                             <IconButton
                                                 icon="trash-can-outline"
                                                 iconColor="#e74c3c"
@@ -169,6 +219,13 @@ export default function FuncionariosScreen(props: {
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
+
+                <SignatureCapture
+                    visible={isSignatureDialogVisible}
+                    onConfirm={handleSignatureConfirm}
+                    onDismiss={handleSignatureDismiss}
+                    title={`Assinatura - ${funcionarioToSign?.funcionario_nome || ''}`}
+                />
             </ScrollView>
         </View >
     );
@@ -226,5 +283,16 @@ const styles = StyleSheet.create({
     cardDescriptionText: {
         fontSize: 14,
         color: '#888',
+    },
+    signedBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 4,
+    },
+    signedText: {
+        fontSize: 13,
+        color: '#27ae60',
+        fontWeight: '600',
+        marginLeft: -8,
     },
 });
