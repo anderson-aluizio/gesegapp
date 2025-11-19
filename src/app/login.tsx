@@ -8,7 +8,7 @@ import {
     Image,
     Text,
 } from 'react-native';
-import { Button, TextInput, Checkbox } from 'react-native-paper';
+import { Button, TextInput, Checkbox, Switch } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { router } from 'expo-router';
@@ -140,73 +140,79 @@ export default function LoginScreen() {
                 </View>
 
                 <View style={styles.formContainer}>
-                    <View style={styles.rememberRow}>
-                        <View style={styles.rememberTextWrapper}>
-                            <Text style={styles.rememberText}>Sou operacional</Text>
+                    <Text style={styles.sectionTitle}>Tipo de Acesso</Text>
+                    <View style={styles.operacionalToggle}>
+                        <View style={styles.toggleLabelContainer}>
+                            <Switch value={isOperacional} onValueChange={() => setIsOperacional(!isOperacional)} disabled={loading} />
+                            <Text style={styles.toggleLabel} onPress={() => setIsOperacional(!isOperacional)}>
+                                {isOperacional ? 'Acesso Operacional' : 'Acesso Administrativo'}
+                            </Text>
                         </View>
-                        <Checkbox
-                            status={isOperacional ? 'checked' : 'unchecked'}
-                            onPress={() => setIsOperacional(!isOperacional)}
-                            disabled={loading}
-                        />
                     </View>
 
-                    {isOperacional ? (
-                        <TextInput
-                            label="CPF"
-                            value={cpf}
-                            onChangeText={setCpf}
-                            keyboardType="numeric"
-                            autoCapitalize="none"
-                            left={<TextInput.Icon icon="account" />}
-                            style={styles.input}
-                            mode="outlined"
-                            disabled={loading}
-                            placeholder="000.000.000-00"
-                        />
-                    ) : (
-                        <TextInput
-                            label="E-mail"
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoComplete="email"
-                            left={<TextInput.Icon icon="email" />}
-                            style={styles.input}
-                            mode="outlined"
-                            disabled={loading}
-                        />
-                    )}
+                    <View style={styles.divider} />
 
-                    <TextInput
-                        label="Senha"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry={!showPassword}
-                        autoCapitalize="none"
-                        autoComplete="password"
-                        left={<TextInput.Icon icon="lock" />}
-                        right={
-                            <TextInput.Icon
-                                icon={showPassword ? 'eye-off' : 'eye'}
-                                onPress={() => setShowPassword(!showPassword)}
+                    <View style={styles.credentialsSection}>
+                        <Text style={styles.sectionTitle}>Credenciais</Text>
+
+                        {isOperacional ? (
+                            <TextInput
+                                label="CPF"
+                                value={cpf}
+                                onChangeText={setCpf}
+                                keyboardType="numeric"
+                                autoCapitalize="none"
+                                left={<TextInput.Icon icon="account" />}
+                                style={styles.input}
+                                mode="outlined"
+                                disabled={loading}
+                                placeholder="000.000.000-00"
                             />
-                        }
-                        style={styles.input}
-                        mode="outlined"
-                        disabled={loading}
-                    />
+                        ) : (
+                            <TextInput
+                                label="E-mail Corporativo"
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoComplete="email"
+                                left={<TextInput.Icon icon="email" />}
+                                style={styles.input}
+                                mode="outlined"
+                                disabled={loading}
+                                placeholder="usuario@dinamo.srv.br"
+                            />
+                        )}
 
-                    <View style={styles.rememberRow}>
-                        <View style={styles.rememberTextWrapper}>
-                            <Text style={styles.rememberText}>Lembrar credenciais</Text>
-                        </View>
-                        <Checkbox
-                            status={remember ? 'checked' : 'unchecked'}
-                            onPress={() => setRemember(!remember)}
+                        <TextInput
+                            label="Senha"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                            autoCapitalize="none"
+                            autoComplete="password"
+                            left={<TextInput.Icon icon="lock" />}
+                            right={
+                                <TextInput.Icon
+                                    icon={showPassword ? 'eye-off' : 'eye'}
+                                    onPress={() => setShowPassword(!showPassword)}
+                                />
+                            }
+                            style={styles.input}
+                            mode="outlined"
                             disabled={loading}
                         />
+
+                        <View style={styles.rememberRow}>
+                            <View style={styles.rememberTextWrapper}>
+                                <Text style={styles.rememberText}>Lembrar credenciais</Text>
+                            </View>
+                            <Checkbox
+                                status={remember ? 'checked' : 'unchecked'}
+                                onPress={() => setRemember(!remember)}
+                                disabled={loading}
+                            />
+                        </View>
                     </View>
 
                     <Button
@@ -220,11 +226,11 @@ export default function LoginScreen() {
                         {loading ? 'Acessando...' : 'Acessar'}
                     </Button>
                 </View>
+                <View style={styles.resetDataContainer}>
+                    <ResetData />
+                </View>
             </ScrollView>
 
-            <View style={styles.resetDataContainer}>
-                <ResetData />
-            </View>
 
             <InfoDialog
                 visible={dialog.visible}
@@ -247,50 +253,77 @@ const styles = StyleSheet.create({
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 10,
     },
     resetDataContainer: {
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
-        zIndex: 1,
+        marginTop: 20,
+        alignItems: 'flex-end',
     },
     logo: {
         width: 320,
         height: 100,
         borderRadius: 8,
     },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#333',
-        marginBottom: 8,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#666',
-        textAlign: 'center',
-    },
     formContainer: {
         backgroundColor: 'white',
-        borderRadius: 10,
-        padding: 20,
-        elevation: 3,
+        borderRadius: 12,
+        padding: 24,
+        elevation: 4,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
             height: 2,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+    },
+    sectionTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+        marginBottom: 12,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    operacionalToggle: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#f5f7fa',
+        borderRadius: 8,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#e1e8ed',
+    },
+    toggleLabelContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+        gap: 8,
+    },
+    toggleLabel: {
+        fontSize: 15,
+        color: '#333',
+        fontWeight: '500',
+        flex: 1,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#e1e8ed',
+        marginVertical: 10,
+    },
+    credentialsSection: {
+        marginBottom: 4,
     },
     input: {
         marginBottom: 16,
+        backgroundColor: 'white',
     },
     rememberRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        marginTop: 4,
         marginBottom: 8,
         paddingHorizontal: 4,
     },
@@ -298,27 +331,16 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     rememberText: {
-        fontSize: 16,
-        color: '#333',
+        fontSize: 15,
+        color: '#555',
     },
     loginButton: {
-        marginTop: 10,
-        marginBottom: 20,
+        marginTop: 16,
+        marginBottom: 8,
         backgroundColor: '#2980ef',
+        borderRadius: 8,
     },
     loginButtonContent: {
         height: 50,
-    },
-    infoContainer: {
-        backgroundColor: '#f8f9fa',
-        padding: 15,
-        borderRadius: 8,
-        borderLeftWidth: 4,
-        borderLeftColor: '#007bff',
-    },
-    infoText: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 2,
     },
 });
