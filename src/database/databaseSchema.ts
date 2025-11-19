@@ -1,6 +1,40 @@
 import { type SQLiteDatabase } from "expo-sqlite"
+import { MigrationManager, allMigrations } from "./migrations"
 
+/**
+ * Initialize database using migrations
+ * This is the new preferred method that handles schema versioning
+ */
 export async function initializeDatabase(database: SQLiteDatabase) {
+  const migrationManager = new MigrationManager(database, allMigrations);
+
+  try {
+    const info = await migrationManager.getInfo();
+
+    if (info.needsMigration) {
+      console.log(`Running ${info.pendingMigrations.length} pending migration(s)...`);
+      const results = await migrationManager.migrate();
+
+      const failed = results.find(r => !r.success);
+      if (failed) {
+        throw new Error(`Migration ${failed.version} failed: ${failed.error}`);
+      }
+
+      console.log('Database migrations completed successfully');
+    }
+
+  } catch (error) {
+    console.error('Database initialization error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Legacy initialization function (deprecated)
+ * Kept for reference, but should not be used
+ * @deprecated Use initializeDatabase() which uses migrations
+ */
+export async function initializeDatabaseLegacy(database: SQLiteDatabase) {
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS centro_custo_estruturas (
       id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -257,13 +291,19 @@ export async function resetDatabase(database: SQLiteDatabase) {
   await initializeDatabase(database);
 }
 
+/**
+ * Safe database initialization with error recovery
+ * This function handles migration failures gracefully
+ */
 export async function safeInitializeDatabase(database: SQLiteDatabase) {
   try {
     await initializeDatabase(database);
   } catch (error) {
-    console.error('Database initialization failed, attempting reset...', error);
+    console.error('Database initialization failed:', error);
 
     const errorMessage = error instanceof Error ? error.message : String(error);
+
+    // Check if this is a schema/migration error
     const isSchemaError = errorMessage.includes('no such column') ||
       errorMessage.includes('no such table') ||
       errorMessage.includes('FOREIGN KEY constraint failed') ||
@@ -271,14 +311,39 @@ export async function safeInitializeDatabase(database: SQLiteDatabase) {
       errorMessage.includes('column') ||
       errorMessage.includes('prepareAsync') ||
       errorMessage.includes('Call to function') ||
+      errorMessage.includes('Migration') ||
       errorMessage.includes('rejected');
 
     if (isSchemaError) {
-      console.error('Schema error detected, resetting database...');
-      await resetDatabase(database);
-      console.log('Database reset completed successfully');
+      console.error('Schema/migration error detected, attempting recovery...');
+
+      // In development, we can reset
+      if (__DEV__) {
+        console.log('Development mode: resetting database...');
+        await resetDatabase(database);
+        await initializeDatabase(database);
+        console.log('Database reset and reinitialized successfully');
+      } else {
+        // In production, log the error and let the app handle it
+        console.error('Production mode: Database migration failed. Manual intervention may be required.');
+        console.error('Error details:', errorMessage);
+
+        // Try one more time with legacy init as fallback
+        console.log('Attempting fallback initialization...');
+        await initializeDatabaseLegacy(database);
+        console.log('Fallback initialization completed');
+      }
     } else {
       throw error;
     }
   }
+}
+
+/**
+ * Get database migration info
+ * Useful for debugging and displaying in settings
+ */
+export async function getDatabaseInfo(database: SQLiteDatabase) {
+  const migrationManager = new MigrationManager(database, allMigrations);
+  return await migrationManager.getInfo();
 }
