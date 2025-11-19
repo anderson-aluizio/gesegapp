@@ -13,9 +13,12 @@ import { useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useC
 import { useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDialog } from '@/hooks/useDialog';
+import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function EditChecklistRealizado() {
   const { user } = useAuth();
+  const dialog = useDialog();
   const [index, setIndex] = useState(0);
 
   const allRoutes = [
@@ -65,7 +68,6 @@ export default function EditChecklistRealizado() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isReloadList, setisReloadList] = useState<boolean>(false);
   const [isdialogFinishShow, setIsdialogFinishShow] = useState<boolean>(false);
-  const [dialogDesc, setDialogDesc] = useState<string>('');
   const [isUserDeclarouConformidade, setIsUserDeclarouConformidade] = useState<boolean>(false);
 
   type Route = { key: string; title: string; focusedIcon: string; unfocusedIcon: string };
@@ -93,7 +95,7 @@ export default function EditChecklistRealizado() {
     if (!checklistRealizado.checklist_grupo_id || !checklistRealizado.checklist_estrutura_id ||
       !checklistRealizado.localidade_cidade_id || !checklistRealizado.date || !checklistRealizado.area ||
       !checklistRealizado.equipe_id) {
-      setDialogDesc('Preencha todos os campos obrigatórios em Dados Gerais.');
+      dialog.show('⚠️ Atenção\n\nPreencha todos os campos obrigatórios em Dados Gerais.');
       return false;
     }
     return true;
@@ -101,7 +103,7 @@ export default function EditChecklistRealizado() {
 
   const checkliderancaIsValid = async () => {
     if (!checklistRealizado.supervisor_cpf || !checklistRealizado.coordenador_cpf || !checklistRealizado.gerente_cpf) {
-      setDialogDesc('Preencha todos os campos obrigatórios em Liderança.');
+      dialog.show('⚠️ Atenção\n\nPreencha todos os campos obrigatórios em Liderança.');
       return false;
     }
     return true;
@@ -110,7 +112,7 @@ export default function EditChecklistRealizado() {
   const checkFuncionariosIsValid = async () => {
     const responseFuncionarios = await checklistRealizadoFuncionarioDb.getByChecklistRealizadoId(checklistRealizado.id);
     if (responseFuncionarios.length === 0) {
-      setDialogDesc('Adicione pelo menos um colaborador.');
+      dialog.show('⚠️ Atenção\n\nAdicione pelo menos um colaborador.');
       return false;
     }
     return true;
@@ -124,7 +126,10 @@ export default function EditChecklistRealizado() {
     }
     const itemsValid = responseItems.every(item => item.is_respondido);
     if (!itemsValid) {
-      setDialogDesc('Responda todos os itens.');
+      // Find the first unanswered item to show to the user
+      const firstUnansweredItem = responseItems.find(item => !item.is_respondido);
+      const itemName = firstUnansweredItem?.checklist_item_nome || 'Item';
+      dialog.show(`⚠️ Atenção\n\nResponda todos os itens.\n\nItem não respondido:\n"${itemName}"`);
       return { valid: false, hasInconformidades: hasSomeInconforme };
     }
     const totalItemsInconformesDescricaoRequired = responseItems.filter(item =>
@@ -133,7 +138,7 @@ export default function EditChecklistRealizado() {
     const totalItemsDescricaoFilled = responseItems.filter(item => String(item.descricao)?.length > 0).length;
     const possuiDescricoesPendentes = totalItemsInconformesDescricaoRequired > 0 && totalItemsDescricaoFilled < totalItemsInconformesDescricaoRequired;
     if (hasSomeInconforme && checklistRealizado.is_gera_nao_conformidade && possuiDescricoesPendentes) {
-      setDialogDesc('Existem itens com não conformidades pendentes de descrição.');
+      dialog.show('⚠️ Atenção\n\nExistem itens com não conformidades pendentes de descrição.');
       return { valid: false, hasInconformidades: hasSomeInconforme };
     }
     return { valid: true, hasInconformidades: hasSomeInconforme };
@@ -151,12 +156,12 @@ export default function EditChecklistRealizado() {
 
     if (isChecklistRealizadoTipoObservacao) {
       if (!hasInconformidades && !isUserDeclarouConformidade) {
-        setDialogDesc('É necessário declarar conformidade para continuar.');
+        dialog.show('⚠️ Atenção\n\nÉ necessário declarar conformidade para continuar.');
         return false;
       }
 
       if (hasInconformidades && isUserDeclarouConformidade) {
-        setDialogDesc('Não é possível declarar conformidade quando existem inconformidades registradas.');
+        dialog.show('⚠️ Atenção\n\nNão é possível declarar conformidade quando existem inconformidades registradas.');
         return false;
       }
     }
@@ -173,7 +178,7 @@ export default function EditChecklistRealizado() {
       return;
     }
     if (!user || !user.id) {
-      setDialogDesc('Usuário não autenticado. Por favor, faça login novamente.');
+      dialog.show('⚠️ Atenção\n\nUsuário não autenticado. Por favor, faça login novamente.');
       return;
     }
 
@@ -184,7 +189,7 @@ export default function EditChecklistRealizado() {
       const funcionarios = await checklistRealizadoFuncionarioDb.getByChecklistRealizadoId(checklistRealizado.id);
       const unsignedFuncionarios = funcionarios.filter(f => !f.assinatura);
       if (unsignedFuncionarios.length > 0) {
-        setDialogDesc('Todos os colaboradores precisam assinar antes de finalizar o checklist APR.');
+        dialog.show('⚠️ Atenção\n\nTodos os colaboradores precisam assinar antes de finalizar o checklist APR.');
         return;
       }
     }
@@ -194,7 +199,7 @@ export default function EditChecklistRealizado() {
 
   const finalizeChecklist = () => {
     if (!user || !user.id) {
-      setDialogDesc('Usuário não autenticado. Por favor, faça login novamente.');
+      dialog.show('⚠️ Atenção\n\nUsuário não autenticado. Por favor, faça login novamente.');
       return;
     }
 
@@ -205,7 +210,7 @@ export default function EditChecklistRealizado() {
       })
       .catch((error) => {
         console.error('Erro ao finalizar checklist:', error);
-        setDialogDesc('Erro ao finalizar. Tente novamente mais tarde.');
+        dialog.show('❌ Erro\n\nErro ao finalizar. Tente novamente mais tarde.');
       }
       );
   };
@@ -262,19 +267,12 @@ export default function EditChecklistRealizado() {
                 </Dialog.Actions>
               </Dialog>
             </Portal>
-            <Portal>
-              <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
-                <Dialog.Title>Atenção</Dialog.Title>
-                <Dialog.Content>
-                  <Text variant="bodyMedium">
-                    {dialogDesc}
-                  </Text>
-                </Dialog.Content>
-                <Dialog.Actions>
-                  <Button onPress={() => setDialogDesc('')}>Fechar</Button>
-                </Dialog.Actions>
-              </Dialog>
-            </Portal>
+
+            <InfoDialog
+              visible={dialog.visible}
+              description={dialog.description}
+              onDismiss={dialog.hide}
+            />
           </View>
         )}
       </>

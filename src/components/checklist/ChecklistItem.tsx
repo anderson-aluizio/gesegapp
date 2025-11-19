@@ -108,7 +108,7 @@ const ChecklistItem = memo(({
                     {item.checklist_item_nome}
                 </Text>
             </View>
-            <View style={{ marginVertical: 8 }}>
+            <View style={{ marginVertical: 8, gap: 12 }}>
                 {(!item.checklist_alternativas_array || item.checklist_alternativas_array.length === 0) ? (
                     <TextInput
                         label="Digite uma resposta para este item"
@@ -158,18 +158,25 @@ const ChecklistItem = memo(({
                 {item.is_desc_nconf_required &&
                     item.is_gera_nao_conformidade &&
                     item.inconformidade_funcionarios_array?.length && (
-                        <TextInput
-                            label="Descrição da não conformidade"
-                            value={item.descricao || ''}
-                            onChangeText={handleDescricaoChange}
-                            mode="outlined"
-                            theme={{ roundness: 8 }}
-                            outlineColor="#d1d5db"
-                            activeOutlineColor="#0439c9"
-                            placeholder="Resposta"
-                            multiline
-                            numberOfLines={3}
-                        />
+                        <View>
+                            <View style={styles.header}>
+                                <Text variant="labelMedium" style={styles.label}>
+                                    Descrição <Text style={styles.required}>*</Text>
+                                </Text>
+                            </View>
+                            <TextInput
+                                label="Informe detalhes da não conformidade"
+                                value={item.descricao || ''}
+                                onChangeText={handleDescricaoChange}
+                                mode="outlined"
+                                theme={{ roundness: 8 }}
+                                outlineColor="#d1d5db"
+                                activeOutlineColor="#0439c9"
+                                placeholder="Resposta"
+                                multiline
+                                numberOfLines={3}
+                            />
+                        </View>
                     )}
                 <PhotoPicker
                     fotoPath={item.foto_path}
@@ -270,6 +277,24 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         borderWidth: 1,
         borderColor: '#e5e7eb',
+    },
+    container: {
+        marginTop: 8,
+        padding: 8,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
+    },
+    header: {
+        marginBottom: 8,
+    },
+    label: {
+        color: '#444',
+        fontWeight: '600',
+    },
+    required: {
+        color: '#f02323',
     },
 });
 
