@@ -7,6 +7,8 @@ import {
     ScrollView,
     Image,
     Text,
+    Linking,
+    TouchableOpacity,
 } from 'react-native';
 import { Button, TextInput, Checkbox, Switch } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -213,6 +215,14 @@ export default function LoginScreen() {
                                 disabled={loading}
                             />
                         </View>
+
+                        <TouchableOpacity
+                            style={styles.forgotPasswordContainer}
+                            onPress={() => Linking.openURL('https://geseg2.dinamo.srv.br/reset-password-operacional')}
+                            disabled={loading}
+                        >
+                            <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
+                        </TouchableOpacity>
                     </View>
 
                     <Button
@@ -333,6 +343,16 @@ const styles = StyleSheet.create({
     rememberText: {
         fontSize: 15,
         color: '#555',
+    },
+    forgotPasswordContainer: {
+        marginTop: 12,
+        alignItems: 'center',
+    },
+    forgotPasswordText: {
+        fontSize: 14,
+        color: '#2980ef',
+        fontWeight: '500',
+        textDecorationLine: 'underline',
     },
     loginButton: {
         marginTop: 16,
