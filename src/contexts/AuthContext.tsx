@@ -5,6 +5,7 @@ import { apiClientWrapper, UpdateRequiredHandledError } from '@/services';
 import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import { useSQLiteContext } from 'expo-sqlite';
 import { clearTables } from '@/database/databaseSchema';
+import { getErrorMessage } from '@/services/api/apiErrors';
 
 export default interface UserInterface {
     id: number;
@@ -20,10 +21,15 @@ export interface LoginResponse {
     user: UserInterface
 }
 
+export interface LoginResult {
+    isSuccess: boolean;
+    error: any;
+}
+
 interface AuthContextType {
     isAuthenticated: boolean;
     user: UserInterface | null;
-    login: (emailOrCpf: string, password: string, isOperacional?: boolean) => Promise<boolean>;
+    login: (emailOrCpf: string, password: string, isOperacional?: boolean) => Promise<LoginResult>;
     logout: () => Promise<void>;
     loading: boolean;
 }
@@ -66,7 +72,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const login = async (emailOrCpf: string, password: string, isOperacional: boolean = false): Promise<boolean> => {
+    const login = async (emailOrCpf: string, password: string, isOperacional: boolean = false): Promise<LoginResult> => {
         try {
             const requestBody = { login: emailOrCpf, password, is_operacional: isOperacional };
             const responseLogin = await apiClientWrapper.post<LoginResponse>('/auth-user', requestBody);
@@ -98,18 +104,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 }
 
                 router.replace('/(tabs)/home');
-                return true;
+                return { isSuccess: true, error: null };
             } else {
                 console.error('Invalid login response:', responseLogin);
-                return false;
+                return { isSuccess: false, error: "Erro ao fazer login" };
             }
         } catch (error) {
             if (error instanceof UpdateRequiredHandledError) {
                 throw error;
             }
 
-            console.error('Login error:', error);
-            return false;
+            const errorMessage = getErrorMessage(error);
+            return { isSuccess: false, error: errorMessage };
         }
     };
 

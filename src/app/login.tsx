@@ -84,13 +84,13 @@ export default function LoginScreen() {
         setLoading(true);
 
         try {
-            const success = await login(
+            const { isSuccess, error } = await login(
                 isOperacional ? cpf : email,
                 password,
                 isOperacional
             );
 
-            if (success) {
+            if (isSuccess) {
                 try {
                     if (remember) {
                         await AsyncStorage.setItem(
@@ -112,7 +112,7 @@ export default function LoginScreen() {
 
                 router.replace('/(tabs)/home');
             } else {
-                dialog.show('❌ Erro\n\nCredenciais inválidas. Por favor, tente novamente.');
+                dialog.show(`❌ Erro de Login\n\n${error}`);
             }
         } catch (error) {
             if (error instanceof UpdateRequiredHandledError) {
