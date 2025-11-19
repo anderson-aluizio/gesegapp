@@ -38,7 +38,7 @@ export default function HomeScreen() {
   const [confirmDialogConfig, setConfirmDialogConfig] = useState({
     title: '',
     description: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
     confirmText: 'Confirmar',
   });
 
@@ -174,7 +174,6 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
 
-      {/* Header */}
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
           <View style={styles.logoContainer}>
@@ -202,7 +201,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Content */}
       <ScrollView
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContent}
@@ -281,7 +279,6 @@ export default function HomeScreen() {
         <View style={styles.footerSpacer} />
       </ScrollView>
 
-      {/* Quick Action FAB */}
       <IconButton
         icon="plus"
         iconColor="#fff"
@@ -291,10 +288,9 @@ export default function HomeScreen() {
         onPress={handleQuickChecklistCreate}
       />
 
-      {/* Dialogs */}
       <ConfirmDialog
         visible={logoutDialogVisible}
-        title="🚪 Confirmar Logout"
+        title="Confirmar Logout"
         description="Ao sair, todos os dados não sincronizados serão deletados. Deseja continuar?"
         onConfirm={confirmLogout}
         onDismiss={() => setLogoutDialogVisible(false)}
