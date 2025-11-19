@@ -72,12 +72,11 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         flexDirection: 'row',
-        gap: 8,
-        paddingHorizontal: 8,
+        gap: 4,
     },
     button: {
         flex: 1,
         borderRadius: 25,
-        marginHorizontal: 4,
+        marginHorizontal: 2,
     },
 });

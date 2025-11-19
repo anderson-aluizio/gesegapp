@@ -23,7 +23,7 @@ export interface LoginResponse {
 interface AuthContextType {
     isAuthenticated: boolean;
     user: UserInterface | null;
-    login: (email: string, password: string) => Promise<boolean>;
+    login: (emailOrCpf: string, password: string, isOperacional?: boolean) => Promise<boolean>;
     logout: () => Promise<void>;
     loading: boolean;
 }
@@ -66,12 +66,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const login = async (email: string, password: string): Promise<boolean> => {
+    const login = async (emailOrCpf: string, password: string, isOperacional: boolean = false): Promise<boolean> => {
         try {
-            const responseLogin = await apiClientWrapper.post<LoginResponse>('/auth-user', {
-                email,
-                password,
-            });
+            const requestBody = { login: emailOrCpf, password, is_operacional: isOperacional };
+            const responseLogin = await apiClientWrapper.post<LoginResponse>('/auth-user', requestBody);
+
             if (responseLogin && responseLogin.user.token) {
                 await AsyncStorage.setItem('authToken', responseLogin.user.token);
                 await AsyncStorage.setItem('userData', JSON.stringify({

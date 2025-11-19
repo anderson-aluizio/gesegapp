@@ -195,7 +195,7 @@ export default function HomeScreen() {
               style={styles.logoutButton}
             />
             <Text style={styles.userText} numberOfLines={1}>
-              {user?.email}
+              {user?.name}
             </Text>
           </View>
         </View>
@@ -290,7 +290,7 @@ export default function HomeScreen() {
 
       <ConfirmDialog
         visible={logoutDialogVisible}
-        title="Confirmar Logout"
+        title="Confirmar Deslogar"
         description="Ao sair, todos os dados não sincronizados serão deletados. Deseja continuar?"
         onConfirm={confirmLogout}
         onDismiss={() => setLogoutDialogVisible(false)}

@@ -19,7 +19,9 @@ import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState<string>('');
+    const [cpf, setCpf] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [isOperacional, setIsOperacional] = useState<boolean>(false);
     const [remember, setRemember] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -34,7 +36,9 @@ export default function LoginScreen() {
                 const json = await AsyncStorage.getItem(CREDENTIALS_KEY);
                 if (json) {
                     const data = JSON.parse(json);
+                    if (data?.isOperacional !== undefined) setIsOperacional(data.isOperacional);
                     if (data?.email) setEmail(data.email);
+                    if (data?.cpf) setCpf(data.cpf);
                     if (data?.password) setPassword(data.password);
                     if (data?.remember) setRemember(true);
                 }
@@ -47,14 +51,27 @@ export default function LoginScreen() {
     }, []);
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            dialog.show('⚠️ Atenção\n\nPreencha todos os campos');
-            return;
-        }
+        if (isOperacional) {
+            if (!cpf || !password) {
+                dialog.show('⚠️ Atenção\n\nPreencha todos os campos');
+                return;
+            }
 
-        if (!email.includes('@dinamo.srv.br')) {
-            dialog.show('⚠️ Atenção\n\nPor favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
-            return;
+            const cpfNumbers = cpf.replace(/\D/g, '');
+            if (cpfNumbers.length !== 11) {
+                dialog.show('⚠️ Atenção\n\nPor favor, informe um CPF válido com 11 dígitos');
+                return;
+            }
+        } else {
+            if (!email || !password) {
+                dialog.show('⚠️ Atenção\n\nPreencha todos os campos');
+                return;
+            }
+
+            if (!email.includes('@dinamo.srv.br')) {
+                dialog.show('⚠️ Atenção\n\nPor favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
+                return;
+            }
         }
 
         if (password.length < 6) {
@@ -65,14 +82,24 @@ export default function LoginScreen() {
         setLoading(true);
 
         try {
-            const success = await login(email, password);
+            const success = await login(
+                isOperacional ? cpf : email,
+                password,
+                isOperacional
+            );
 
             if (success) {
                 try {
                     if (remember) {
                         await AsyncStorage.setItem(
                             CREDENTIALS_KEY,
-                            JSON.stringify({ email, password, remember: true })
+                            JSON.stringify({
+                                email: isOperacional ? '' : email,
+                                cpf: isOperacional ? cpf : '',
+                                password,
+                                isOperacional,
+                                remember: true
+                            })
                         );
                     } else {
                         await AsyncStorage.removeItem(CREDENTIALS_KEY);
@@ -113,18 +140,44 @@ export default function LoginScreen() {
                 </View>
 
                 <View style={styles.formContainer}>
-                    <TextInput
-                        label="E-mail"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoComplete="email"
-                        left={<TextInput.Icon icon="email" />}
-                        style={styles.input}
-                        mode="outlined"
-                        disabled={loading}
-                    />
+                    <View style={styles.rememberRow}>
+                        <View style={styles.rememberTextWrapper}>
+                            <Text style={styles.rememberText}>Sou operacional</Text>
+                        </View>
+                        <Checkbox
+                            status={isOperacional ? 'checked' : 'unchecked'}
+                            onPress={() => setIsOperacional(!isOperacional)}
+                            disabled={loading}
+                        />
+                    </View>
+
+                    {isOperacional ? (
+                        <TextInput
+                            label="CPF"
+                            value={cpf}
+                            onChangeText={setCpf}
+                            keyboardType="numeric"
+                            autoCapitalize="none"
+                            left={<TextInput.Icon icon="account" />}
+                            style={styles.input}
+                            mode="outlined"
+                            disabled={loading}
+                            placeholder="000.000.000-00"
+                        />
+                    ) : (
+                        <TextInput
+                            label="E-mail"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                            autoComplete="email"
+                            left={<TextInput.Icon icon="email" />}
+                            style={styles.input}
+                            mode="outlined"
+                            disabled={loading}
+                        />
+                    )}
 
                     <TextInput
                         label="Senha"
