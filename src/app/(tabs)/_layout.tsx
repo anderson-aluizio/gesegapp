@@ -42,6 +42,12 @@ export default function AuthenticatedLayout() {
             title: 'Turnos',
           }}
         />
+        <Stack.Screen
+          name="reports"
+          options={{
+            title: 'Relatórios',
+          }}
+        />
       </Stack>
     </ProtectedRoute>
   );

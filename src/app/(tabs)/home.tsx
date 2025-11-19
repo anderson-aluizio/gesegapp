@@ -85,15 +85,15 @@ export default function HomeScreen() {
       description: 'Atualizar dados do servidor',
       icon: 'sync',
       route: '/sync-data',
-      colors: ['#4facfe', '#00f2fe'],
+      colors: ['#4facfe', '#00e4f0ff'],
     },
     {
       id: 'reports',
       title: 'Relatórios',
-      description: 'Em breve - Visualizar relatórios',
+      description: 'Visualizar estatísticas e análises',
       icon: 'chart-bar',
-      route: '#',
-      colors: ['#43e97b', '#38f9d7'],
+      route: '/reports',
+      colors: ['#30bb5eff', '#00c09dff'],
     },
   ];
 
