@@ -3,15 +3,16 @@ import { Dialog, Portal, Text, Button } from 'react-native-paper';
 
 interface InfoDialogProps {
     visible: boolean;
+    title: string;
     description: string;
     onDismiss: () => void;
 }
 
-export default function InfoDialog({ visible, description, onDismiss }: InfoDialogProps) {
+export default function InfoDialog({ visible, title, description, onDismiss }: InfoDialogProps) {
     return (
         <Portal>
             <Dialog visible={visible} onDismiss={onDismiss} style={styles.dialog}>
-                <Dialog.Title style={styles.dialogTitle}>Informação</Dialog.Title>
+                <Dialog.Title style={styles.dialogTitle}>{title}</Dialog.Title>
                 <Dialog.Content>
                     <Text variant="bodyMedium" style={styles.dialogText}>
                         {description}

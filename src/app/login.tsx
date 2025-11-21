@@ -55,29 +55,29 @@ export default function LoginScreen() {
     const handleLogin = async () => {
         if (isOperacional) {
             if (!cpf || !password) {
-                dialog.show('⚠️ Atenção\n\nPreencha todos os campos');
+                dialog.show('⚠️ Atenção', 'Preencha todos os campos');
                 return;
             }
 
             const cpfNumbers = cpf.replace(/\D/g, '');
             if (cpfNumbers.length !== 11) {
-                dialog.show('⚠️ Atenção\n\nPor favor, informe um CPF válido com 11 dígitos');
+                dialog.show('⚠️ Atenção', 'Por favor, informe um CPF válido com 11 dígitos');
                 return;
             }
         } else {
             if (!email || !password) {
-                dialog.show('⚠️ Atenção\n\nPreencha todos os campos');
+                dialog.show('⚠️ Atenção', 'Preencha todos os campos');
                 return;
             }
 
             if (!email.includes('@dinamo.srv.br')) {
-                dialog.show('⚠️ Atenção\n\nPor favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
+                dialog.show('⚠️ Atenção', 'Por favor, use um e-mail válido da Dinamo (ex: usuario@dinamo.srv.br)');
                 return;
             }
         }
 
         if (password.length < 6) {
-            dialog.show('⚠️ Atenção\n\nA senha deve ter pelo menos 6 caracteres');
+            dialog.show('⚠️ Atenção', 'A senha deve ter pelo menos 6 caracteres');
             return;
         }
 
@@ -112,7 +112,7 @@ export default function LoginScreen() {
 
                 router.replace('/(tabs)/home');
             } else {
-                dialog.show(`❌ Erro de Login\n\n${error}`);
+                dialog.show('❌ Erro de Login', `${error}`);
             }
         } catch (error) {
             if (error instanceof UpdateRequiredHandledError) {
@@ -121,7 +121,7 @@ export default function LoginScreen() {
             }
 
             console.error('Erro ao fazer login:', error);
-            dialog.show('❌ Erro\n\nOcorreu um erro durante o login');
+            dialog.show('❌ Erro', 'Ocorreu um erro durante o login');
         } finally {
             setLoading(false);
         }
@@ -245,6 +245,7 @@ export default function LoginScreen() {
             <InfoDialog
                 visible={dialog.visible}
                 description={dialog.description}
+                title={dialog.title}
                 onDismiss={dialog.hide}
             />
         </KeyboardAvoidingView>

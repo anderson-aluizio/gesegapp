@@ -10,6 +10,7 @@ import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase
 import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
+import { useDialog } from '@/hooks';
 
 export default function ChecklistListScreen() {
     const router = useRouter();
@@ -20,8 +21,6 @@ export default function ChecklistListScreen() {
     const [isShowEditDialog, setIsShowEditDialog] = useState<boolean>(false);
     const [isShowDeleteDialog, setIsShowDeleteDialog] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>('');
-    const [infoDialogVisible, setInfoDialogVisible] = useState<boolean>(false);
-    const [infoDialogMessage, setInfoDialogMessage] = useState<string>('');
     const [confirmDialogVisible, setConfirmDialogVisible] = useState<boolean>(false);
     const [confirmDialogConfig, setConfirmDialogConfig] = useState({
         title: '',
@@ -29,6 +28,7 @@ export default function ChecklistListScreen() {
         onConfirm: () => { },
         confirmText: 'Confirmar',
     });
+    const dialog = useDialog();
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
     const checklistDb = useChecklisRealizadoDatabase();
@@ -36,11 +36,6 @@ export default function ChecklistListScreen() {
     const centroCustoDb = useCentroCustoDatabase();
     const turnoDb = useEquipeTurnoDatabase();
     const { user } = useAuth();
-
-    const showInfoDialog = (message: string) => {
-        setInfoDialogMessage(message);
-        setInfoDialogVisible(true);
-    };
 
     const showConfirmDialog = (title: string, description: string, onConfirm: () => void, confirmText: string = 'Confirmar') => {
         setConfirmDialogConfig({ title, description, onConfirm, confirmText });
@@ -126,7 +121,7 @@ export default function ChecklistListScreen() {
             router.push('/checklist/create');
         } catch (error) {
             console.error('Erro ao validar requisitos:', error);
-            showInfoDialog('❌ Erro\n\nOcorreu um erro ao validar os requisitos. Tente novamente.');
+            dialog.show('❌ Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
         }
     };
 
@@ -329,9 +324,10 @@ export default function ChecklistListScreen() {
             </Portal>
 
             <InfoDialog
-                visible={infoDialogVisible}
-                description={infoDialogMessage}
-                onDismiss={() => setInfoDialogVisible(false)}
+                visible={dialog.visible}
+                description={dialog.description}
+                title={dialog.title}
+                onDismiss={dialog.hide}
             />
 
             <ConfirmDialog

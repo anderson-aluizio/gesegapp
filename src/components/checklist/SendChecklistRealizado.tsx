@@ -7,24 +7,14 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
 import InfoDialog from "@/components/ui/dialogs/InfoDialog";
-import { checkNetworkConnection } from "@/hooks";
+import { checkNetworkConnection, useDialog } from "@/hooks";
 
 const SendChecklistRealizado = () => {
     const checklistDb = useChecklisRealizadoDatabase();
     const checklistFuncionarios = useChecklistRealizadoFuncionarioDatabase();
     const checklistItemsDb = useChecklisRealizadoItemsDatabase();
     const [loading, setLoading] = useState(false);
-    const [dialogVisible, setDialogVisible] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState('');
-
-    const showDialog = (message: string) => {
-        setDialogMessage(message);
-        setDialogVisible(true);
-    };
-
-    const hideDialog = () => {
-        setDialogVisible(false);
-    };
+    const dialog = useDialog();
 
     const handleSendChecklist = async () => {
         setLoading(true);
@@ -33,14 +23,14 @@ const SendChecklistRealizado = () => {
                 await checkNetworkConnection();
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
-                showDialog(errorMessage);
+                dialog.show('❌ Erro', errorMessage);
                 setLoading(false);
                 return;
             }
 
             const checklists = await checklistDb.getFinalizados();
             if (checklists.length === 0) {
-                showDialog("Não há registros finalizados para enviar.");
+                dialog.show('ℹ️ Informação', "Não há registros finalizados para enviar.");
                 setLoading(false);
                 return;
             }
@@ -85,20 +75,16 @@ const SendChecklistRealizado = () => {
             }
 
             if (errorCount === 0) {
-                showDialog(`✅ Sucesso!\n\n${successCount} registro(s) enviado(s) com sucesso!`);
+                dialog.show('✅ Sucesso', `${successCount} registro(s) enviado(s) com sucesso!`);
             } else {
                 const errorList = errorDetails.join('\n\n');
-                showDialog(
-                    `⚠️ Envio Parcial\n\n` +
-                    `${successCount} registro(s) enviado(s) com sucesso.\n` +
-                    `${errorCount} registro(s) com erro.\n\n` +
-                    `Detalhes dos erros:\n${errorList}`
-                );
+                dialog.show('⚠️ Envio Parcial',
+                    `${successCount} registro(s) enviado(s) com sucesso.\n${errorCount} registro(s) com erro.\n\nDetalhes dos erros:\n${errorList}`);
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            showDialog(
-                `❌ Erro ao enviar\n\n` +
+            dialog.show(
+                '❌ Erro ao enviar',
                 `Ocorreu um erro ao enviar os registros finalizados.\n\n` +
                 `Detalhes: ${errorMessage}\n\n` +
                 `Por favor, tente novamente.`
@@ -134,9 +120,10 @@ const SendChecklistRealizado = () => {
             </Surface>
 
             <InfoDialog
-                visible={dialogVisible}
-                description={dialogMessage}
-                onDismiss={hideDialog}
+                visible={dialog.visible}
+                description={dialog.description}
+                title={dialog.title}
+                onDismiss={dialog.hide}
             />
         </>
     );

@@ -97,7 +97,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
 
     const handleNext = async () => {
         if (!selectedEncarregado || !selectedSupervisor || !selectedCoordenador || !selectedGerente) {
-            dialog.show('Preencha todos os campos obrigatórios.');
+            dialog.show('Atenção', 'Preencha todos os campos obrigatórios.');
             return;
         }
         const updatedChecklist = {
@@ -121,12 +121,12 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
                 );
             }
 
-            dialog.show('Dados atualizados com sucesso.');
+            dialog.show('Sucesso', 'Dados atualizados com sucesso.');
             setIsFormDirty(false);
             props.formUpdated();
         } catch (error) {
             console.error('Erro ao atualizar liderança:', error);
-            dialog.show('Erro ao atualizar os dados. Tente novamente.');
+            dialog.show('Atenção', 'Erro ao atualizar os dados. Tente novamente.');
         }
     }
     return (
@@ -167,6 +167,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
             <InfoDialog
                 visible={dialog.visible}
                 description={dialog.description}
+                title={dialog.title}
                 onDismiss={dialog.hide}
             />
 

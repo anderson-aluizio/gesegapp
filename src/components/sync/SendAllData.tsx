@@ -10,7 +10,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
 import InfoDialog from "@/components/ui/dialogs/InfoDialog";
-import { checkNetworkConnection } from "@/hooks";
+import { checkNetworkConnection, useDialog } from "@/hooks";
 
 type EquipeTurnoFormatted = {
     equipe_id: number;
@@ -41,17 +41,7 @@ const SendAllData = () => {
     const realizadoControlesDb = useChecklisRealizadoControleRiscosDatabase();
 
     const [loading, setLoading] = useState(false);
-    const [dialogVisible, setDialogVisible] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState('');
-
-    const showDialog = (message: string) => {
-        setDialogMessage(message);
-        setDialogVisible(true);
-    };
-
-    const hideDialog = () => {
-        setDialogVisible(false);
-    };
+    const dialog = useDialog();
 
     const handleSendTurnos = async () => {
         const turnos = await turnoDb.getAll();
@@ -148,7 +138,7 @@ const SendAllData = () => {
                 await checkNetworkConnection();
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
-                showDialog(errorMessage);
+                dialog.show('❌ Erro', errorMessage);
                 setLoading(false);
                 return;
             }
@@ -165,7 +155,7 @@ const SendAllData = () => {
             ];
 
             if (totalSuccess === 0 && totalErrors === 0) {
-                showDialog("Não há dados finalizados para enviar.");
+                dialog.show('ℹ️ Informação', "Não há dados finalizados para enviar.");
                 setLoading(false);
                 return;
             }
@@ -174,7 +164,7 @@ const SendAllData = () => {
                 const turnoMsg = turnoResults.success > 0 ? `${turnoResults.success} turno(s)` : '';
                 const checklistMsg = checklistResults.success > 0 ? `${checklistResults.success} checklist(s)` : '';
                 const items = [turnoMsg, checklistMsg].filter(Boolean).join(' e ');
-                showDialog(`✅ Sucesso!\n\n${items} enviado(s) com sucesso!`);
+                dialog.show('✅ Sucesso', `${items} enviado(s) com sucesso!`);
             } else {
                 const errorList = allErrorDetails.join('\n\n');
                 const messageParts = [`⚠️ Envio ${totalSuccess > 0 ? 'Parcial' : 'com Erros'}\n`];
@@ -189,12 +179,12 @@ const SendAllData = () => {
 
                 messageParts.push(`\nDetalhes dos erros:\n${errorList}`);
 
-                showDialog(messageParts.join(''));
+                dialog.show('⚠️ Envio Parcial', messageParts.join(''));
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            showDialog(
-                `❌ Erro ao enviar\n\n` +
+            dialog.show(
+                '❌ Erro ao enviar',
                 `Ocorreu um erro ao enviar os dados finalizados.\n\n` +
                 `Detalhes: ${errorMessage}\n\n` +
                 `Por favor, tente novamente.`
@@ -230,9 +220,10 @@ const SendAllData = () => {
             </Surface>
 
             <InfoDialog
-                visible={dialogVisible}
-                description={dialogMessage}
-                onDismiss={hideDialog}
+                visible={dialog.visible}
+                description={dialog.description}
+                title={dialog.title}
+                onDismiss={dialog.hide}
             />
         </>
     );

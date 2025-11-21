@@ -2,9 +2,11 @@ import { useState } from 'react';
 
 export function useDialog() {
     const [visible, setVisible] = useState(false);
+    const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
-    const show = (desc: string) => {
+    const show = (title: string, desc: string) => {
+        setTitle(title);
         setDescription(desc);
         setVisible(true);
     };
@@ -15,6 +17,7 @@ export function useDialog() {
 
     return {
         visible,
+        title,
         description,
         show,
         hide,

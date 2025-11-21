@@ -32,7 +32,7 @@ export default function DuplicateChecklistScreen() {
             const originalChecklist = await checklistDb.show(parseInt(id as string));
 
             if (!originalChecklist) {
-                dialog.show('❌ Erro\n\nChecklist original não encontrado.');
+                dialog.show('❌ Erro', 'Checklist original não encontrado.');
                 setIsLoading(false);
                 return;
             }
@@ -47,7 +47,7 @@ export default function DuplicateChecklistScreen() {
             setFilteredEstruturas(filteredData);
         } catch (error) {
             console.error('Error loading estruturas:', error);
-            dialog.show('❌ Erro\n\nNão foi possível carregar as estruturas de checklist.');
+            dialog.show('❌ Erro', 'Não foi possível carregar as estruturas de checklist.');
         } finally {
             setIsLoading(false);
         }
@@ -71,7 +71,7 @@ export default function DuplicateChecklistScreen() {
 
     const handleDuplicate = async () => {
         if (!selectedEstrutura) {
-            dialog.show('⚠️ Atenção\n\nSelecione uma estrutura de checklist para continuar.');
+            dialog.show('⚠️ Atenção', 'Selecione uma estrutura de checklist para continuar.');
             return;
         }
 
@@ -80,7 +80,7 @@ export default function DuplicateChecklistScreen() {
             const result = await checklistDb.duplicate(parseInt(id as string), selectedEstrutura);
 
             if (result.success) {
-                dialog.show('✅ Sucesso\n\nChecklist duplicado com sucesso!');
+                dialog.show('✅ Sucesso', 'Checklist duplicado com sucesso!');
                 setTimeout(() => {
                     router.replace(`/checklist/${result.newChecklistId}`);
                 }, 1500);
@@ -88,7 +88,7 @@ export default function DuplicateChecklistScreen() {
         } catch (error) {
             console.error('Error duplicating checklist:', error);
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            dialog.show(`❌ Erro\n\nNão foi possível duplicar o checklist.\n\n${errorMessage}`);
+            dialog.show('❌ Erro', `Não foi possível duplicar o checklist.\n\n${errorMessage}`);
         } finally {
             setIsDuplicating(false);
         }
@@ -205,6 +205,7 @@ export default function DuplicateChecklistScreen() {
             <InfoDialog
                 visible={dialog.visible}
                 description={dialog.description}
+                title={dialog.title}
                 onDismiss={dialog.hide}
             />
         </View>

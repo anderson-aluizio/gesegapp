@@ -60,7 +60,7 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
                     const controles = estruturaControles.map(controle => {
                         const isSelected = selectedControles.some(
                             sc => sc.checklist_realizado_apr_risco_id === selectedRisco?.id &&
-                                  sc.checklist_estrutura_controle_risco_id === controle.id
+                                sc.checklist_estrutura_controle_risco_id === controle.id
                         );
                         return { controle, isSelected };
                     });
@@ -154,10 +154,10 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
             setIsFormDirty(false);
             props.formUpdated();
             await loadRiscos();
-            dialog.show('Dados atualizados com sucesso.');
+            dialog.show('Sucesso', 'Dados atualizados com sucesso.');
         } catch (error) {
             console.error('Erro ao salvar riscos:', error);
-            dialog.show('Erro ao atualizar os dados. Tente novamente.');
+            dialog.show('Atenção', 'Erro ao atualizar os dados. Tente novamente.');
         } finally {
             setIsSaving(false);
         }
@@ -252,6 +252,7 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
             <InfoDialog
                 visible={dialog.visible}
                 description={dialog.description}
+                title={dialog.title}
                 onDismiss={dialog.hide}
             />
 

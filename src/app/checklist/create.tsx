@@ -105,7 +105,7 @@ export default function CreateChecklistRealizadoScreen() {
                     setTodayEquipeTurnoFuncionarios(turnoFuncionarios);
                     setIsFromTurno(true);
                 } else {
-                    dialog.show('Você precisa criar um turno antes de prosseguir.');
+                    dialog.show('Atenção', 'Você precisa criar um turno antes de prosseguir.');
                     setTimeout(() => {
                         router.replace('/(tabs)/turno-equipe/create');
                     }, 4000);
@@ -174,7 +174,7 @@ export default function CreateChecklistRealizadoScreen() {
 
     const handleNext = async () => {
         if (!selectedGrupo || !selectedCentroCusto || !selectedEstrutura || !selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
-            dialog.show('Preencha todos os campos.');
+            dialog.show('Atenção', 'Preencha todos os campos.');
             return;
         }
 
@@ -184,14 +184,14 @@ export default function CreateChecklistRealizadoScreen() {
             const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
 
             if (!isAutoChecklistGroup && !hasAutoChecklist) {
-                dialog.show('Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
+                dialog.show('Atenção', 'Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
                 return;
             }
         }
 
         const equipe = await equipeDb.show(Number(selectedEquipe));
         if (!equipe) {
-            dialog.show('Equipe não encontrada.');
+            dialog.show('Atenção', 'Equipe não encontrada.');
             return;
         }
 
@@ -218,7 +218,7 @@ export default function CreateChecklistRealizadoScreen() {
             }
             const lastChecklistRealizado = await checklistRealizadoDb.create(createdChecklist);
             if (!lastChecklistRealizado) {
-                dialog.show('Erro ao criar registro. Tente novamente.');
+                dialog.show('Atenção', 'Erro ao criar registro. Tente novamente.');
                 return;
             }
 
@@ -235,7 +235,7 @@ export default function CreateChecklistRealizadoScreen() {
                 } catch (funcionarioError) {
                     console.error('Error creating checklist funcionarios:', funcionarioError);
                     await checklistRealizadoDb.remove(Number(lastChecklistRealizado.insertedRowId));
-                    dialog.show('Erro ao associar funcionários ao checklist. Tente novamente.');
+                    dialog.show('Atenção', 'Erro ao associar funcionários ao checklist. Tente novamente.');
                     return;
                 }
             }
@@ -243,7 +243,7 @@ export default function CreateChecklistRealizadoScreen() {
             router.replace(`/checklist/${lastChecklistRealizado.insertedRowId}`)
         } catch (error) {
             console.error('Error creating checklist:', error);
-            dialog.show('Erro ao criar o registro. Tente novamente.');
+            dialog.show('Atenção', 'Erro ao criar o registro. Tente novamente.');
         }
     }
 
@@ -331,6 +331,7 @@ export default function CreateChecklistRealizadoScreen() {
                 <InfoDialog
                     visible={dialog.visible}
                     description={dialog.description}
+                    title={dialog.title}
                     onDismiss={dialog.hide}
                 />
 

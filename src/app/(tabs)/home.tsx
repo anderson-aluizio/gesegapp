@@ -10,6 +10,7 @@ import { useChecklisEstruturaItemsDatabase } from '@/database/models/useChecklis
 import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
+import { useDialog } from '@/hooks/useDialog';
 
 const { width } = Dimensions.get('window');
 const CARD_SPACING = 12;
@@ -30,10 +31,9 @@ export default function HomeScreen() {
   const { user, logout } = useAuth();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
+  const dialog = useDialog();
 
   const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
-  const [infoDialogVisible, setInfoDialogVisible] = useState(false);
-  const [infoDialogMessage, setInfoDialogMessage] = useState('');
   const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
   const [confirmDialogConfig, setConfirmDialogConfig] = useState({
     title: '',
@@ -108,11 +108,6 @@ export default function HomeScreen() {
     router.push(route as any);
   };
 
-  const showInfoDialog = (message: string) => {
-    setInfoDialogMessage(message);
-    setInfoDialogVisible(true);
-  };
-
   const showConfirmDialog = (title: string, description: string, onConfirm: () => void, confirmText: string = 'Confirmar') => {
     setConfirmDialogConfig({ title, description, onConfirm, confirmText });
     setConfirmDialogVisible(true);
@@ -166,7 +161,7 @@ export default function HomeScreen() {
       router.push('/checklist/create');
     } catch (error) {
       console.error('Erro ao validar requisitos:', error);
-      showInfoDialog('❌ Erro\n\nOcorreu um erro ao validar os requisitos. Tente novamente.');
+      dialog.show('❌ Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
     }
   };
 
@@ -310,9 +305,10 @@ export default function HomeScreen() {
       />
 
       <InfoDialog
-        visible={infoDialogVisible}
-        description={infoDialogMessage}
-        onDismiss={() => setInfoDialogVisible(false)}
+        visible={dialog.visible}
+        description={dialog.description}
+        title={dialog.title}
+        onDismiss={dialog.hide}
       />
     </View>
   );

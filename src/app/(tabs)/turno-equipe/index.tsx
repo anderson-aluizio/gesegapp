@@ -11,22 +11,22 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { isBeforeToday } from '@/utils/dateUtils';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
+import { useDialog } from '@/hooks/useDialog';
 
 export default function TurnoEquipeScreen() {
     const router = useRouter();
+    const dialog = useDialog();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [turnos, setTurnos] = useState<EquipeTurnoDatabaseWithRelations[]>([]);
     const [selectedTurno, setSelectedTurno] = useState<EquipeTurnoDatabaseWithRelations | null>(null);
     const [isShowDeleteDialog, setIsShowDeleteDialog] = useState<boolean>(false);
     const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
     const [funcionariosByTurno, setFuncionariosByTurno] = useState<Map<number, EquipeTurnoFuncionarioDatabaseWithRelations[]>>(new Map());
-    const [infoDialogVisible, setInfoDialogVisible] = useState<boolean>(false);
-    const [infoDialogMessage, setInfoDialogMessage] = useState<string>('');
     const [confirmDialogVisible, setConfirmDialogVisible] = useState<boolean>(false);
     const [confirmDialogConfig, setConfirmDialogConfig] = useState({
         title: '',
         description: '',
-        onConfirm: () => {},
+        onConfirm: () => { },
         confirmText: 'Confirmar',
     });
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -36,11 +36,6 @@ export default function TurnoEquipeScreen() {
     const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
     const centroCustoDb = useCentroCustoDatabase();
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
-
-    const showInfoDialog = (message: string) => {
-        setInfoDialogMessage(message);
-        setInfoDialogVisible(true);
-    };
 
     const showConfirmDialog = (title: string, description: string, onConfirm: () => void, confirmText: string = 'Confirmar') => {
         setConfirmDialogConfig({ title, description, onConfirm, confirmText });
@@ -91,7 +86,7 @@ export default function TurnoEquipeScreen() {
             router.push('/turno-equipe/create');
         } catch (error) {
             console.error('Erro ao validar requisitos:', error);
-            showInfoDialog('❌ Erro\n\nOcorreu um erro ao validar os requisitos. Tente novamente.');
+            dialog.show('❌ Erro', 'Ocorreu um erro ao validar os requisitos. Tente novamente.');
         }
     };
 
@@ -104,17 +99,17 @@ export default function TurnoEquipeScreen() {
             const hasChecklists = await checklistRealizadoDb.hasChecklistsByDate(turnoDate);
 
             if (hasChecklists) {
-                showInfoDialog('⚠️ Atenção\n\nVocê deve excluir todos os checklists criados nesta data antes de remover o turno.');
+                dialog.show('⚠️ Atenção', 'Você deve excluir todos os checklists criados nesta data antes de remover o turno.');
                 setSelectedTurno(null);
                 return;
             }
 
             await turnoDb.remove(selectedTurno.id);
-            showInfoDialog('✅ Sucesso\n\nTurno removido com sucesso.');
+            dialog.show('✅ Sucesso', 'Turno removido com sucesso.');
             await list();
         } catch (error) {
             console.error('Erro ao remover turno:', error);
-            showInfoDialog('❌ Erro\n\nErro ao remover turno. Tente novamente.');
+            dialog.show('❌ Erro', 'Erro ao remover turno. Tente novamente.');
         } finally {
             setSelectedTurno(null);
         }
@@ -122,7 +117,7 @@ export default function TurnoEquipeScreen() {
 
     const handleDeletePress = (turno: EquipeTurnoDatabaseWithRelations) => {
         if (isBeforeToday(turno.date)) {
-            showInfoDialog('⚠️ Atenção\n\nVocê não pode remover registros de turnos anteriores.');
+            dialog.show('⚠️ Atenção', 'Você não pode remover registros de turnos anteriores.');
             return;
         }
         setSelectedTurno(turno);
@@ -355,9 +350,10 @@ export default function TurnoEquipeScreen() {
                 </Portal>
 
                 <InfoDialog
-                    visible={infoDialogVisible}
-                    description={infoDialogMessage}
-                    onDismiss={() => setInfoDialogVisible(false)}
+                    visible={dialog.visible}
+                    description={dialog.description}
+                    title={dialog.title}
+                    onDismiss={dialog.hide}
                 />
 
                 <ConfirmDialog

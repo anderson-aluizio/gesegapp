@@ -65,6 +65,7 @@ export default function SyncDataScreen() {
             <InfoDialog
                 visible={dialog.visible}
                 description={dialog.description}
+                title={dialog.title}
                 onDismiss={dialog.hide}
             />
 

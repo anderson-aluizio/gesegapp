@@ -6,7 +6,7 @@ import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
 import InfoDialog from "@/components/ui/dialogs/InfoDialog";
-import { checkNetworkConnection } from "@/hooks";
+import { checkNetworkConnection, useDialog } from "@/hooks";
 
 export type EquipeTurnoFormatted = {
     equipe_id: number;
@@ -22,17 +22,7 @@ const SendEquipeTurno = () => {
     const turnoDb = useEquipeTurnoDatabase();
     const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
     const [loading, setLoading] = useState(false);
-    const [dialogVisible, setDialogVisible] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState('');
-
-    const showDialog = (message: string) => {
-        setDialogMessage(message);
-        setDialogVisible(true);
-    };
-
-    const hideDialog = () => {
-        setDialogVisible(false);
-    };
+    const dialog = useDialog();
 
     const handleSendTurnos = async () => {
         setLoading(true);
@@ -42,14 +32,14 @@ const SendEquipeTurno = () => {
                 console.log('Network connection:', networkInfo);
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
-                showDialog(errorMessage);
+                dialog.show('❌ Erro', errorMessage);
                 setLoading(false);
                 return;
             }
 
             const turnos = await turnoDb.getAll();
             if (turnos.length === 0) {
-                showDialog("Não há turnos finalizados para enviar.");
+                dialog.show('ℹ️ Informação', "Não há turnos finalizados para enviar.");
                 setLoading(false);
                 return;
             }
@@ -82,11 +72,11 @@ const SendEquipeTurno = () => {
             }
 
             if (errorCount === 0) {
-                showDialog(`✅ Sucesso!\n\n${successCount} turno(s) enviado(s) com sucesso!`);
+                dialog.show('✅ Sucesso', `${successCount} turno(s) enviado(s) com sucesso!`);
             } else {
                 const errorList = errorDetails.join('\n\n');
-                showDialog(
-                    `⚠️ Envio Parcial\n\n` +
+                dialog.show(
+                    '⚠️ Envio Parcial',
                     `${successCount} turno(s) enviado(s) com sucesso.\n` +
                     `${errorCount} turno(s) com erro.\n\n` +
                     `Detalhes dos erros:\n${errorList}`
@@ -94,8 +84,8 @@ const SendEquipeTurno = () => {
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            showDialog(
-                `❌ Erro ao enviar\n\n` +
+            dialog.show(
+                '❌ Erro ao enviar',
                 `Ocorreu um erro ao enviar os turnos finalizados.\n\n` +
                 `Detalhes: ${errorMessage}\n\n` +
                 `Por favor, tente novamente.`
@@ -131,9 +121,10 @@ const SendEquipeTurno = () => {
             </Surface>
 
             <InfoDialog
-                visible={dialogVisible}
-                description={dialogMessage}
-                onDismiss={hideDialog}
+                visible={dialog.visible}
+                description={dialog.description}
+                title={dialog.title}
+                onDismiss={dialog.hide}
             />
         </>
     );

@@ -50,7 +50,7 @@ export default function ReportsScreen() {
             setReportsData(response);
         } catch (error) {
             console.error('Error loading reports:', error);
-            dialog.show('❌ Erro\n\nOcorreu um erro ao carregar os relatórios. Tente novamente.');
+            dialog.show('❌ Erro', 'Ocorreu um erro ao carregar os relatórios. Tente novamente.');
         } finally {
             setLoading(false);
         }
@@ -260,6 +260,7 @@ export default function ReportsScreen() {
             <InfoDialog
                 visible={dialog.visible}
                 description={dialog.description}
+                title={dialog.title}
                 onDismiss={dialog.hide}
             />
         </View>
