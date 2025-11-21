@@ -108,7 +108,7 @@ export default function ItensScreen(props: {
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
-                    Boolean(updatedItem.is_foto_obrigatoria),
+                    Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
                     updatedItem.foto_path
                 );
 
@@ -145,7 +145,7 @@ export default function ItensScreen(props: {
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
-                    Boolean(updatedItem.is_foto_obrigatoria),
+                    Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
                     updatedItem.foto_path
                 );
 
@@ -182,7 +182,7 @@ export default function ItensScreen(props: {
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
-                    Boolean(updatedItem.is_foto_obrigatoria),
+                    Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
                     updatedItem.foto_path
                 );
 
@@ -240,7 +240,7 @@ export default function ItensScreen(props: {
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
-                    Boolean(updatedItem.is_foto_obrigatoria),
+                    Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
                     fotoPath
                 );
 
@@ -277,7 +277,7 @@ export default function ItensScreen(props: {
                     funcionariosFilled,
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
-                    Boolean(updatedItem.is_foto_obrigatoria),
+                    Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
                     undefined
                 );
 

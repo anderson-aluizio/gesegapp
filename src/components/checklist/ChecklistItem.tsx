@@ -182,7 +182,7 @@ const ChecklistItem = memo(({
                     fotoPath={item.foto_path}
                     onPhotoSelect={handlePhotoSelect}
                     onPhotoRemove={handlePhotoRemove}
-                    isFotoObrigatoria={item.is_foto_obrigatoria}
+                    isFotoObrigatoria={item.is_gera_nao_conformidade && item.is_foto_obrigatoria}
                 />
             </View>
         </View>
