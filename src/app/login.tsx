@@ -207,7 +207,7 @@ export default function LoginScreen() {
 
                         <View style={styles.rememberRow}>
                             <View style={styles.rememberTextWrapper}>
-                                <Text style={styles.rememberText}>Lembrar credenciais</Text>
+                                <Text style={styles.rememberText} onPress={() => setRemember(!remember)}>Lembrar credenciais</Text>
                             </View>
                             <Checkbox
                                 status={remember ? 'checked' : 'unchecked'}
