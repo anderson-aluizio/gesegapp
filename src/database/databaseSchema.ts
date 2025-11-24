@@ -10,6 +10,7 @@ export async function initializeDatabase(database: SQLiteDatabase) {
 
   try {
     const info = await migrationManager.getInfo();
+    console.log(info);
 
     if (info.needsMigration) {
       console.log(`Running ${info.pendingMigrations.length} pending migration(s)...`);
@@ -261,6 +262,9 @@ export async function dropTables(database: SQLiteDatabase) {
     DROP TABLE IF EXISTS funcionarios;
     DROP TABLE IF EXISTS localidade_cidades;
     DROP TABLE IF EXISTS veiculos;
+
+    -- Reset the migration version to 0 so migrations will run again
+    PRAGMA user_version = 0;
   `)
 }
 export async function clearTables(database: SQLiteDatabase) {

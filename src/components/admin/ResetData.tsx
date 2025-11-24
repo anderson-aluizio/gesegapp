@@ -2,7 +2,8 @@ import { Button, Dialog, IconButton, Portal, Text, TextInput } from 'react-nativ
 import { useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { resetDatabase } from '@/database/databaseSchema';
-import { useAuth } from '@/contexts/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 interface ShowDialogProps {
   desc: string;
@@ -15,7 +16,6 @@ const ResetDataScreen = () => {
   const [passwordDialogVisible, setPasswordDialogVisible] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
-  const { logout } = useAuth();
 
   const generateCurrentPassword = (): string => {
     const now = new Date();
@@ -68,8 +68,15 @@ const ResetDataScreen = () => {
   const handleResetDatabase = async () => {
     setIsLoading(true);
     try {
+      // Reset the database (drops and recreates all tables)
       await resetDatabase(db);
-      logout();
+
+      // Clear authentication tokens (don't call logout() as it tries to clear tables that were just reset)
+      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('userData');
+
+      // Redirect to login
+      router.replace('/login');
     } catch (error) {
       console.error('Erro ao resetar o banco de dados:', error);
       showDialog('Erro ao resetar o banco de dados. Tente novamente.');
