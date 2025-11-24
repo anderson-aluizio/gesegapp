@@ -235,6 +235,9 @@ export default function LoginScreen() {
                     >
                         {loading ? 'Acessando...' : 'Acessar'}
                     </Button>
+                    <Text style={{ textAlign: 'center', marginTop: 8, color: '#666' }}>
+                        Versão: {process.env.EXPO_PUBLIC_LOCAL_VERSION}
+                    </Text>
                 </View>
                 <View style={styles.resetDataContainer}>
                     <ResetData />
