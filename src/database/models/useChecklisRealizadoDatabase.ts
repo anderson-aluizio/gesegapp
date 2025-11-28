@@ -204,12 +204,13 @@ export const useChecklisRealizadoDatabase = () => {
 
   const updateDadosGerais = async (data: ChecklistRealizadoDatabase) => {
     const statement = await database.prepareAsync(
-      `UPDATE checklist_realizados 
-        SET 
-          localidade_cidade_id = $localidade_cidade_id, 
+      `UPDATE checklist_realizados
+        SET
+          localidade_cidade_id = $localidade_cidade_id,
           equipe_id = $equipe_id,
           veiculo_id = $veiculo_id,
           area = $area,
+          observacao = $observacao,
           encarregado_cpf = $encarregado_cpf,
           supervisor_cpf = $supervisor_cpf,
           coordenador_cpf = $coordenador_cpf,
@@ -223,6 +224,7 @@ export const useChecklisRealizadoDatabase = () => {
         $equipe_id: data.equipe_id,
         $veiculo_id: data.veiculo_id,
         $area: data.area,
+        $observacao: data.observacao || '',
         $encarregado_cpf: data.encarregado_cpf,
         $supervisor_cpf: data.supervisor_cpf,
         $coordenador_cpf: data.coordenador_cpf,

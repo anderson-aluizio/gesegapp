@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Dialog, Portal, Text } from 'react-native-paper';
+import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
@@ -20,6 +20,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     const [selectedEquipe, setSelectedEquipe] = useState<string | null>();
     const [selectedVeiculo, setSelectedVeiculo] = useState<string | null>();
     const [selectedArea, setSelectedArea] = useState<string | null>(null);
+    const [observacao, setObservacao] = useState<string>('');
     const [dialogDesc, setDialogDesc] = useState<string>('');
 
     const areas: AutocompleteDropdownOption[] = [
@@ -47,6 +48,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                 ? String(checklistRealizado.area)
                 : null
         );
+        setObservacao(checklistRealizado?.observacao || '');
     }, [checklistRealizado]);
 
     const municipioInitialItem = checklistRealizado?.localidade_cidade_id ? [{
@@ -94,6 +96,11 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
         setIsFormDirty(true);
     };
 
+    const handleChangeObservacao = (value: string) => {
+        setObservacao(value);
+        setIsFormDirty(true);
+    };
+
     const handleUpdate = async () => {
         if (!selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
             setDialogDesc('Preencha todos os campos.');
@@ -110,6 +117,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
             equipe_id: Number(selectedEquipe),
             veiculo_id: selectedVeiculo,
             area: selectedArea,
+            observacao: observacao,
             encarregado_cpf: equipe.encarregado_cpf,
             supervisor_cpf: equipe.supervisor_cpf,
             coordenador_cpf: equipe.coordenador_cpf,
@@ -182,6 +190,18 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         value={selectedArea}
                         onValueChange={handleChangeArea}
                         initialItems={areas} />
+                    <TextInput
+                        label="Observação"
+                        placeholder="Digite uma observação (opcional)"
+                        value={observacao}
+                        onChangeText={handleChangeObservacao}
+                        multiline
+                        mode="outlined"
+                        theme={{ roundness: 8 }}
+                        outlineColor="#d1d5db"
+                        activeOutlineColor="#0439c9"
+                        numberOfLines={3}
+                    />
                 </View>
                 <Portal>
                     <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
@@ -264,5 +284,8 @@ const styles = StyleSheet.create({
     },
     btnNext: {
         margin: 16,
+    },
+    textInput: {
+        backgroundColor: '#fff',
     }
 });
