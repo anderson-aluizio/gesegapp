@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
     View,
     StyleSheet,
@@ -13,6 +13,7 @@ import {
 import { Button, TextInput, Checkbox, Switch } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 import { router } from 'expo-router';
 import ResetData from '@/components/admin/ResetData';
 import { UpdateRequiredHandledError } from '@/services';
@@ -28,7 +29,10 @@ export default function LoginScreen() {
     const [loading, setLoading] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const { login } = useAuth();
+    const { colors } = useTheme();
     const dialog = useDialog();
+
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     const CREDENTIALS_KEY = '@geseg:credentials';
 
@@ -169,6 +173,9 @@ export default function LoginScreen() {
                                 mode="outlined"
                                 disabled={loading}
                                 placeholder="000.000.000-00"
+                                textColor={colors.text}
+                                outlineColor={colors.border}
+                                activeOutlineColor={colors.primary}
                             />
                         ) : (
                             <TextInput
@@ -183,6 +190,9 @@ export default function LoginScreen() {
                                 mode="outlined"
                                 disabled={loading}
                                 placeholder="usuario@dinamo.srv.br"
+                                textColor={colors.text}
+                                outlineColor={colors.border}
+                                activeOutlineColor={colors.primary}
                             />
                         )}
 
@@ -203,6 +213,9 @@ export default function LoginScreen() {
                             style={styles.input}
                             mode="outlined"
                             disabled={loading}
+                            textColor={colors.text}
+                            outlineColor={colors.border}
+                            activeOutlineColor={colors.primary}
                         />
 
                         <View style={styles.rememberRow}>
@@ -235,7 +248,7 @@ export default function LoginScreen() {
                     >
                         {loading ? 'Acessando...' : 'Acessar'}
                     </Button>
-                    <Text style={{ textAlign: 'center', marginTop: 8, color: '#666' }}>
+                    <Text style={{ textAlign: 'center', marginTop: 8, color: colors.textTertiary }}>
                         Versão: {process.env.EXPO_PUBLIC_LOCAL_VERSION}
                     </Text>
                 </View>
@@ -255,10 +268,10 @@ export default function LoginScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#2980ef',
+        backgroundColor: colors.backgroundAlt,
     },
     scrollContainer: {
         flexGrow: 1,
@@ -279,11 +292,11 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     formContainer: {
-        backgroundColor: 'white',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         padding: 24,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -294,7 +307,7 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#666',
+        color: colors.textTertiary,
         marginBottom: 12,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
@@ -303,11 +316,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#f5f7fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 8,
         padding: 12,
         borderWidth: 1,
-        borderColor: '#e1e8ed',
+        borderColor: colors.border,
     },
     toggleLabelContainer: {
         flexDirection: 'row',
@@ -317,13 +330,13 @@ const styles = StyleSheet.create({
     },
     toggleLabel: {
         fontSize: 15,
-        color: '#333',
+        color: colors.text,
         fontWeight: '500',
         flex: 1,
     },
     divider: {
         height: 1,
-        backgroundColor: '#e1e8ed',
+        backgroundColor: colors.divider,
         marginVertical: 10,
     },
     credentialsSection: {
@@ -331,7 +344,7 @@ const styles = StyleSheet.create({
     },
     input: {
         marginBottom: 16,
-        backgroundColor: 'white',
+        backgroundColor: colors.inputBackground,
     },
     rememberRow: {
         flexDirection: 'row',
@@ -346,7 +359,7 @@ const styles = StyleSheet.create({
     },
     rememberText: {
         fontSize: 15,
-        color: '#555',
+        color: colors.textSecondary,
     },
     forgotPasswordContainer: {
         marginTop: 12,
@@ -354,14 +367,14 @@ const styles = StyleSheet.create({
     },
     forgotPasswordText: {
         fontSize: 14,
-        color: '#2980ef',
+        color: colors.link,
         fontWeight: '500',
         textDecorationLine: 'underline',
     },
     loginButton: {
         marginTop: 16,
         marginBottom: 8,
-        backgroundColor: '#2980ef',
+        backgroundColor: colors.buttonPrimary,
         borderRadius: 8,
     },
     loginButtonContent: {
