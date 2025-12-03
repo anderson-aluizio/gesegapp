@@ -205,7 +205,14 @@ export default function CreateChecklistRealizadoScreen() {
         setIsSubmitting(true);
 
         try {
-            const coords = await getCurrentLocation();
+            const locationResult = await getCurrentLocation();
+
+            if (locationResult.error) {
+                dialog.show('Erro de Localização', locationResult.error);
+                setIsSubmitting(false);
+                return;
+            }
+
             const createdChecklist = {
                 checklist_grupo_id: Number(selectedGrupo),
                 checklist_estrutura_id: Number(selectedEstrutura),
@@ -222,8 +229,8 @@ export default function CreateChecklistRealizadoScreen() {
                 gerente_cpf: equipe.gerente_cpf || '',
                 is_finalizado: false,
                 is_user_declarou_conformidade: false,
-                latitude: coords?.latitude,
-                longitude: coords?.longitude,
+                latitude: locationResult.coords?.latitude,
+                longitude: locationResult.coords?.longitude,
             }
             const lastChecklistRealizado = await checklistRealizadoDb.create(createdChecklist);
             if (!lastChecklistRealizado) {
