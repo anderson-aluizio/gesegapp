@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Dialog, IconButton, Portal, Text } from 'react-native-paper';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
@@ -7,12 +7,16 @@ import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionario
 import { useSQLiteContext } from 'expo-sqlite';
 import { useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
 import SignatureCapture from '@/components/ui/inputs/SignatureCapture';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function FuncionariosScreen(props: {
     checklistRealizado: ChecklistRealizadoDatabase;
     formUpdated: () => void;
     setReloadList: (reload: boolean) => void;
 }) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const database = useSQLiteContext();
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoItemsDb = useChecklisRealizadoItemsDatabase();
@@ -159,7 +163,7 @@ export default function FuncionariosScreen(props: {
                                                     <View style={styles.signedBadge}>
                                                         <IconButton
                                                             icon="check-circle"
-                                                            iconColor="#27ae60"
+                                                            iconColor={colors.success}
                                                             size={16}
                                                             style={{ margin: 0 }}
                                                         />
@@ -169,7 +173,7 @@ export default function FuncionariosScreen(props: {
                                             </View>
                                             <IconButton
                                                 icon={colaborador.assinatura ? "pen" : "draw"}
-                                                iconColor={colaborador.assinatura ? "#3498db" : "#27ae60"}
+                                                iconColor={colaborador.assinatura ? colors.info : colors.success}
                                                 size={26}
                                                 onPress={() => handleSignFuncionario(colaborador)}
                                                 style={{ marginLeft: 4 }}
@@ -180,7 +184,7 @@ export default function FuncionariosScreen(props: {
                                                 checklistRealizado.checklist_grupo_nome_interno !== 'checklist_auto_checklist' && (
                                                     <IconButton
                                                         icon="trash-can-outline"
-                                                        iconColor="#e74c3c"
+                                                        iconColor={colors.error}
                                                         size={26}
                                                         onPress={() => { setFuncionarioToDelete(colaborador.id); setIsDialogConfirmDeleteShow(true); }}
                                                         style={{ marginLeft: 4 }}
@@ -196,32 +200,32 @@ export default function FuncionariosScreen(props: {
                     </View>
                 )}
                 <Portal>
-                    <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
-                        <Dialog.Title>Atenção</Dialog.Title>
+                    <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')} style={styles.dialog}>
+                        <Dialog.Title style={styles.dialogTitle}>Atenção</Dialog.Title>
                         <Dialog.Content>
-                            <Text variant="bodyMedium">
+                            <Text variant="bodyMedium" style={styles.dialogText}>
                                 {dialogDesc}
                             </Text>
                         </Dialog.Content>
                         <Dialog.Actions>
-                            <Button onPress={() => setDialogDesc('')}>Fechar</Button>
+                            <Button onPress={() => setDialogDesc('')} textColor={colors.buttonPrimary}>Fechar</Button>
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
                 <Portal>
-                    <Dialog visible={isDialogConfirmDeleteShow} onDismiss={() => setIsDialogConfirmDeleteShow(false)}>
-                        <Dialog.Title>Atenção</Dialog.Title>
+                    <Dialog visible={isDialogConfirmDeleteShow} onDismiss={() => setIsDialogConfirmDeleteShow(false)} style={styles.dialog}>
+                        <Dialog.Title style={styles.dialogTitle}>Atenção</Dialog.Title>
                         <Dialog.Content>
-                            <Text variant="bodyMedium">
+                            <Text variant="bodyMedium" style={styles.dialogText}>
                                 Deseja realmente remover este funcionário da lista?
                             </Text>
-                            <Text variant="bodySmall" style={{ color: 'red', marginTop: 8 }}>
+                            <Text variant="bodySmall" style={{ color: colors.error, marginTop: 8 }}>
                                 Caso haja itens respondidos, eles serão removidos.
                             </Text>
                         </Dialog.Content>
                         <Dialog.Actions>
-                            <Button onPress={() => setIsDialogConfirmDeleteShow(false)}>Fechar</Button>
-                            <Button onPress={handleRemoveFuncionario}>Remover</Button>
+                            <Button onPress={() => setIsDialogConfirmDeleteShow(false)} textColor={colors.textSecondary}>Fechar</Button>
+                            <Button onPress={handleRemoveFuncionario} textColor={colors.error}>Remover</Button>
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
@@ -237,7 +241,7 @@ export default function FuncionariosScreen(props: {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
     },
@@ -251,20 +255,20 @@ const styles = StyleSheet.create({
     cardView: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 12,
         padding: 4,
         marginBottom: 4,
         borderWidth: 1,
-        borderColor: '#e0e0e0',
-        shadowColor: '#000',
+        borderColor: colors.cardBorder,
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 2,
         elevation: 1
     },
     cardTitle: {
-        backgroundColor: '#e3e8fd',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 24,
         width: 48,
         height: 48,
@@ -275,7 +279,7 @@ const styles = StyleSheet.create({
     cardTitleText: {
         fontSize: 24,
         fontWeight: '700',
-        color: '#4a4a4a',
+        color: colors.textSecondary,
     },
     cardSubtitle: {
         flex: 1,
@@ -284,11 +288,11 @@ const styles = StyleSheet.create({
     cardSubtitleText: {
         fontWeight: '700',
         fontSize: 17,
-        color: '#222'
+        color: colors.text,
     },
     cardDescriptionText: {
         fontSize: 14,
-        color: '#888',
+        color: colors.textTertiary,
     },
     signedBadge: {
         flexDirection: 'row',
@@ -297,8 +301,19 @@ const styles = StyleSheet.create({
     },
     signedText: {
         fontSize: 13,
-        color: '#27ae60',
+        color: colors.success,
         fontWeight: '600',
         marginLeft: -8,
+    },
+    dialog: {
+        backgroundColor: colors.surface,
+        borderRadius: 16,
+    },
+    dialogTitle: {
+        color: colors.text,
+        fontWeight: 'bold',
+    },
+    dialogText: {
+        color: colors.textSecondary,
     },
 });

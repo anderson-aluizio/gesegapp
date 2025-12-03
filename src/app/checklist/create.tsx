@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
@@ -15,8 +15,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import { useLocation } from '@/hooks/useLocation';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function CreateChecklistRealizadoScreen() {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [grupos, setGrupos] = useState<AutocompleteDropdownOption[]>([]);
     const [allGrupos, setAllGrupos] = useState<ChecklistGrupoDatabase[]>([]);
     const [selectedGrupo, setSelectedGrupo] = useState<string | null>(null);
@@ -336,7 +340,7 @@ export default function CreateChecklistRealizadoScreen() {
                 />
 
                 <View style={styles.stickyButtonContainer}>
-                    <Button mode="contained" onPress={handleNext} buttonColor="#0439c9" style={styles.btnNext}>
+                    <Button mode="contained" onPress={handleNext} buttonColor={colors.buttonPrimary} style={styles.btnNext}>
                         CADASTRAR
                     </Button>
                 </View>
@@ -345,10 +349,10 @@ export default function CreateChecklistRealizadoScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f4f6fb",
+        backgroundColor: colors.background,
     },
     scrollContent: {
         flexGrow: 1,
@@ -356,9 +360,9 @@ const styles = StyleSheet.create({
         paddingTop: 8,
     },
     formCard: {
-        backgroundColor: "#fff",
+        backgroundColor: colors.surface,
         padding: 12,
-        shadowColor: "#000",
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.10,
         shadowRadius: 10,
@@ -367,7 +371,7 @@ const styles = StyleSheet.create({
     formTitle: {
         fontSize: 22,
         fontWeight: "700",
-        color: "#222",
+        color: colors.text,
         marginBottom: 18,
         textAlign: "center",
         letterSpacing: 0.2,
@@ -376,7 +380,7 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     stickyButtonContainer: {
-        backgroundColor: "#f4f6fb",
+        backgroundColor: colors.background,
         paddingHorizontal: 16,
         paddingBottom: 16,
         paddingTop: 6,

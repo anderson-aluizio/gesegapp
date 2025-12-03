@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function DadosGeraisScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void; isUserOperacao: boolean }) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
@@ -198,27 +202,28 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         multiline
                         mode="outlined"
                         theme={{ roundness: 8 }}
-                        outlineColor="#d1d5db"
-                        activeOutlineColor="#0439c9"
+                        outlineColor={colors.border}
+                        activeOutlineColor={colors.primary}
+                        textColor={colors.text}
                         numberOfLines={3}
                     />
                 </View>
                 <Portal>
-                    <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
-                        <Dialog.Title>Atenção</Dialog.Title>
+                    <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')} style={styles.dialog}>
+                        <Dialog.Title style={styles.dialogTitle}>Atenção</Dialog.Title>
                         <Dialog.Content>
-                            <Text variant="bodyMedium">
+                            <Text variant="bodyMedium" style={styles.dialogText}>
                                 {dialogDesc}
                             </Text>
                         </Dialog.Content>
                         <Dialog.Actions>
-                            <Button onPress={() => setDialogDesc('')}>Fechar</Button>
+                            <Button onPress={() => setDialogDesc('')} textColor={colors.buttonPrimary}>Fechar</Button>
                         </Dialog.Actions>
                     </Dialog>
                 </Portal>
             </ScrollView>
             {isFormDirty ? (
-                <Button mode="contained" onPress={handleUpdate} buttonColor="#0439c9" style={styles.btnNext}>
+                <Button mode="contained" onPress={handleUpdate} buttonColor={colors.buttonPrimary} style={styles.btnNext}>
                     ATUALIZAR
                 </Button>
             ) : null}
@@ -226,7 +231,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
     },
@@ -235,12 +240,12 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     infoCard: {
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 12,
         padding: 16,
         borderLeftWidth: 4,
-        borderLeftColor: '#0439c9',
-        shadowColor: '#000',
+        borderLeftColor: colors.primary,
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 1,
@@ -258,7 +263,7 @@ const styles = StyleSheet.create({
     infoLabel: {
         fontSize: 12,
         fontWeight: '600',
-        color: '#6c757d',
+        color: colors.textTertiary,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
         marginBottom: 4,
@@ -266,19 +271,19 @@ const styles = StyleSheet.create({
     infoValue: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#212529',
+        color: colors.text,
         lineHeight: 22,
     },
     lockNotice: {
-        backgroundColor: '#fff3cd',
+        backgroundColor: colors.warning + '22',
         borderRadius: 8,
         padding: 6,
         borderWidth: 1,
-        borderColor: '#ffeaa7',
+        borderColor: colors.warning,
     },
     lockNoticeText: {
         fontSize: 13,
-        color: '#856404',
+        color: colors.warning,
         textAlign: 'center',
         fontWeight: '500',
     },
@@ -286,6 +291,17 @@ const styles = StyleSheet.create({
         margin: 16,
     },
     textInput: {
-        backgroundColor: '#fff',
-    }
+        backgroundColor: colors.cardBackground,
+    },
+    dialog: {
+        backgroundColor: colors.surface,
+        borderRadius: 16,
+    },
+    dialogTitle: {
+        color: colors.text,
+        fontWeight: 'bold',
+    },
+    dialogText: {
+        color: colors.textSecondary,
+    },
 });

@@ -15,10 +15,14 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function EditChecklistRealizado() {
   const { user } = useAuth();
   const dialog = useDialog();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const [index, setIndex] = useState(0);
 
   const allRoutes = [
@@ -228,7 +232,7 @@ export default function EditChecklistRealizado() {
               options={{
                 title: 'Editar',
                 headerRight: () => (
-                  <Button icon="checkbox-marked-circle-outline" onPress={() => setIsdialogFinishShow(true)} textColor="green">
+                  <Button icon="checkbox-marked-circle-outline" onPress={() => setIsdialogFinishShow(true)} textColor={colors.success}>
                     Finalizar
                   </Button>
                 ),
@@ -281,7 +285,7 @@ export default function EditChecklistRealizado() {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   loading: {
     flex: 1,
     justifyContent: 'center',
@@ -293,7 +297,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#f6f6f6',
+    backgroundColor: colors.background,
   },
   section: {
     flexDirection: 'row',
@@ -301,6 +305,7 @@ const styles = StyleSheet.create({
   },
   paragraph: {
     fontSize: 15,
+    color: colors.text,
   },
   checkbox: {
     marginRight: 8,
@@ -308,7 +313,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: 24,
     height: 24,
-    backgroundColor: '#fff',
-    borderColor: '#ccc',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
   },
 });

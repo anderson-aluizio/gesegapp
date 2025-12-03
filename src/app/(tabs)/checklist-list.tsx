@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, View, StatusBar, Animated, Platform, Image } from 'react-native';
 import { Button, Dialog, Portal, Text, Surface, FAB, Searchbar, IconButton, ActivityIndicator } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef, useMemo } from 'react';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { ChecklistRealizado } from '@/components/checklist/ChecklistRealizado';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,9 +11,13 @@ import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 import { useDialog } from '@/hooks';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function ChecklistListScreen() {
     const router = useRouter();
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [checklistRealizados, setChecklistRealizados] = useState<ChecklistRealizadoDatabase[]>([]);
     const [filteredChecklists, setFilteredChecklists] = useState<ChecklistRealizadoDatabase[]>([]);
@@ -172,12 +176,12 @@ export default function ChecklistListScreen() {
     };
     return (
         <View style={[styles.container]}>
-            <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>
                     <IconButton
                         icon="arrow-left"
-                        iconColor="#fff"
+                        iconColor={colors.textOnPrimary}
                         size={24}
                         onPress={() => router.replace('/(tabs)/home')}
                         style={styles.backButton}
@@ -201,7 +205,7 @@ export default function ChecklistListScreen() {
                                 value={searchQuery}
                                 style={styles.searchBar}
                                 inputStyle={styles.searchInput}
-                                iconColor="#667eea"
+                                iconColor={colors.primaryDark}
                             />
                         </View>
 
@@ -243,7 +247,7 @@ export default function ChecklistListScreen() {
                     </Surface>
                     <IconButton
                         icon="plus"
-                        iconColor="#fff"
+                        iconColor={colors.buttonText}
                         mode="contained"
                         style={styles.buttonAdd}
                         size={40}
@@ -268,7 +272,7 @@ export default function ChecklistListScreen() {
                         <View style={styles.containerButtonsVertical}>
                             <Button
                                 mode="contained"
-                                buttonColor="#667eea"
+                                buttonColor={colors.buttonSecondary}
                                 onPress={handleEditChecklist}
                                 style={styles.dialogButtonFull}
                             >
@@ -276,7 +280,7 @@ export default function ChecklistListScreen() {
                             </Button>
                             <Button
                                 mode="contained"
-                                buttonColor="#f39c12"
+                                buttonColor={colors.warning}
                                 onPress={handleDuplicateChecklist}
                                 style={styles.dialogButtonFull}
                             >
@@ -286,7 +290,7 @@ export default function ChecklistListScreen() {
                                 mode="outlined"
                                 onPress={() => setIsShowEditDialog(false)}
                                 style={styles.dialogButtonFull}
-                                textColor="#666"
+                                textColor={colors.textSecondary}
                             >
                                 Cancelar
                             </Button>
@@ -306,13 +310,13 @@ export default function ChecklistListScreen() {
                                 mode="outlined"
                                 onPress={() => setIsShowDeleteDialog(false)}
                                 style={styles.dialogButton}
-                                textColor="#666"
+                                textColor={colors.textSecondary}
                             >
                                 Cancelar
                             </Button>
                             <Button
                                 mode="contained"
-                                buttonColor="#e74c3c"
+                                buttonColor={colors.buttonDanger}
                                 onPress={handleDeleteChecklist}
                                 style={styles.dialogButton}
                             >
@@ -343,10 +347,10 @@ export default function ChecklistListScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.background,
     },
     inner: {
         gap: 10,
@@ -361,10 +365,10 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderBottomEndRadius: 0,
         borderBottomStartRadius: 0,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         overflow: 'hidden',
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -378,9 +382,9 @@ const styles = StyleSheet.create({
     },
     searchBar: {
         elevation: 2,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 15,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -389,7 +393,7 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     searchInput: {
-        color: '#333',
+        color: colors.text,
     },
     resultsContainer: {
         paddingHorizontal: 16,
@@ -397,7 +401,7 @@ const styles = StyleSheet.create({
     },
     resultsText: {
         fontSize: 12,
-        color: '#666',
+        color: colors.textSecondary,
         fontWeight: '500',
     },
     listWrapper: {
@@ -413,20 +417,20 @@ const styles = StyleSheet.create({
         padding: 40,
     },
     emptyTitle: {
-        color: '#6c757d',
+        color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: 8,
     },
     emptySubtitle: {
-        color: '#9ca3af',
+        color: colors.textMuted,
         textAlign: 'center',
         opacity: 0.8,
     },
     dialog: {
         borderRadius: 20,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         elevation: 24,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 12,
@@ -438,17 +442,17 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
     },
     dialogContent: {
         textAlign: 'center',
         lineHeight: 24,
-        color: '#666',
+        color: colors.textSecondary,
     },
     dialogContentDescprition: {
         textAlign: 'center',
         lineHeight: 20,
-        color: 'red',
+        color: colors.error,
     },
     dialogButton: {
         flex: 1,
@@ -480,9 +484,9 @@ const styles = StyleSheet.create({
         right: 16,
         bottom: 40,
         borderRadius: 30,
-        backgroundColor: '#0439c9',
+        backgroundColor: colors.buttonPrimary,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -491,13 +495,13 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     headerContainer: {
-        backgroundColor: '#667eea',
+        backgroundColor: colors.primaryDark,
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -515,7 +519,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     headerTitle: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 20,
         fontWeight: 'bold',
         flex: 1,

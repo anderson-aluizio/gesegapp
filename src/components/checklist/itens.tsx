@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Button, Dialog, MD2Colors, Portal, Text } from 'react-native-paper';
+import { ActivityIndicator, Button, Dialog, Portal, Text } from 'react-native-paper';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { ChecklistRealizadoItemsDatabaseWithItem, useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
 import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
 import ChecklistItem from './ChecklistItem';
 import validateItemIsRespondido from './utils';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function ItensScreen(props: {
     checklistRealizado: ChecklistRealizadoDatabase;
@@ -14,6 +15,9 @@ export default function ItensScreen(props: {
     reloadList: boolean;
     setReloadList: (reload: boolean) => void;
 }) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const { checklistRealizado } = props;
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
@@ -326,7 +330,7 @@ export default function ItensScreen(props: {
         <>
             {isLoading ? (
                 <View style={styles.loading}>
-                    <ActivityIndicator animating={true} color={MD2Colors.blue500} size="large" />
+                    <ActivityIndicator animating={true} color={colors.primary} size="large" />
                 </View>
             ) : (
                 <View style={styles.container}>
@@ -357,7 +361,7 @@ export default function ItensScreen(props: {
                         <Button
                             mode="contained"
                             onPress={handleUpdate}
-                            buttonColor="#0439c9"
+                            buttonColor={colors.buttonPrimary}
                             style={styles.btnNext}
                         >
                             ATUALIZAR
@@ -366,15 +370,15 @@ export default function ItensScreen(props: {
                 </View>
             )}
             <Portal>
-                <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')}>
-                    <Dialog.Title>Atenção</Dialog.Title>
+                <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')} style={styles.dialog}>
+                    <Dialog.Title style={styles.dialogTitle}>Atenção</Dialog.Title>
                     <Dialog.Content>
-                        <Text variant="bodyMedium">
+                        <Text variant="bodyMedium" style={styles.dialogText}>
                             {dialogDesc}
                         </Text>
                     </Dialog.Content>
                     <Dialog.Actions>
-                        <Button onPress={() => setDialogDesc('')}>Fechar</Button>
+                        <Button onPress={() => setDialogDesc('')} textColor={colors.buttonPrimary}>Fechar</Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
@@ -382,7 +386,7 @@ export default function ItensScreen(props: {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     loading: {
         flex: 1,
         justifyContent: 'center',
@@ -390,7 +394,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         zIndex: 10,
         width: '100%',
-        height: '100%'
+        height: '100%',
+        backgroundColor: colors.background,
     },
     container: {
         flex: 1,
@@ -401,11 +406,22 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         textAlign: 'center',
-        color: '#888',
+        color: colors.textSecondary,
         marginVertical: 24,
         fontSize: 16
     },
     btnNext: {
         margin: 16,
+    },
+    dialog: {
+        backgroundColor: colors.surface,
+        borderRadius: 16,
+    },
+    dialogTitle: {
+        color: colors.text,
+        fontWeight: 'bold',
+    },
+    dialogText: {
+        color: colors.textSecondary,
     },
 });

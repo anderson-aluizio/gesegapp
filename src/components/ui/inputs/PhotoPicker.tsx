@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { Alert, Image, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Text } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export interface PhotoPickerProps {
     fotoPath?: string;
@@ -11,6 +12,9 @@ export interface PhotoPickerProps {
 }
 
 const PhotoPicker = ({ fotoPath, onPhotoSelect, onPhotoRemove, isFotoObrigatoria }: PhotoPickerProps) => {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [isLoading, setIsLoading] = useState(false);
 
     const requestCameraPermissions = useCallback(async () => {
@@ -110,7 +114,7 @@ const PhotoPicker = ({ fotoPath, onPhotoSelect, onPhotoRemove, isFotoObrigatoria
                     <IconButton
                         icon="close-circle"
                         size={28}
-                        iconColor="#f02323"
+                        iconColor={colors.error}
                         style={styles.removeButton}
                         onPress={handleRemovePhoto}
                     />
@@ -145,24 +149,24 @@ const PhotoPicker = ({ fotoPath, onPhotoSelect, onPhotoRemove, isFotoObrigatoria
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         marginTop: 8,
         padding: 8,
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#e5e7eb',
+        borderColor: colors.border,
     },
     header: {
         marginBottom: 8,
     },
     label: {
-        color: '#444',
+        color: colors.textSecondary,
         fontWeight: '600',
     },
     required: {
-        color: '#f02323',
+        color: colors.error,
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
     },
     button: {
         flex: 1,
-        borderColor: '#0439c9',
+        borderColor: colors.primary,
     },
     buttonLabel: {
         fontSize: 12,
@@ -189,7 +193,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: -8,
         right: -8,
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 14,
     },
 });

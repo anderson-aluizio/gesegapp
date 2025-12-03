@@ -1,15 +1,19 @@
 import { View, StyleSheet, FlatList, StatusBar } from 'react-native';
 import { Text, Surface, Card, IconButton, ActivityIndicator, Searchbar, Button } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useChecklistEstruturaDatabase, ChecklistEstruturaDatabase } from '@/database/models/useChecklistEstruturaDatabase';
 import { useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function DuplicateChecklistScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [isLoading, setIsLoading] = useState(true);
     const [isDuplicating, setIsDuplicating] = useState(false);
     const [estruturas, setEstruturas] = useState<ChecklistEstruturaDatabase[]>([]);
@@ -96,13 +100,13 @@ export default function DuplicateChecklistScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
 
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>
                     <IconButton
                         icon="arrow-left"
-                        iconColor="#fff"
+                        iconColor={colors.textOnPrimary}
                         size={24}
                         onPress={() => router.back()}
                         style={styles.backButton}
@@ -126,13 +130,13 @@ export default function DuplicateChecklistScreen() {
                         value={searchQuery}
                         style={styles.searchBar}
                         inputStyle={styles.searchInput}
-                        iconColor="#667eea"
+                        iconColor={colors.primaryDark}
                     />
                 </View>
 
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#667eea" />
+                        <ActivityIndicator size="large" color={colors.primaryDark} />
                         <Text style={styles.loadingText}>Carregando estruturas...</Text>
                     </View>
                 ) : filteredEstruturas.length === 0 ? (
@@ -167,7 +171,7 @@ export default function DuplicateChecklistScreen() {
                                             <IconButton
                                                 icon="check-circle"
                                                 size={24}
-                                                iconColor="#4caf50"
+                                                iconColor={colors.success}
                                                 style={styles.checkIcon}
                                             />
                                         )}
@@ -193,7 +197,7 @@ export default function DuplicateChecklistScreen() {
                         mode="contained"
                         onPress={handleDuplicate}
                         style={styles.duplicateButton}
-                        buttonColor="#f39c12"
+                        buttonColor={colors.warning}
                         loading={isDuplicating}
                         disabled={isDuplicating || !selectedEstrutura}
                     >
@@ -212,19 +216,19 @@ export default function DuplicateChecklistScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.background,
     },
     headerContainer: {
-        backgroundColor: '#667eea',
+        backgroundColor: colors.primaryDark,
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -242,7 +246,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     headerTitle: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 20,
         fontWeight: 'bold',
         flex: 1,
@@ -256,10 +260,10 @@ const styles = StyleSheet.create({
         margin: 16,
         marginTop: -10,
         borderRadius: 20,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         overflow: 'hidden',
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -269,12 +273,12 @@ const styles = StyleSheet.create({
     },
     infoCard: {
         padding: 12,
-        backgroundColor: '#f0f4ff',
+        backgroundColor: colors.surfaceVariant,
         borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
+        borderBottomColor: colors.border,
     },
     infoDescription: {
-        color: '#666',
+        color: colors.textSecondary,
         lineHeight: 18,
         fontSize: 13,
     },
@@ -284,11 +288,11 @@ const styles = StyleSheet.create({
     },
     searchBar: {
         elevation: 2,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 15,
     },
     searchInput: {
-        color: '#333',
+        color: colors.text,
     },
     loadingContainer: {
         flex: 1,
@@ -298,7 +302,7 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         marginTop: 16,
-        color: '#666',
+        color: colors.textSecondary,
     },
     emptyState: {
         flex: 1,
@@ -307,12 +311,12 @@ const styles = StyleSheet.create({
         padding: 40,
     },
     emptyTitle: {
-        color: '#6c757d',
+        color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: 8,
     },
     emptySubtitle: {
-        color: '#9ca3af',
+        color: colors.textMuted,
         textAlign: 'center',
         opacity: 0.8,
     },
@@ -322,14 +326,14 @@ const styles = StyleSheet.create({
     },
     estruturaCard: {
         marginBottom: 12,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         elevation: 2,
     },
     selectedCard: {
-        backgroundColor: '#e8f5e9',
+        backgroundColor: colors.success,
         borderWidth: 2,
-        borderColor: '#4caf50',
+        borderColor: colors.success,
     },
     cardContent: {
         paddingVertical: 12,
@@ -343,7 +347,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     cardTitle: {
-        color: '#333',
+        color: colors.text,
         fontWeight: 'bold',
         marginBottom: 4,
     },
@@ -355,8 +359,8 @@ const styles = StyleSheet.create({
         padding: 16,
         gap: 12,
         borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-        backgroundColor: '#fafafa',
+        borderTopColor: colors.border,
+        backgroundColor: colors.surfaceVariant,
     },
     cancelButton: {
         flex: 1,

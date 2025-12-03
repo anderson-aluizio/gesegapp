@@ -1,19 +1,24 @@
+import { useMemo } from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 interface SyncHeaderProps {
     onBack: () => void;
 }
 
 export default function SyncHeader({ onBack }: SyncHeaderProps) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     return (
         <>
-            <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>
                     <IconButton
                         icon="arrow-left"
-                        iconColor="#fff"
+                        iconColor={colors.textOnPrimary}
                         size={24}
                         onPress={onBack}
                         style={styles.backButton}
@@ -26,15 +31,15 @@ export default function SyncHeader({ onBack }: SyncHeaderProps) {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     headerContainer: {
-        backgroundColor: '#667eea',
+        backgroundColor: colors.primaryDark,
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -52,7 +57,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     headerTitle: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 20,
         fontWeight: 'bold',
         flex: 1,

@@ -1,6 +1,7 @@
-import { Animated, ScrollView, StyleSheet } from 'react-native';
+import { useMemo } from 'react';
+import { Animated, ScrollView, StyleSheet, View } from 'react-native';
 import { Dialog, Portal, Text, ProgressBar, Surface } from 'react-native-paper';
-import { View } from 'react-native';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 interface SyncProgressDialogProps {
     visible: boolean;
@@ -17,6 +18,9 @@ export default function SyncProgressDialog({
     currentStep,
     fadeAnim
 }: SyncProgressDialogProps) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     return (
         <Portal>
             <Dialog visible={visible} dismissable={false} style={styles.syncDialog}>
@@ -37,7 +41,7 @@ export default function SyncProgressDialog({
                             <Animated.View style={styles.progressBarContainer}>
                                 <ProgressBar
                                     progress={percentage / 100}
-                                    color="#0439c9"
+                                    color={colors.buttonPrimary}
                                     style={styles.progressBar}
                                 />
                             </Animated.View>
@@ -70,13 +74,14 @@ export default function SyncProgressDialog({
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     syncDialog: {
         borderRadius: 16,
         maxHeight: '80%',
+        backgroundColor: colors.surface,
     },
     syncDialogTitle: {
-        color: '#333',
+        color: colors.text,
         fontWeight: 'bold',
         textAlign: 'center',
     },
@@ -90,16 +95,16 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     progressStep: {
-        color: '#333',
+        color: colors.text,
         flex: 1,
         marginRight: 16,
     },
     progressPercent: {
-        color: '#0439c9',
+        color: colors.buttonPrimary,
         fontWeight: 'bold',
     },
     progressBarContainer: {
-        backgroundColor: '#f0f0f0',
+        backgroundColor: colors.border,
         borderRadius: 6,
         overflow: 'hidden',
     },
@@ -108,13 +113,13 @@ const styles = StyleSheet.create({
         borderRadius: 6,
     },
     logContainer: {
-        backgroundColor: '#fafafa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 12,
         padding: 16,
         maxHeight: 200,
     },
     logHeader: {
-        color: '#666',
+        color: colors.textSecondary,
         fontWeight: 'bold',
         marginBottom: 12,
         textTransform: 'uppercase',
@@ -126,10 +131,10 @@ const styles = StyleSheet.create({
     logItem: {
         paddingVertical: 4,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: colors.border,
     },
     logText: {
-        color: '#555',
+        color: colors.textSecondary,
         lineHeight: 16,
         fontFamily: 'monospace',
     },

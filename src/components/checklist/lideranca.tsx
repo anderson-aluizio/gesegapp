@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
@@ -6,8 +6,12 @@ import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function LiderancaScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void }) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
@@ -172,7 +176,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
             />
 
             {isFormDirty ? (
-                <Button mode="contained" onPress={handleNext} buttonColor="#0439c9" style={styles.btnNext}>
+                <Button mode="contained" onPress={handleNext} buttonColor={colors.buttonPrimary} style={styles.btnNext}>
                     ATUALIZAR
                 </Button>
             ) : null}
@@ -180,7 +184,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
     },

@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, View, Animated, StatusBar } from 'react-native';
 import { Button, Dialog, Portal, Text, Surface, IconButton, ActivityIndicator, Card, Chip, List, Divider } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useState, useRef, useMemo } from 'react';
 import { EquipeTurnoDatabaseWithRelations, useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
 import { EquipeTurnoFuncionarioDatabaseWithRelations, useEquipeTurnoFuncionarioDatabase } from '@/database/models/useEquipeTurnoFuncionarioDatabase';
 import { useChecklisEstruturaItemsDatabase } from '@/database/models/useChecklisEstruturaItemsDatabase';
@@ -12,10 +12,14 @@ import { isBeforeToday } from '@/utils/dateUtils';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 import { useDialog } from '@/hooks/useDialog';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function TurnoEquipeScreen() {
     const router = useRouter();
     const dialog = useDialog();
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [turnos, setTurnos] = useState<EquipeTurnoDatabaseWithRelations[]>([]);
     const [selectedTurno, setSelectedTurno] = useState<EquipeTurnoDatabaseWithRelations | null>(null);
@@ -167,7 +171,7 @@ export default function TurnoEquipeScreen() {
                                 <IconButton
                                     icon="delete"
                                     size={20}
-                                    iconColor="#e74c3c"
+                                    iconColor={colors.buttonDanger}
                                     onPress={() => handleDeletePress(item)}
                                     style={styles.deleteButton}
                                 />
@@ -203,7 +207,7 @@ export default function TurnoEquipeScreen() {
 
                             {isPast ? (
                                 <Surface style={styles.historicalBanner} elevation={0}>
-                                    <IconButton icon="information" size={16} iconColor="#856404" style={styles.bannerIcon} />
+                                    <IconButton icon="information" size={16} iconColor={colors.warning} style={styles.bannerIcon} />
                                     <Text variant="bodySmall" style={styles.bannerText}>
                                         Registro histórico - não editável
                                     </Text>
@@ -261,7 +265,7 @@ export default function TurnoEquipeScreen() {
     return (
         <ProtectedRoute>
             <View style={styles.container}>
-                <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+                <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
 
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
@@ -296,7 +300,7 @@ export default function TurnoEquipeScreen() {
                                 </Animated.View>
                             ) : (
                                 <Animated.View style={[styles.emptyState, { opacity: fadeAnim }]}>
-                                    <IconButton icon="clipboard-text-off-outline" size={64} iconColor="#ccc" />
+                                    <IconButton icon="clipboard-text-off-outline" size={64} iconColor={colors.disabled} />
                                     <Text variant="titleMedium" style={styles.emptyTitle}>
                                         Nenhum turno cadastrado
                                     </Text>
@@ -309,7 +313,7 @@ export default function TurnoEquipeScreen() {
 
                         <IconButton
                             icon="plus"
-                            iconColor="#fff"
+                            iconColor={colors.buttonText}
                             mode="contained"
                             style={styles.fabButton}
                             size={40}
@@ -332,13 +336,13 @@ export default function TurnoEquipeScreen() {
                                     mode="outlined"
                                     onPress={() => setIsShowDeleteDialog(false)}
                                     style={styles.dialogButton}
-                                    textColor="#666"
+                                    textColor={colors.textSecondary}
                                 >
                                     Cancelar
                                 </Button>
                                 <Button
                                     mode="contained"
-                                    buttonColor="#e74c3c"
+                                    buttonColor={colors.buttonDanger}
                                     onPress={handleDeleteTurno}
                                     style={styles.dialogButton}
                                 >
@@ -370,10 +374,10 @@ export default function TurnoEquipeScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.background,
     },
     loadingContainer: {
         flex: 1,
@@ -381,13 +385,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     headerContainer: {
-        backgroundColor: '#667eea',
+        backgroundColor: colors.primaryDark,
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -405,7 +409,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     headerTitle: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 20,
         fontWeight: 'bold',
         flex: 1,
@@ -428,7 +432,8 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         borderRadius: 12,
         borderLeftWidth: 4,
-        borderLeftColor: '#667eea',
+        borderLeftColor: colors.primaryDark,
+        backgroundColor: colors.surface,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -445,11 +450,11 @@ const styles = StyleSheet.create({
     },
     equipeName: {
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
         marginBottom: 4,
     },
     dateText: {
-        color: '#666',
+        color: colors.textSecondary,
         textTransform: 'capitalize',
     },
     deleteButton: {
@@ -470,7 +475,7 @@ const styles = StyleSheet.create({
         marginRight: -8,
     },
     infoText: {
-        color: '#666',
+        color: colors.textSecondary,
     },
     expandedSection: {
         marginTop: 12,
@@ -481,7 +486,7 @@ const styles = StyleSheet.create({
     historicalBanner: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff3cd',
+        backgroundColor: colors.warning,
         borderRadius: 8,
         paddingVertical: 8,
         paddingHorizontal: 12,
@@ -492,20 +497,20 @@ const styles = StyleSheet.create({
         marginRight: -4,
     },
     bannerText: {
-        color: '#856404',
+        color: colors.text,
         flex: 1,
     },
     sectionTitle: {
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
         marginBottom: 8,
     },
     listItemTitle: {
         fontSize: 14,
-        color: '#666',
+        color: colors.textSecondary,
     },
     emptyFuncionarios: {
-        color: '#999',
+        color: colors.textTertiary,
         textAlign: 'center',
         paddingVertical: 12,
     },
@@ -520,19 +525,19 @@ const styles = StyleSheet.create({
     },
     funcionarioNome: {
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
         marginBottom: 4,
     },
     funcionarioDetails: {
-        color: '#666',
+        color: colors.textSecondary,
         marginBottom: 6,
     },
     liderChip: {
         alignSelf: 'flex-start',
-        backgroundColor: '#e3f2fd',
+        backgroundColor: colors.info,
     },
     liderChipText: {
-        color: '#1976d2',
+        color: colors.textOnPrimary,
     },
     itemDivider: {
         marginVertical: 4,
@@ -544,12 +549,12 @@ const styles = StyleSheet.create({
         padding: 40,
     },
     emptyTitle: {
-        color: '#6c757d',
+        color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: 8,
     },
     emptySubtitle: {
-        color: '#9ca3af',
+        color: colors.textMuted,
         textAlign: 'center',
     },
     fabButton: {
@@ -557,23 +562,23 @@ const styles = StyleSheet.create({
         right: 16,
         bottom: 40,
         borderRadius: 30,
-        backgroundColor: '#0439c9',
+        backgroundColor: colors.buttonPrimary,
         elevation: 4,
     },
     dialog: {
         borderRadius: 20,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
     },
     dialogTitle: {
         textAlign: 'center',
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
     },
     dialogContent: {
         textAlign: 'center',
         lineHeight: 24,
-        color: '#666',
+        color: colors.textSecondary,
     },
     dialogButtonsContainer: {
         flexDirection: 'row',

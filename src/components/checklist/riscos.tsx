@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Card, Checkbox, Text, ActivityIndicator } from 'react-native-paper';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
@@ -8,6 +8,7 @@ import { useChecklisRealizadoRiscosDatabase } from '@/database/models/useCheckli
 import { useChecklisRealizadoControleRiscosDatabase } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 type RiscoWithControles = {
     risco: ChecklistEstruturaRiscosDatabase;
@@ -20,6 +21,9 @@ type RiscoWithControles = {
 };
 
 export default function RiscosScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void }) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
@@ -166,7 +170,7 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#0439c9" />
+                <ActivityIndicator size="large" color={colors.primary} />
                 <Text style={styles.loadingText}>Carregando riscos...</Text>
             </View>
         );
@@ -262,7 +266,7 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
                     onPress={handleSave}
                     loading={isSaving}
                     disabled={isSaving}
-                    buttonColor="#0439c9"
+                    buttonColor={colors.buttonPrimary}
                     style={styles.btnSave}
                 >
                     {isSaving ? 'SALVANDO...' : 'SALVAR RISCOS'}
@@ -272,7 +276,7 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
     },
@@ -292,7 +296,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 12,
         fontSize: 16,
-        color: '#666',
+        color: colors.textSecondary,
     },
     emptyContainer: {
         flex: 1,
@@ -302,17 +306,17 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: '#666',
+        color: colors.textSecondary,
         textAlign: 'center',
     },
     headerText: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
+        color: colors.text,
         marginBottom: 8,
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         elevation: 2,
         marginBottom: 8,
     },
@@ -320,7 +324,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 12,
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
     },
     checkboxContainer: {
         marginRight: 8,
@@ -330,7 +334,7 @@ const styles = StyleSheet.create({
     },
     riscoTitle: {
         fontSize: 16,
-        color: '#333',
+        color: colors.text,
         fontWeight: '500',
     },
     expandIconContainer: {
@@ -338,19 +342,19 @@ const styles = StyleSheet.create({
     },
     expandIcon: {
         fontSize: 16,
-        color: '#666',
+        color: colors.textSecondary,
     },
     controlesContainer: {
         padding: 16,
         paddingTop: 0,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
+        borderTopColor: colors.border,
     },
     controlesHeader: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#555',
+        color: colors.textSecondary,
         marginBottom: 12,
     },
     controleItem: {
@@ -360,14 +364,14 @@ const styles = StyleSheet.create({
     },
     controleText: {
         fontSize: 14,
-        color: '#333',
+        color: colors.text,
         flex: 1,
         marginLeft: 8,
     },
     noControlesText: {
         padding: 16,
         fontSize: 14,
-        color: '#999',
+        color: colors.textMuted,
         fontStyle: 'italic',
         textAlign: 'center',
     },

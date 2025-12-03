@@ -3,9 +3,10 @@ import { EquipeDatabase, useEquipeDatabase } from '@/database/models/useEquipeDa
 import { FuncionarioDatabase, useFuncionarioDatabase } from '@/database/models/useFuncionarioDatabase';
 import { LocalidadeCidadeDatabase, useLocalidadeCidadeDatabase } from '@/database/models/useLocalidadeCidadeDatabase';
 import { useVeiculoDatabase, VeiculoDatabase } from '@/database/models/useVeiculoDatabase';
-import React, { useCallback, useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useCallback, useEffect, useState, useRef, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { AutocompleteDropdown, type AutocompleteDropdownItem } from 'react-native-autocomplete-dropdown';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export type AutocompleteDropdownOption = AutocompleteDropdownItem;
 
@@ -29,6 +30,9 @@ type AutocompleteSearchDropdownProps = {
 }
 
 const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, AutocompleteSearchDropdownProps>((props, ref) => {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const localidadeCidadeDb = useLocalidadeCidadeDatabase();
     const funcionarioDb = useFuncionarioDatabase();
     const veiculoDb = useVeiculoDatabase();
@@ -326,7 +330,7 @@ const AutocompleteSearchDropdown = forwardRef<AutocompleteSearchDropdownRef, Aut
 
             {isPropsLoading ? (
                 <View style={[styles.cardPropsLoading]}>
-                    <Text style={{ fontSize: 14, color: '#666' }}>Carregando...</Text>
+                    <Text style={{ fontSize: 14, color: colors.textSecondary }}>Carregando...</Text>
                 </View>
             ) : props.disable ? (
                 <View style={[styles.disabledContainer]}>
@@ -405,33 +409,33 @@ AutocompleteSearchDropdown.displayName = 'AutocompleteSearchDropdown';
 
 export default AutocompleteSearchDropdown;
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
     },
     cardPropsLoading: {
         padding: 12,
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 10,
         borderWidth: 1.2,
-        borderColor: '#e0e7ef',
-        shadowColor: "#000",
+        borderColor: colors.cardBorder,
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.07,
         shadowRadius: 8,
     },
     disabledContainer: {
         padding: 12,
-        backgroundColor: '#f0f1f3',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 10,
         borderWidth: 1.2,
-        borderColor: '#e0e7ef',
+        borderColor: colors.cardBorder,
         minHeight: 48,
         justifyContent: 'center',
     },
     disabledText: {
         fontSize: 14,
-        color: '#b0b0b0',
+        color: colors.disabled,
         fontWeight: '500',
     },
     containerDisabled: {
@@ -440,39 +444,39 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#666',
+        color: colors.textSecondary,
         marginBottom: 0,
         paddingHorizontal: 4,
     },
     labelDisabled: {
-        color: '#b0b0b0',
+        color: colors.disabled,
     },
     autocompleteContainer: {
         flexGrow: 1,
         flexShrink: 1,
     },
     inputContainer: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 10,
         borderWidth: 1.2,
-        borderColor: '#e0e7ef',
-        shadowColor: "#000",
+        borderColor: colors.cardBorder,
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.07,
         shadowRadius: 8,
     },
     inputContainerDisabled: {
-        backgroundColor: '#f0f1f3',
-        borderColor: '#e0e7ef',
+        backgroundColor: colors.surfaceVariant,
+        borderColor: colors.cardBorder,
     },
     textInput: {
         fontSize: 14,
-        color: '#222',
+        color: colors.text,
         fontWeight: '500',
         backgroundColor: 'transparent',
     },
     textInputDisabled: {
-        color: '#b0b0b0',
+        color: colors.disabled,
     },
     rightButtonsContainer: {
         paddingRight: 12,
@@ -480,10 +484,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     suggestionsList: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 8,
         marginTop: 4,
-        shadowColor: "#000",
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.15,
         shadowRadius: 12,
@@ -492,16 +496,16 @@ const styles = StyleSheet.create({
     },
     selectedItemsContainer: {
         marginTop: 12,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 8,
         padding: 12,
         borderWidth: 1,
-        borderColor: '#e9ecef',
+        borderColor: colors.border,
     },
     selectedItemsTitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#495057',
+        color: colors.textSecondary,
         marginBottom: 8,
     },
     selectedItemsList: {
@@ -512,7 +516,7 @@ const styles = StyleSheet.create({
     selectedItemChip: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#0439c9',
+        backgroundColor: colors.primary,
         borderRadius: 16,
         paddingHorizontal: 12,
         paddingVertical: 6,
@@ -521,7 +525,7 @@ const styles = StyleSheet.create({
     },
     selectedItemText: {
         fontSize: 12,
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontWeight: '500',
         flex: 1,
         marginRight: 4,
@@ -537,7 +541,7 @@ const styles = StyleSheet.create({
     },
     removeButtonText: {
         fontSize: 12,
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontWeight: 'bold',
         lineHeight: 12,
     },
@@ -548,7 +552,7 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 14,
-        color: '#666',
+        color: colors.textSecondary,
         fontStyle: 'italic',
     },
 });

@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { Dialog, Portal, Text, Button } from 'react-native-paper';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 interface InfoDialogProps {
     visible: boolean;
@@ -9,6 +11,9 @@ interface InfoDialogProps {
 }
 
 export default function InfoDialog({ visible, title, description, onDismiss }: InfoDialogProps) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     return (
         <Portal>
             <Dialog visible={visible} onDismiss={onDismiss} style={styles.dialog}>
@@ -19,7 +24,7 @@ export default function InfoDialog({ visible, title, description, onDismiss }: I
                     </Text>
                 </Dialog.Content>
                 <Dialog.Actions>
-                    <Button onPress={onDismiss} mode="contained">
+                    <Button onPress={onDismiss} mode="contained" buttonColor={colors.buttonPrimary}>
                         Fechar
                     </Button>
                 </Dialog.Actions>
@@ -28,16 +33,17 @@ export default function InfoDialog({ visible, title, description, onDismiss }: I
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     dialog: {
         borderRadius: 16,
+        backgroundColor: colors.surface,
     },
     dialogTitle: {
-        color: '#333',
+        color: colors.text,
         fontWeight: 'bold',
     },
     dialogText: {
-        color: '#666',
+        color: colors.textSecondary,
         lineHeight: 20,
     },
 });

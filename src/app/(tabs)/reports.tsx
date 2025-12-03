@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     StyleSheet,
@@ -17,6 +17,7 @@ import {
 } from '@/services/api/reportsService';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -35,6 +36,9 @@ type StatCardData = {
 export default function ReportsScreen() {
     const router = useRouter();
     const dialog = useDialog();
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const [timeFilter, setTimeFilter] = useState<TimeFilter>('week');
     const [reportsData, setReportsData] = useState<ReportsData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -120,14 +124,14 @@ export default function ReportsScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
 
             {/* Header */}
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>
                     <IconButton
                         icon="arrow-left"
-                        iconColor="#fff"
+                        iconColor={colors.textOnPrimary}
                         size={24}
                         onPress={() => router.back()}
                         style={styles.backButton}
@@ -139,7 +143,7 @@ export default function ReportsScreen() {
 
             {loading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#667eea" />
+                    <ActivityIndicator size="large" color={colors.primaryDark} />
                     <Text style={styles.loadingText}>Carregando relatórios...</Text>
                 </View>
             ) : (
@@ -194,7 +198,7 @@ export default function ReportsScreen() {
                     <Card style={styles.card}>
                         <Card.Content>
                             <View style={styles.cardHeader}>
-                                <IconButton icon="chart-bar" size={24} iconColor="#667eea" />
+                                <IconButton icon="chart-bar" size={24} iconColor={colors.primaryDark} />
                                 <Text style={styles.cardTitle}>Por dias</Text>
                             </View>
                             <ScrollView
@@ -228,7 +232,7 @@ export default function ReportsScreen() {
                     <Card style={styles.card}>
                         <Card.Title
                             title="Por Grupo"
-                            left={() => <IconButton icon="shape" iconColor="#667eea" />}
+                            left={() => <IconButton icon="shape" iconColor={colors.primaryDark} />}
                         />
                         <Card.Content>
                             {categoryData.map((category, index) => (
@@ -267,19 +271,19 @@ export default function ReportsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.background,
     },
     headerContainer: {
-        backgroundColor: '#667eea',
+        backgroundColor: colors.primaryDark,
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderBottomLeftRadius: 20,
         borderBottomRightRadius: 20,
         elevation: 4,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
             height: 2,
@@ -297,7 +301,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     headerTitle: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 20,
         fontWeight: 'bold',
         flex: 1,
@@ -315,7 +319,7 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 16,
         fontSize: 16,
-        color: '#666',
+        color: colors.textSecondary,
     },
     scrollContainer: {
         flex: 1,
@@ -328,6 +332,7 @@ const styles = StyleSheet.create({
     filterCard: {
         marginBottom: 16,
         elevation: 2,
+        backgroundColor: colors.surface,
     },
     statsGrid: {
         flexDirection: 'row',
@@ -361,20 +366,20 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     topText: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 11,
         fontWeight: '600',
     },
     statValue: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#fff',
+        color: colors.textOnPrimary,
         marginBottom: 4,
     },
     statTitle: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#fff',
+        color: colors.textOnPrimary,
         marginBottom: 2,
     },
     statSubtitle: {
@@ -384,6 +389,7 @@ const styles = StyleSheet.create({
     card: {
         marginBottom: 16,
         elevation: 2,
+        backgroundColor: colors.surface,
     },
     cardHeader: {
         flexDirection: 'row',
@@ -393,7 +399,7 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#333',
+        color: colors.text,
         marginLeft: 8,
     },
     chartScrollContent: {
@@ -419,7 +425,7 @@ const styles = StyleSheet.create({
     },
     bar: {
         width: '100%',
-        backgroundColor: '#667eea',
+        backgroundColor: colors.primaryDark,
         borderTopLeftRadius: 8,
         borderTopRightRadius: 8,
         justifyContent: 'flex-start',
@@ -428,13 +434,13 @@ const styles = StyleSheet.create({
         minHeight: 30,
     },
     barValue: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 12,
         fontWeight: '600',
     },
     barLabel: {
         fontSize: 12,
-        color: '#666',
+        color: colors.textSecondary,
         marginTop: 8,
         fontWeight: '500',
     },
@@ -444,7 +450,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: colors.border,
     },
     categoryInfo: {
         flexDirection: 'row',
@@ -459,7 +465,7 @@ const styles = StyleSheet.create({
     },
     categoryName: {
         fontSize: 14,
-        color: '#333',
+        color: colors.text,
         flex: 1,
     },
     categoryStats: {
@@ -470,30 +476,30 @@ const styles = StyleSheet.create({
     categoryCount: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
+        color: colors.text,
     },
     categoryPercentage: {
         fontSize: 13,
-        color: '#666',
+        color: colors.textSecondary,
     },
     performerItem: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: colors.border,
     },
     performerRank: {
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: '#667eea',
+        backgroundColor: colors.primaryDark,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 12,
     },
     rankNumber: {
-        color: '#fff',
+        color: colors.textOnPrimary,
         fontSize: 14,
         fontWeight: 'bold',
     },
@@ -503,7 +509,7 @@ const styles = StyleSheet.create({
     performerName: {
         fontSize: 15,
         fontWeight: '600',
-        color: '#333',
+        color: colors.text,
         marginBottom: 4,
     },
     performerStats: {
@@ -512,15 +518,15 @@ const styles = StyleSheet.create({
     },
     performerCount: {
         fontSize: 13,
-        color: '#666',
+        color: colors.textSecondary,
     },
     performerCompletion: {
         fontSize: 13,
-        color: '#43e97b',
+        color: colors.success,
         fontWeight: '500',
     },
     infoCard: {
-        backgroundColor: '#e7f3ff',
+        backgroundColor: colors.surfaceVariant,
         elevation: 1,
     },
     infoHeader: {
@@ -531,12 +537,12 @@ const styles = StyleSheet.create({
     infoTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#667eea',
+        color: colors.primaryDark,
         marginLeft: 4,
     },
     infoText: {
         fontSize: 14,
-        color: '#555',
+        color: colors.textSecondary,
         lineHeight: 20,
     },
     footerSpacer: {

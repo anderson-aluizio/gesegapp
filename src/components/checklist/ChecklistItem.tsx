@@ -5,6 +5,7 @@ import { ChecklistRealizadoItemsDatabaseWithItem } from '@/database/models/useCh
 import { ChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
 import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import PhotoPicker from '@/components/ui/inputs/PhotoPicker';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export interface ChecklistItemProps {
     item: ChecklistRealizadoItemsDatabaseWithItem;
@@ -27,6 +28,9 @@ const ChecklistItem = memo(({
     onPhotoSelect,
     onPhotoRemove
 }: ChecklistItemProps) => {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const isInconforme = useMemo(() =>
         Boolean(item.is_gera_nao_conformidade &&
             item.alternativa_inconformidades_array?.length &&
@@ -116,9 +120,10 @@ const ChecklistItem = memo(({
                         onChangeText={handleAlternativaChange}
                         mode="outlined"
                         theme={{ roundness: 8 }}
-                        outlineColor="#d1d5db"
-                        activeOutlineColor="#0439c9"
+                        outlineColor={colors.border}
+                        activeOutlineColor={colors.primary}
                         placeholder="Resposta"
+                        textColor={colors.text}
                     />
                 ) : (
                     <RadioButton.Group
@@ -170,9 +175,10 @@ const ChecklistItem = memo(({
                                 onChangeText={handleDescricaoChange}
                                 mode="outlined"
                                 theme={{ roundness: 8 }}
-                                outlineColor="#d1d5db"
-                                activeOutlineColor="#0439c9"
+                                outlineColor={colors.border}
+                                activeOutlineColor={colors.primary}
                                 placeholder="Resposta"
+                                textColor={colors.text}
                                 multiline
                                 numberOfLines={3}
                             />
@@ -191,13 +197,13 @@ const ChecklistItem = memo(({
 
 ChecklistItem.displayName = 'ChecklistItem';
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     questionCard: {
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 10,
         padding: 12,
         marginBottom: 16,
-        shadowColor: '#000',
+        shadowColor: colors.shadow,
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
@@ -205,9 +211,9 @@ const styles = StyleSheet.create({
         borderColor: 'transparent',
     },
     questionCardCompleted: {
-        backgroundColor: '#f0f9f4',
-        borderColor: '#10b981',
-        shadowColor: '#10b981',
+        backgroundColor: colors.successLight,
+        borderColor: colors.success,
+        shadowColor: colors.success,
         shadowOpacity: 0.1,
     },
     cardHeader: {
@@ -226,18 +232,18 @@ const styles = StyleSheet.create({
         flexShrink: 0,
     },
     questionTitle: {
-        color: '#222',
+        color: colors.text,
         flex: 1,
         flexWrap: 'wrap',
         marginRight: 8,
     },
     questionTitleCompleted: {
-        color: '#065f46',
+        color: colors.success,
         fontWeight: '600',
     },
     subGrupoBadge: {
-        backgroundColor: '#0439c9',
-        color: '#fff',
+        backgroundColor: colors.primary,
+        color: colors.textOnPrimary,
         borderRadius: 12,
         paddingHorizontal: 10,
         paddingVertical: 2,
@@ -245,8 +251,8 @@ const styles = StyleSheet.create({
         fontSize: 11,
     },
     respondidoBadge: {
-        backgroundColor: '#10b981',
-        color: '#fff',
+        backgroundColor: colors.success,
+        color: colors.textOnPrimary,
         borderRadius: 12,
         paddingHorizontal: 10,
         paddingVertical: 2,
@@ -254,8 +260,8 @@ const styles = StyleSheet.create({
         fontSize: 11,
     },
     clearBadge: {
-        backgroundColor: '#f02323ff',
-        color: '#fff',
+        backgroundColor: colors.error,
+        color: colors.textOnPrimary,
         borderRadius: 12,
         paddingHorizontal: 10,
         paddingVertical: 2,
@@ -268,33 +274,33 @@ const styles = StyleSheet.create({
     },
     radioLabel: {
         fontSize: 16,
-        color: '#444',
+        color: colors.textSecondary,
     },
     funcionarioSelection: {
         marginTop: 6,
         padding: 6,
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#e5e7eb',
+        borderColor: colors.border,
     },
     container: {
         marginTop: 8,
         padding: 8,
-        backgroundColor: '#fff',
+        backgroundColor: colors.cardBackground,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#e5e7eb',
+        borderColor: colors.border,
     },
     header: {
         marginBottom: 8,
     },
     label: {
-        color: '#444',
+        color: colors.textSecondary,
         fontWeight: '600',
     },
     required: {
-        color: '#f02323',
+        color: colors.error,
     },
 });
 

@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Button, Portal, Text } from 'react-native-paper';
 import Signature from 'react-native-signature-canvas';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 interface SignatureCaptureProps {
   visible: boolean;
@@ -16,6 +17,9 @@ export default function SignatureCapture({
   onDismiss,
   title = 'Assinatura'
 }: SignatureCaptureProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+
   const signatureRef = useRef<any>(null);
   const [hasSignature, setHasSignature] = useState(false);
 
@@ -84,11 +88,11 @@ export default function SignatureCapture({
             />
           </View>
           <View style={styles.actions}>
-            <Button onPress={handleDismiss}>Cancelar</Button>
-            <Button onPress={handleClear} disabled={!hasSignature}>
+            <Button onPress={handleDismiss} textColor={colors.textSecondary}>Cancelar</Button>
+            <Button onPress={handleClear} disabled={!hasSignature} textColor={colors.warning}>
               Limpar
             </Button>
-            <Button onPress={handleConfirm} disabled={!hasSignature} mode="contained">
+            <Button onPress={handleConfirm} disabled={!hasSignature} mode="contained" buttonColor={colors.buttonPrimary}>
               Confirmar
             </Button>
           </View>
@@ -98,15 +102,15 @@ export default function SignatureCapture({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     borderRadius: 8,
     overflow: 'hidden',
     transform: [{ rotate: '90deg' }],
@@ -118,18 +122,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: '600',
+    color: colors.text,
   },
   instruction: {
     marginTop: 4,
-    color: '#666',
+    color: colors.textSecondary,
   },
   signatureContainer: {
     flex: 1,
     marginHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.border,
     borderRadius: 4,
-    backgroundColor: '#fff',
+    backgroundColor: colors.cardBackground,
   },
   actions: {
     flexDirection: 'row',

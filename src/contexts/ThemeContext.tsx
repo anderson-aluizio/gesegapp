@@ -17,6 +17,7 @@ export const lightColors = {
     textSecondary: '#555555',
     textTertiary: '#666666',
     textOnPrimary: '#ffffff',
+    textMuted: '#9ca3af',
 
     // Border colors
     border: '#e1e8ed',
@@ -24,6 +25,8 @@ export const lightColors = {
 
     // Button colors
     buttonPrimary: '#2980ef',
+    buttonSecondary: '#667eea',
+    buttonDanger: '#e74c3c',
     buttonText: '#ffffff',
 
     // Input colors
@@ -33,8 +36,24 @@ export const lightColors = {
     // Status colors
     error: '#e74c3c',
     success: '#27ae60',
+    successLight: '#f0f9f4',
     warning: '#f39c12',
     info: '#2196f3',
+
+    // Card colors
+    cardBackground: '#ffffff',
+    cardBorder: '#e6e8ec',
+    cardRipple: '#e0e7ef',
+
+    // Icon colors
+    icon: '#667eea',
+    iconMuted: '#999999',
+
+    // Overlay
+    overlay: 'rgba(0, 0, 0, 0.5)',
+
+    // Disabled state
+    disabled: '#cccccc',
 
     // Link colors
     link: '#2980ef',
@@ -59,6 +78,7 @@ export const darkColors = {
     textSecondary: '#b0b0b0',
     textTertiary: '#888888',
     textOnPrimary: '#ffffff',
+    textMuted: '#6b7280',
 
     // Border colors
     border: '#3a3a3a',
@@ -66,6 +86,8 @@ export const darkColors = {
 
     // Button colors
     buttonPrimary: '#4a9af5',
+    buttonSecondary: '#7b93ed',
+    buttonDanger: '#ef5350',
     buttonText: '#ffffff',
 
     // Input colors
@@ -75,8 +97,24 @@ export const darkColors = {
     // Status colors
     error: '#ef5350',
     success: '#4caf50',
+    successLight: '#1a3d2b',
     warning: '#ffb74d',
     info: '#42a5f5',
+
+    // Card colors
+    cardBackground: '#1e1e1e',
+    cardBorder: '#3a3a3a',
+    cardRipple: '#3a3a3a',
+
+    // Icon colors
+    icon: '#7b93ed',
+    iconMuted: '#666666',
+
+    // Overlay
+    overlay: 'rgba(0, 0, 0, 0.7)',
+
+    // Disabled state
+    disabled: '#555555',
 
     // Link colors
     link: '#4a9af5',

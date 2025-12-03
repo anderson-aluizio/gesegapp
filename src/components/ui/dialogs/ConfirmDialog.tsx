@@ -1,5 +1,7 @@
+import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Dialog, Portal, Text, Button } from 'react-native-paper';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 interface ConfirmDialogProps {
     visible: boolean;
@@ -21,9 +23,12 @@ export default function ConfirmDialog({
     onConfirm,
     confirmText = 'Confirmar',
     cancelText = 'Cancelar',
-    confirmColor = '#0439c9',
-    cancelColor = '#666',
+    confirmColor,
+    cancelColor,
 }: ConfirmDialogProps) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     return (
         <Portal>
             <Dialog visible={visible} onDismiss={onDismiss} style={styles.dialog}>
@@ -39,7 +44,7 @@ export default function ConfirmDialog({
                             mode="outlined"
                             onPress={onDismiss}
                             style={styles.button}
-                            textColor={cancelColor}
+                            textColor={cancelColor || colors.textSecondary}
                         >
                             {cancelText}
                         </Button>
@@ -47,7 +52,7 @@ export default function ConfirmDialog({
                             mode="contained"
                             onPress={onConfirm}
                             style={styles.button}
-                            buttonColor={confirmColor}
+                            buttonColor={confirmColor || colors.buttonPrimary}
                         >
                             {confirmText}
                         </Button>
@@ -58,16 +63,17 @@ export default function ConfirmDialog({
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     dialog: {
         borderRadius: 16,
+        backgroundColor: colors.surface,
     },
     dialogTitle: {
-        color: '#333',
+        color: colors.text,
         fontWeight: 'bold',
     },
     dialogText: {
-        color: '#666',
+        color: colors.textSecondary,
         lineHeight: 20,
     },
     buttonContainer: {

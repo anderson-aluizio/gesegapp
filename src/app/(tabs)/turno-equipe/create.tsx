@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
@@ -7,6 +7,7 @@ import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase
 import { useEquipeTurnoFuncionarioDatabase } from '@/database/models/useEquipeTurnoFuncionarioDatabase';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 type FuncionarioSelected = {
     cpf: string;
@@ -17,6 +18,9 @@ type FuncionarioSelected = {
 
 export default function CreateTurnoEquipeScreen() {
     const { user } = useAuth();
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const userFuncionarioSelected = {
         cpf: user?.cpf || '',
         nome: user?.name || '',
@@ -233,7 +237,7 @@ export default function CreateTurnoEquipeScreen() {
                                                     disabled={funcionario.is_blocked}
                                                     mode="text"
                                                     onPress={() => handleRemoveFuncionario(funcionario.cpf)}
-                                                    textColor="#e74c3c"
+                                                    textColor={colors.buttonDanger}
                                                     compact
                                                 >
                                                     Remover
@@ -284,7 +288,7 @@ export default function CreateTurnoEquipeScreen() {
                     <Button
                         mode="contained"
                         onPress={handleSubmit}
-                        buttonColor="#0439c9"
+                        buttonColor={colors.buttonPrimary}
                         style={styles.btnSubmit}
                         loading={isSubmitting}
                         disabled={isSubmitting}
@@ -297,10 +301,10 @@ export default function CreateTurnoEquipeScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f4f6fb",
+        backgroundColor: colors.background,
     },
     scrollContent: {
         flexGrow: 1,
@@ -308,11 +312,11 @@ const styles = StyleSheet.create({
         paddingBottom: 80,
     },
     formCard: {
-        backgroundColor: "#fff",
+        backgroundColor: colors.surface,
         margin: 12,
         borderRadius: 12,
         padding: 16,
-        shadowColor: "#000",
+        shadowColor: colors.shadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.10,
         shadowRadius: 8,
@@ -323,30 +327,30 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
         marginBottom: 4,
     },
     dateContainer: {
         padding: 12,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 8,
     },
     label: {
-        color: '#666',
+        color: colors.textSecondary,
         marginBottom: 4,
     },
     dateText: {
-        color: '#333',
+        color: colors.text,
         textTransform: 'capitalize',
     },
     funcionariosContainer: {
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 12,
         padding: 12,
         gap: 12,
     },
     funcionarioCard: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.surface,
         borderRadius: 8,
         padding: 12,
         gap: 8,
@@ -361,10 +365,10 @@ const styles = StyleSheet.create({
     },
     funcionarioNome: {
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
     },
     funcionarioDetails: {
-        color: '#666',
+        color: colors.textSecondary,
         marginTop: 2,
     },
     funcionarioChips: {
@@ -376,13 +380,13 @@ const styles = StyleSheet.create({
         height: 32,
     },
     emptyFuncionarios: {
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 8,
         padding: 20,
         alignItems: 'center',
     },
     emptyText: {
-        color: '#999',
+        color: colors.textTertiary,
         textAlign: 'center',
     },
     stickyButtonContainer: {
@@ -390,12 +394,12 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "#fff",
+        backgroundColor: colors.surface,
         paddingHorizontal: 16,
         paddingBottom: 16,
         paddingTop: 12,
         borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
+        borderTopColor: colors.border,
         elevation: 8,
     },
     btnSubmit: {
