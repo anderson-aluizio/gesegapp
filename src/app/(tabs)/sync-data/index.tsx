@@ -1,10 +1,12 @@
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useMemo } from 'react';
 import { useSnackbar } from '@/hooks/useSnackbar';
 import { useDialog } from '@/hooks/useDialog';
 import { useSyncProgress } from '@/hooks/useSyncProgress';
 import { useAnimations } from '@/hooks/useAnimations';
 import { useCentroCustoSync } from '@/hooks/useCentroCustoSync';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 import SyncHeader from '@/components/sync/SyncHeader';
 import CentroCustoList from '@/components/sync/CentroCustoList';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
@@ -18,6 +20,9 @@ export default function SyncDataScreen() {
     const dialog = useDialog();
     const syncProgress = useSyncProgress();
     const { fadeAnim, slideAnim } = useAnimations();
+    const { colors } = useTheme();
+
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     const { centroCustos, isLoading, isSyncing, syncCentroCusto } = useCentroCustoSync({
         onError: (message) => {
@@ -87,10 +92,10 @@ export default function SyncDataScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.background,
     },
     scrollContainer: {
         flex: 1,

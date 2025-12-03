@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { Animated, View, StyleSheet } from 'react-native';
 import { ProgressBar, Surface, Text } from 'react-native-paper';
 import { CentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 import CentroCustoCard from './CentroCustoCard';
 
 interface CentroCustoListProps {
@@ -20,10 +22,13 @@ export default function CentroCustoList({
     fadeAnim,
     slideAnim
 }: CentroCustoListProps) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ProgressBar indeterminate color="#0439c9" style={styles.loadingBar} />
+                <ProgressBar indeterminate color={colors.buttonPrimary} style={styles.loadingBar} />
                 <Text variant="bodyMedium" style={styles.loadingText}>
                     Carregando centros de custo...
                 </Text>
@@ -81,7 +86,7 @@ export default function CentroCustoList({
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     contentContainer: {
         flex: 1,
     },
@@ -97,7 +102,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     loadingText: {
-        color: '#666',
+        color: colors.textSecondary,
         textAlign: 'center',
     },
     emptyState: {
@@ -105,17 +110,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 12,
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         marginVertical: 10,
     },
     emptyStateText: {
-        color: '#666',
+        color: colors.textSecondary,
         textAlign: 'center',
         marginBottom: 24,
         lineHeight: 20,
     },
     infoCard: {
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         padding: 10,
         marginBottom: 14,
@@ -126,11 +131,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     infoTitle: {
-        color: '#333',
+        color: colors.text,
         fontWeight: 'bold',
     },
     infoDescription: {
-        color: '#666',
+        color: colors.textSecondary,
         lineHeight: 18,
     },
     cardsContainer: {

@@ -1,7 +1,8 @@
-import { Animated, StyleSheet } from 'react-native';
+import { useMemo } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import { Card, Text, IconButton } from 'react-native-paper';
-import { View } from 'react-native';
 import { CentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 interface CentroCustoCardProps {
     centroCusto: CentroCustoDatabase;
@@ -18,6 +19,9 @@ export default function CentroCustoCard({
     index,
     slideAnim
 }: CentroCustoCardProps) {
+    const { colors } = useTheme();
+    const styles = useMemo(() => createStyles(colors), [colors]);
+
     const formatSyncDate = (date: string | null | undefined) => {
         if (!date) {
             return 'Não sincronizado';
@@ -68,7 +72,7 @@ export default function CentroCustoCard({
                                 styles.syncButton,
                                 disabled && styles.syncButtonDisabled
                             ]}
-                            iconColor={disabled ? "#cccccc" : "#ffffff"}
+                            iconColor={disabled ? colors.border : colors.buttonText}
                         />
                     </View>
                 </Card.Content>
@@ -77,12 +81,12 @@ export default function CentroCustoCard({
     );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     cardWrapper: {
         marginBottom: 4,
     },
     card: {
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         overflow: 'hidden',
     },
@@ -100,27 +104,26 @@ const styles = StyleSheet.create({
         marginRight: 12,
     },
     cardTitle: {
-        color: '#333',
+        color: colors.text,
         fontWeight: 'bold',
         marginBottom: 2,
     },
     cardSubtitle: {
-        color: '#666',
+        color: colors.textSecondary,
         fontSize: 12,
         lineHeight: 16,
     },
     syncDate: {
-        color: '#999',
+        color: colors.textTertiary,
         fontSize: 12,
     },
     syncButton: {
         borderRadius: 8,
         elevation: 2,
-        backgroundColor: '#0439c9',
-        color: '#ffffff',
+        backgroundColor: colors.buttonPrimary,
     },
     syncButtonDisabled: {
-        backgroundColor: '#cccccc',
+        backgroundColor: colors.border,
         elevation: 0,
         opacity: 0.6,
     },

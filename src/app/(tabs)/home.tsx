@@ -2,8 +2,9 @@ import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, StatusBar }
 import { Text, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { Animated } from 'react-native';
 import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
 import { useChecklisEstruturaItemsDatabase } from '@/database/models/useChecklisEstruturaItemsDatabase';
@@ -29,9 +30,12 @@ type ModuleCardData = {
 export default function HomeScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { colors } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
   const dialog = useDialog();
+
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
   const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
@@ -167,7 +171,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#667eea" translucent={false} />
+      <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
 
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
@@ -314,19 +318,19 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.background,
   },
   headerContainer: {
-    backgroundColor: '#667eea',
+    backgroundColor: colors.primaryDark,
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     elevation: 6,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 3,
@@ -387,7 +391,7 @@ const styles = StyleSheet.create({
   },
   welcomeSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textTertiary,
     lineHeight: 22,
   },
   modulesGrid: {
@@ -404,7 +408,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -464,9 +468,9 @@ const styles = StyleSheet.create({
     right: 16,
     bottom: 40,
     borderRadius: 30,
-    backgroundColor: '#0439c9',
+    backgroundColor: colors.buttonPrimary,
     elevation: 6,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 3,

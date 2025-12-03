@@ -6,11 +6,12 @@ import { useChecklistRealizadoFuncionarioDatabase, ChecklistRealizadoFuncionario
 import { useChecklisRealizadoControleRiscosDatabase, ChecklistRealizadoControleRiscosDatabaseWithRelations } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
 import InfoDialog from "@/components/ui/dialogs/InfoDialog";
 import { checkNetworkConnection, useDialog } from "@/hooks";
+import { useTheme, ThemeColors } from "@/contexts/ThemeContext";
 
 type EquipeTurnoFormatted = {
     equipe_id: number;
@@ -42,6 +43,9 @@ const SendAllData = () => {
 
     const [loading, setLoading] = useState(false);
     const dialog = useDialog();
+    const { colors } = useTheme();
+
+    const styles = useMemo(() => createStyles(colors), [colors]);
 
     const handleSendTurnos = async () => {
         const turnos = await turnoDb.getAll();
@@ -210,8 +214,9 @@ const SendAllData = () => {
                     mode="contained"
                     icon="send"
                     onPress={handleSendAllData}
-                    style={{ marginTop: 10 }}
-                    buttonColor="#0439c9"
+                    style={styles.sendButton}
+                    buttonColor={colors.buttonPrimary}
+                    textColor={colors.buttonText}
                     disabled={loading}
                     loading={loading}
                 >
@@ -231,9 +236,9 @@ const SendAllData = () => {
 
 export default SendAllData;
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
     infoCard: {
-        backgroundColor: '#ffffff',
+        backgroundColor: colors.surface,
         borderRadius: 12,
         padding: 10,
         marginBottom: 14,
@@ -246,14 +251,17 @@ const styles = StyleSheet.create({
     },
     infoTitle: {
         fontWeight: '700',
-        color: "#222",
+        color: colors.text,
         flex: 1,
         flexWrap: "wrap",
     },
     infoDescription: {
-        color: '#6c7a89',
+        color: colors.textSecondary,
         marginRight: 2,
         flex: 1,
         flexWrap: "wrap",
+    },
+    sendButton: {
+        marginTop: 10,
     },
 });
