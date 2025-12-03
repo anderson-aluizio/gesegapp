@@ -102,9 +102,6 @@ const ChecklistItem = memo(({
                         </Text>
                     </View>
                 )}
-                <Text variant="labelSmall" style={styles.subGrupoBadge}>
-                    {item.checklist_sub_grupo ?? 'N/A'}
-                </Text>
                 <Text variant="labelLarge" style={[
                     styles.questionTitle,
                     item.is_respondido && styles.questionTitleCompleted
