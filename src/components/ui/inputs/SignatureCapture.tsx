@@ -119,14 +119,17 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
+    alignItems: 'center',
   },
   title: {
     fontWeight: '600',
     color: colors.text,
+    textAlign: 'center',
   },
   instruction: {
     marginTop: 4,
     color: colors.textSecondary,
+    textAlign: 'center',
   },
   signatureContainer: {
     flex: 1,
@@ -138,7 +141,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     paddingHorizontal: 8,
     paddingVertical: 8,
     gap: 8,
