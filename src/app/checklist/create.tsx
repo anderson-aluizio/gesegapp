@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Modal, ActivityIndicator } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
-import { Button, IconButton } from 'react-native-paper';
+import { Button, IconButton, Text } from 'react-native-paper';
 import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/models/useChecklistGrupoDatabase';
 import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
@@ -34,6 +34,7 @@ export default function CreateChecklistRealizadoScreen() {
     const [isFromTurno, setIsFromTurno] = useState(false);
     const [todayTurno, setTodayTurno] = useState<EquipeTurnoDatabase | null>(null);
     const [todayEquipeTurnoFuncionarios, setTodayEquipeTurnoFuncionarios] = useState<EquipeTurnoFuncionarioDatabaseWithRelations[] | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const centroCustoRef = useRef<AutocompleteSearchDropdownRef>(null);
     const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
@@ -177,6 +178,8 @@ export default function CreateChecklistRealizadoScreen() {
     };
 
     const handleNext = async () => {
+        if (isSubmitting) return;
+
         if (!selectedGrupo || !selectedCentroCusto || !selectedEstrutura || !selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
             dialog.show('Atenção', 'Preencha todos os campos.');
             return;
@@ -198,6 +201,8 @@ export default function CreateChecklistRealizadoScreen() {
             dialog.show('Atenção', 'Equipe não encontrada.');
             return;
         }
+
+        setIsSubmitting(true);
 
         try {
             const coords = await getCurrentLocation();
@@ -223,6 +228,7 @@ export default function CreateChecklistRealizadoScreen() {
             const lastChecklistRealizado = await checklistRealizadoDb.create(createdChecklist);
             if (!lastChecklistRealizado) {
                 dialog.show('Atenção', 'Erro ao criar registro. Tente novamente.');
+                setIsSubmitting(false);
                 return;
             }
 
@@ -240,14 +246,15 @@ export default function CreateChecklistRealizadoScreen() {
                     console.error('Error creating checklist funcionarios:', funcionarioError);
                     await checklistRealizadoDb.remove(Number(lastChecklistRealizado.insertedRowId));
                     dialog.show('Atenção', 'Erro ao associar funcionários ao checklist. Tente novamente.');
+                    setIsSubmitting(false);
                     return;
                 }
             }
 
             router.replace(`/checklist/${lastChecklistRealizado.insertedRowId}`)
         } catch (error) {
-            console.error('Error creating checklist:', error);
             dialog.show('Atenção', 'Erro ao criar o registro. Tente novamente.');
+            setIsSubmitting(false);
         }
     }
 
@@ -340,10 +347,31 @@ export default function CreateChecklistRealizadoScreen() {
                 />
 
                 <View style={styles.stickyButtonContainer}>
-                    <Button mode="contained" onPress={handleNext} buttonColor={colors.buttonPrimary} style={styles.btnNext}>
+                    <Button
+                        mode="contained"
+                        onPress={handleNext}
+                        buttonColor={colors.buttonPrimary}
+                        style={styles.btnNext}
+                        disabled={isSubmitting}
+                    >
                         CADASTRAR
                     </Button>
                 </View>
+
+                <Modal
+                    visible={isSubmitting}
+                    transparent={true}
+                    animationType="fade"
+                    statusBarTranslucent={true}
+                >
+                    <View style={styles.loadingOverlay}>
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color={colors.primary} />
+                            <Text style={styles.loadingText}>Cadastrando checklist...</Text>
+                            <Text style={styles.loadingSubtext}>Obtendo localização</Text>
+                        </View>
+                    </View>
+                </Modal>
             </View>
         </ProtectedRoute>
     );
@@ -396,5 +424,36 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontWeight: "700",
         fontSize: 16,
         letterSpacing: 0.5,
+    },
+    loadingOverlay: {
+        flex: 1,
+        backgroundColor: colors.overlay,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    loadingContainer: {
+        backgroundColor: colors.surface,
+        borderRadius: 16,
+        padding: 32,
+        alignItems: 'center',
+        shadowColor: colors.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+        minWidth: 200,
+    },
+    loadingText: {
+        marginTop: 16,
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text,
+        textAlign: 'center',
+    },
+    loadingSubtext: {
+        marginTop: 8,
+        fontSize: 14,
+        color: colors.textSecondary,
+        textAlign: 'center',
     },
 });
