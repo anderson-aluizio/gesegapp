@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
 import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
@@ -156,6 +156,22 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                                 <Text style={styles.infoValue}>{checklistRealizado?.checklist_estrutura_nome || '-'}</Text>
                             </View>
                         </View>
+                        {isUserOperacao && (
+                            <>
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoItem}>
+                                        <Text style={styles.infoLabel}>Equipe</Text>
+                                        <Text style={styles.infoValue}>{checklistRealizado?.equipe_nome || '-'}</Text>
+                                    </View>
+                                </View>
+                                <View style={styles.infoRow}>
+                                    <View style={styles.infoItem}>
+                                        <Text style={styles.infoLabel}>Veículo</Text>
+                                        <Text style={styles.infoValue}>{checklistRealizado?.veiculo_id || '-'}</Text>
+                                    </View>
+                                </View>
+                            </>
+                        )}
                         <View style={styles.lockNotice}>
                             <Text style={styles.lockNoticeText}>
                                 Campos bloqueados para edição. Caso precise alterar, exclua o registro e crie um novo.
@@ -170,43 +186,48 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         value={selectedMunicipio}
                         onValueChange={handleChangeMunicipio}
                         initialItems={municipioInitialItem} />
-                    <AutocompleteSearchDropdown
-                        listName="equipes"
-                        label="Equipe"
-                        placeholder={isUserOperacao ? "Equipe bloqueada (usuário operação)" : "Digite o nome da equipe"}
-                        extraParam={{ centro_custo_id: checklistRealizado.centro_custo_id || '' }}
-                        value={selectedEquipe}
-                        onValueChange={handleChangeEquipe}
-                        initialItems={equipeInitialItem}
-                        disable={isUserOperacao} />
-                    <AutocompleteSearchDropdown
-                        listName="veiculos"
-                        initialSearch={checklistRealizado?.veiculo_id || ''}
-                        label="Veiculo"
-                        placeholder={isUserOperacao ? "Veículo bloqueado (usuário operação)" : "Digite o ID do veículo"}
-                        value={selectedVeiculo}
-                        onValueChange={handleChangeVeiculo}
-                        initialItems={veiculoInitialItem}
-                        disable={isUserOperacao} />
+                    {!isUserOperacao && (
+                        <>
+                            <AutocompleteSearchDropdown
+                                listName="equipes"
+                                label="Equipe"
+                                placeholder="Digite o nome da equipe"
+                                extraParam={{ centro_custo_id: checklistRealizado.centro_custo_id || '' }}
+                                value={selectedEquipe}
+                                onValueChange={handleChangeEquipe}
+                                initialItems={equipeInitialItem} />
+                            <AutocompleteSearchDropdown
+                                listName="veiculos"
+                                initialSearch={checklistRealizado?.veiculo_id || ''}
+                                label="Veiculo"
+                                placeholder="Digite o ID do veículo"
+                                value={selectedVeiculo}
+                                onValueChange={handleChangeVeiculo}
+                                initialItems={veiculoInitialItem} />
+                        </>
+                    )}
                     <AutocompleteSearchDropdown
                         label="Area"
                         placeholder="Digite o nome do município"
                         value={selectedArea}
                         onValueChange={handleChangeArea}
                         initialItems={areas} />
-                    <TextInput
-                        label="Observação"
-                        placeholder="Digite uma observação (opcional)"
-                        value={observacao}
-                        onChangeText={handleChangeObservacao}
-                        multiline
-                        mode="outlined"
-                        theme={{ roundness: 8 }}
-                        outlineColor={colors.border}
-                        activeOutlineColor={colors.primary}
-                        textColor={colors.text}
-                        numberOfLines={3}
-                    />
+                    <View style={styles.container}>
+                        <RNText style={styles.label}>Observação</RNText>
+                        <TextInput
+                            placeholder="Digite uma observação (opcional)"
+                            value={observacao}
+                            onChangeText={handleChangeObservacao}
+                            multiline
+                            mode="outlined"
+                            style={styles.textInput}
+                            theme={{ roundness: 8 }}
+                            outlineColor={colors.border}
+                            activeOutlineColor={colors.primary}
+                            textColor={colors.text}
+                            numberOfLines={3}
+                        />
+                    </View>
                 </View>
                 <Portal>
                     <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')} style={styles.dialog}>
@@ -304,4 +325,11 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     dialogText: {
         color: colors.textSecondary,
     },
+    label: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.textSecondary,
+        marginBottom: 0,
+        paddingHorizontal: 4,
+    }
 });
