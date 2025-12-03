@@ -187,13 +187,15 @@ export default function EditChecklistRealizado() {
     }
 
     const isAprChecklist = checklistRealizado.checklist_grupo_nome_interno === 'checklist_apr';
+    const isAutoChecklist = checklistRealizado.checklist_grupo_nome_interno === 'checklist_auto_checklist';
     const isUserOperacao = user?.is_operacao;
 
-    if (isAprChecklist && isUserOperacao) {
+    if ((isAprChecklist || isAutoChecklist) && isUserOperacao) {
       const funcionarios = await checklistRealizadoFuncionarioDb.getByChecklistRealizadoId(checklistRealizado.id);
       const unsignedFuncionarios = funcionarios.filter(f => !f.assinatura);
       if (unsignedFuncionarios.length > 0) {
-        dialog.show('⚠️ Atenção', 'Todos os colaboradores precisam assinar antes de finalizar o checklist APR.');
+        const checklistType = isAprChecklist ? 'APR' : 'Auto Checklist';
+        dialog.show('⚠️ Atenção', `Todos os colaboradores precisam assinar antes de finalizar o ${checklistType}.`);
         return;
       }
     }
