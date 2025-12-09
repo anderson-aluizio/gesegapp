@@ -7,6 +7,7 @@
 
 import { Migration } from './types';
 import { migration_001_initial_schema } from './001_initial_schema';
+import { migration_002_add_is_synced_fields } from './002_add_is_synced_fields';
 
 /**
  * All migrations in sequential order
@@ -14,8 +15,8 @@ import { migration_001_initial_schema } from './001_initial_schema';
  */
 export const allMigrations: Migration[] = [
     migration_001_initial_schema,
+    migration_002_add_is_synced_fields,
     // Add new migrations here
-    // migration_002_add_some_feature,
     // migration_003_modify_table,
 ];
 

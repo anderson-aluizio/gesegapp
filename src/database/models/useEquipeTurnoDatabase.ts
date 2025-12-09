@@ -6,6 +6,7 @@ export type EquipeTurnoDatabase = {
   date: string;
   veiculo_id: string;
   created_at: string;
+  is_synced?: number;
 }
 
 export type EquipeTurnoDatabaseWithRelations = EquipeTurnoDatabase & {
@@ -172,6 +173,66 @@ export const useEquipeTurnoDatabase = () => {
     }
   }
 
+  const getNotSynced = async () => {
+    try {
+      const query = `
+        SELECT
+          et.*,
+          e.nome as equipe_nome,
+          v.nome as veiculo_nome,
+          (SELECT COUNT(*) FROM equipe_turno_funcionarios WHERE equipe_turno_id = et.id) as total_funcionarios
+        FROM equipe_turnos et
+        LEFT JOIN equipes e ON et.equipe_id = e.id
+        LEFT JOIN veiculos v ON et.veiculo_id = v.id
+        WHERE et.is_synced = 0
+        ORDER BY et.date DESC, et.created_at DESC
+      `;
+
+      const response = await database.getAllAsync<EquipeTurnoDatabaseWithRelations>(query, []);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  const markAsSynced = async (id: number) => {
+    try {
+      const statement = await database.prepareAsync(
+        `UPDATE equipe_turnos SET is_synced = 1 WHERE id = ?`
+      );
+
+      const result = await statement.executeAsync([id]);
+      await statement.finalizeAsync();
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  const cleanOldSyncedData = async (daysToKeep: number = 7) => {
+    try {
+      const query = `
+        DELETE FROM equipe_turno_funcionarios
+        WHERE equipe_turno_id IN (
+          SELECT id FROM equipe_turnos
+          WHERE is_synced = 1
+          AND DATE(date) < DATE('now', '-' || ? || ' days')
+        )
+      `;
+      await database.runAsync(query, [daysToKeep]);
+
+      const deleteQuery = `
+        DELETE FROM equipe_turnos
+        WHERE is_synced = 1
+        AND DATE(date) < DATE('now', '-' || ? || ' days')
+      `;
+      const result = await database.runAsync(deleteQuery, [daysToKeep]);
+      return result.changes;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   return {
     getAll,
     show,
@@ -180,6 +241,9 @@ export const useEquipeTurnoDatabase = () => {
     getTodayTurno,
     hasTodayTurno,
     create,
-    remove
+    remove,
+    getNotSynced,
+    markAsSynced,
+    cleanOldSyncedData
   }
 }

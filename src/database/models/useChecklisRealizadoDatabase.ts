@@ -26,6 +26,7 @@ export type ChecklistRealizadoDatabase = {
   gerente_cpf: string
   gerente_nome?: string
   is_finalizado: boolean
+  is_synced?: number
   checklist_grupo_nome?: string
   checklist_grupo_nome_interno?: string
   checklist_estrutura_nome?: string
@@ -149,6 +150,32 @@ export const useChecklisRealizadoDatabase = () => {
       return response;
     } catch (error) {
       throw error
+    }
+  }
+
+  const getFinalizadosNotSynced = async () => {
+    try {
+      const query = `SELECT * FROM checklist_realizados WHERE is_finalizado = 1 AND is_synced = 0`;
+
+      const response = await database.getAllAsync<ChecklistRealizadoDatabase>(query, []);
+
+      return response;
+    } catch (error) {
+      throw error
+    }
+  }
+
+  const markAsSynced = async (id: number) => {
+    const statement = await database.prepareAsync(
+      `UPDATE checklist_realizados SET is_synced = 1 WHERE id = $id`
+    )
+
+    try {
+      await statement.executeAsync({ $id: id })
+    } catch (error) {
+      throw error
+    } finally {
+      await statement.finalizeAsync()
     }
   }
 
@@ -436,10 +463,59 @@ export const useChecklisRealizadoDatabase = () => {
     }
   }
 
+  const cleanOldSyncedData = async (daysToKeep: number = 7) => {
+    try {
+      const idsToDeleteQuery = `
+        SELECT id FROM checklist_realizados
+        WHERE is_synced = 1
+        AND DATE(date) < DATE('now', '-' || ? || ' days')
+      `;
+      const idsToDelete = await database.getAllAsync<{ id: number }>(idsToDeleteQuery, [daysToKeep]);
+
+      if (idsToDelete.length === 0) {
+        return 0;
+      }
+
+      const ids = idsToDelete.map(r => r.id);
+      const placeholders = ids.map(() => '?').join(',');
+
+      await database.runAsync(
+        `DELETE FROM checklist_realizado_apr_controle_riscos WHERE checklist_realizado_id IN (${placeholders})`,
+        ids
+      );
+
+      await database.runAsync(
+        `DELETE FROM checklist_realizado_apr_riscos WHERE checklist_realizado_id IN (${placeholders})`,
+        ids
+      );
+
+      await database.runAsync(
+        `DELETE FROM checklist_realizado_items WHERE checklist_realizado_id IN (${placeholders})`,
+        ids
+      );
+
+      await database.runAsync(
+        `DELETE FROM checklist_realizado_funcionarios WHERE checklist_realizado_id IN (${placeholders})`,
+        ids
+      );
+
+      const result = await database.runAsync(
+        `DELETE FROM checklist_realizados WHERE id IN (${placeholders})`,
+        ids
+      );
+
+      return result.changes;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   return {
     create,
     getAll,
     getFinalizados,
+    getFinalizadosNotSynced,
+    markAsSynced,
     show,
     updateDadosGerais,
     updateLideranca,
@@ -448,6 +524,7 @@ export const useChecklisRealizadoDatabase = () => {
     remove,
     hasAutoChecklistToday,
     hasChecklistsByDate,
-    duplicate
+    duplicate,
+    cleanOldSyncedData
   }
 }

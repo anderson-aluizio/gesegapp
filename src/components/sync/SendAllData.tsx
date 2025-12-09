@@ -48,7 +48,7 @@ const SendAllData = () => {
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     const handleSendTurnos = async () => {
-        const turnos = await turnoDb.getAll();
+        const turnos = await turnoDb.getNotSynced();
         if (turnos.length === 0) {
             return { success: 0, error: 0, errorDetails: [] };
         }
@@ -71,7 +71,7 @@ const SendAllData = () => {
                 };
 
                 await apiClientWrapper.post('/store-equipe-turno', turnoData);
-                await turnoDb.remove(turno.id);
+                await turnoDb.markAsSynced(turno.id);
                 successCount++;
             } catch (error) {
                 errorCount++;
@@ -84,7 +84,7 @@ const SendAllData = () => {
     };
 
     const handleSendChecklists = async () => {
-        const checklists = await checklistDb.getFinalizados();
+        const checklists = await checklistDb.getFinalizadosNotSynced();
         if (checklists.length === 0) {
             return { success: 0, error: 0, errorDetails: [] };
         }
@@ -123,7 +123,7 @@ const SendAllData = () => {
                     await apiClientWrapper.post('/store-checklist-realizado', checklistData);
                 }
 
-                await checklistDb.remove(checklist.id);
+                await checklistDb.markAsSynced(checklist.id);
                 successCount++;
             } catch (error) {
                 errorCount++;
@@ -162,6 +162,14 @@ const SendAllData = () => {
                 dialog.show('ℹ️ Informação', "Não há dados finalizados para enviar.");
                 setLoading(false);
                 return;
+            }
+
+            // Limpar dados sincronizados com mais de 7 dias
+            try {
+                await turnoDb.cleanOldSyncedData(7);
+                await checklistDb.cleanOldSyncedData(7);
+            } catch (cleanError) {
+                console.error("Erro ao limpar dados antigos:", cleanError);
             }
 
             if (totalErrors === 0) {
