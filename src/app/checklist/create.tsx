@@ -14,6 +14,7 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 import { useLocation } from '@/hooks/useLocation';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
@@ -35,6 +36,8 @@ export default function CreateChecklistRealizadoScreen() {
     const [todayTurno, setTodayTurno] = useState<EquipeTurnoDatabase | null>(null);
     const [todayEquipeTurnoFuncionarios, setTodayEquipeTurnoFuncionarios] = useState<EquipeTurnoFuncionarioDatabaseWithRelations[] | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showLocationFailedDialog, setShowLocationFailedDialog] = useState(false);
+    const [pendingEquipe, setPendingEquipe] = useState<any>(null);
 
     const centroCustoRef = useRef<AutocompleteSearchDropdownRef>(null);
     const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
@@ -177,42 +180,8 @@ export default function CreateChecklistRealizadoScreen() {
         }
     };
 
-    const handleNext = async () => {
-        if (isSubmitting) return;
-
-        if (!selectedGrupo || !selectedCentroCusto || !selectedEstrutura || !selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
-            dialog.show('Atenção', 'Preencha todos os campos.');
-            return;
-        }
-
-        if (isUserOperacao) {
-            const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
-            const isAutoChecklistGroup = selectedGrupoData?.nome_interno === 'checklist_auto_checklist';
-            const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
-
-            if (!isAutoChecklistGroup && !hasAutoChecklist) {
-                dialog.show('Atenção', 'Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
-                return;
-            }
-        }
-
-        const equipe = await equipeDb.show(Number(selectedEquipe));
-        if (!equipe) {
-            dialog.show('Atenção', 'Equipe não encontrada.');
-            return;
-        }
-
-        setIsSubmitting(true);
-
+    const createChecklistWithCoordinates = async (equipe: any, coords: { latitude: number; longitude: number } | null) => {
         try {
-            const locationResult = await getCurrentLocation();
-
-            if (locationResult.error) {
-                dialog.show('Erro de Localização', locationResult.error);
-                setIsSubmitting(false);
-                return;
-            }
-
             const createdChecklist = {
                 checklist_grupo_id: Number(selectedGrupo),
                 checklist_estrutura_id: Number(selectedEstrutura),
@@ -220,7 +189,7 @@ export default function CreateChecklistRealizadoScreen() {
                 localidade_cidade_id: Number(selectedMunicipio),
                 equipe_id: Number(selectedEquipe),
                 veiculo_id: String(selectedVeiculo),
-                area: selectedArea,
+                area: selectedArea!,
                 date: new Date(),
                 observacao: "",
                 encarregado_cpf: equipe.encarregado_cpf,
@@ -229,8 +198,8 @@ export default function CreateChecklistRealizadoScreen() {
                 gerente_cpf: equipe.gerente_cpf || '',
                 is_finalizado: false,
                 is_user_declarou_conformidade: false,
-                latitude: locationResult.coords?.latitude,
-                longitude: locationResult.coords?.longitude,
+                latitude: coords?.latitude,
+                longitude: coords?.longitude,
             }
             const lastChecklistRealizado = await checklistRealizadoDb.create(createdChecklist);
             if (!lastChecklistRealizado) {
@@ -264,6 +233,61 @@ export default function CreateChecklistRealizadoScreen() {
             dialog.show('Atenção', 'Erro ao criar o registro. Tente novamente.');
             setIsSubmitting(false);
         }
+    };
+
+    const handleNext = async () => {
+        if (isSubmitting) return;
+
+        if (!selectedGrupo || !selectedCentroCusto || !selectedEstrutura || !selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
+            dialog.show('Atenção', 'Preencha todos os campos.');
+            return;
+        }
+
+        if (isUserOperacao) {
+            const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
+            const isAutoChecklistGroup = selectedGrupoData?.nome_interno === 'checklist_auto_checklist';
+            const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
+
+            if (!isAutoChecklistGroup && !hasAutoChecklist) {
+                dialog.show('Atenção', 'Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
+                return;
+            }
+        }
+
+        const equipe = await equipeDb.show(Number(selectedEquipe));
+        if (!equipe) {
+            dialog.show('Atenção', 'Equipe não encontrada.');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            const locationResult = await getCurrentLocation();
+
+            if (locationResult.error) {
+                setPendingEquipe(equipe);
+                setShowLocationFailedDialog(true);
+                setIsSubmitting(false);
+                return;
+            }
+
+            await createChecklistWithCoordinates(equipe, locationResult.coords);
+        } catch (error) {
+            dialog.show('Atenção', 'Erro ao criar o registro. Tente novamente.');
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleContinueWithoutLocation = async () => {
+        setShowLocationFailedDialog(false);
+        setIsSubmitting(true);
+        await createChecklistWithCoordinates(pendingEquipe, null);
+    };
+
+    const handleLocationDialogDismiss = () => {
+        setShowLocationFailedDialog(false);
+        setPendingEquipe(null);
     }
 
     return (
@@ -352,6 +376,16 @@ export default function CreateChecklistRealizadoScreen() {
                     description={dialog.description}
                     title={dialog.title}
                     onDismiss={dialog.hide}
+                />
+
+                <ConfirmDialog
+                    visible={showLocationFailedDialog}
+                    title="Localização não disponível"
+                    description="Não foi possível obter sua localização. O checklist será criado sem as coordenadas. Deseja continuar?"
+                    onConfirm={handleContinueWithoutLocation}
+                    onDismiss={handleLocationDialogDismiss}
+                    confirmText="Continuar"
+                    cancelText="Cancelar"
                 />
 
                 <View style={styles.stickyButtonContainer}>
