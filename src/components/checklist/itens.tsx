@@ -554,6 +554,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     searchContainer: {
         backgroundColor: colors.surface,

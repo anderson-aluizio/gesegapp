@@ -254,6 +254,11 @@ export default function EditChecklistRealizado() {
               navigationState={{ index, routes }}
               onIndexChange={setIndex}
               renderScene={renderScene}
+              barStyle={{ backgroundColor: colors.surface }}
+              activeColor={colors.primary}
+              inactiveColor={colors.textSecondary}
+              sceneAnimationEnabled={false}
+              sceneAnimationType="shifting"
             />
             <Portal>
               <Dialog visible={isdialogFinishShow} onDismiss={() => setIsdialogFinishShow(false)}>

@@ -255,6 +255,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     inner: {
         gap: 10,

@@ -187,6 +187,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     inner: {
         gap: 10,

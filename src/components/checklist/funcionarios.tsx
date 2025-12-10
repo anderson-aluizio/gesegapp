@@ -244,6 +244,7 @@ export default function FuncionariosScreen(props: {
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: colors.background,
     },
     inner: {
         gap: 10,
