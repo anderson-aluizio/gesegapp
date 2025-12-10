@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image, StatusBar } from 'react-native';
+import { StyleSheet, View, ScrollView, Pressable, Dimensions, Image } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
@@ -173,8 +173,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
-
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
           <View style={styles.logoContainer}>

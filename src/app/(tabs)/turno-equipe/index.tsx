@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, View, Animated, StatusBar } from 'react-native';
+import { FlatList, StyleSheet, View, Animated } from 'react-native';
 import { Button, Dialog, Portal, Text, Surface, IconButton, ActivityIndicator, Card, Chip, List, Divider } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef, useMemo } from 'react';
@@ -265,8 +265,6 @@ export default function TurnoEquipeScreen() {
     return (
         <ProtectedRoute>
             <View style={styles.container}>
-                <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
-
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" />

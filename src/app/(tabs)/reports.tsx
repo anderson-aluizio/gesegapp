@@ -4,7 +4,6 @@ import {
     StyleSheet,
     ScrollView,
     Dimensions,
-    StatusBar,
     ActivityIndicator,
 } from 'react-native';
 import { Text, Card, IconButton, SegmentedButtons } from 'react-native-paper';
@@ -124,8 +123,6 @@ export default function ReportsScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
-
             {/* Header */}
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>

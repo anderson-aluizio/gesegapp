@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList, StatusBar } from 'react-native';
+import { View, StyleSheet, FlatList } from 'react-native';
 import { Text, Surface, Card, IconButton, ActivityIndicator, Searchbar, Button } from 'react-native-paper';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useState, useEffect, useMemo } from 'react';
@@ -100,8 +100,6 @@ export default function DuplicateChecklistScreen() {
 
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
-
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>
                     <IconButton

@@ -1,5 +1,5 @@
-import { FlatList, StyleSheet, View, StatusBar, Animated, Platform, Image } from 'react-native';
-import { Button, Dialog, Portal, Text, Surface, FAB, Searchbar, IconButton, ActivityIndicator } from 'react-native-paper';
+import { FlatList, StyleSheet, View, Animated } from 'react-native';
+import { Button, Dialog, Portal, Text, Surface, Searchbar, IconButton, ActivityIndicator } from 'react-native-paper';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState, useRef, useMemo } from 'react';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
@@ -79,10 +79,6 @@ export default function ChecklistListScreen() {
         useCallback(() => {
             list();
             setIsLoading(false);
-            if (Platform.OS === 'android') {
-                StatusBar.setBarStyle('light-content');
-                StatusBar.setBackgroundColor('#667eea', true);
-            }
         }, [])
     );
 
@@ -176,7 +172,6 @@ export default function ChecklistListScreen() {
     };
     return (
         <View style={[styles.container]}>
-            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
             <View style={styles.headerContainer}>
                 <View style={styles.headerTop}>
                     <IconButton

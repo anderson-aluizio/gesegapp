@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { View, StyleSheet, StatusBar } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
@@ -12,22 +12,19 @@ export default function SyncHeader({ onBack }: SyncHeaderProps) {
     const styles = useMemo(() => createStyles(colors), [colors]);
 
     return (
-        <>
-            <StatusBar barStyle="light-content" backgroundColor={colors.primaryDark} translucent={false} />
-            <View style={styles.headerContainer}>
-                <View style={styles.headerTop}>
-                    <IconButton
-                        icon="arrow-left"
-                        iconColor={colors.textOnPrimary}
-                        size={24}
-                        onPress={onBack}
-                        style={styles.backButton}
-                    />
-                    <Text style={styles.headerTitle}>Sincronização</Text>
-                    <View style={styles.headerSpacer} />
-                </View>
+        <View style={styles.headerContainer}>
+            <View style={styles.headerTop}>
+                <IconButton
+                    icon="arrow-left"
+                    iconColor={colors.textOnPrimary}
+                    size={24}
+                    onPress={onBack}
+                    style={styles.backButton}
+                />
+                <Text style={styles.headerTitle}>Sincronização</Text>
+                <View style={styles.headerSpacer} />
             </View>
-        </>
+        </View>
     );
 }
 
