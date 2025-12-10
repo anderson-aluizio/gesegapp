@@ -258,6 +258,7 @@ export default function CreateChecklistRealizadoScreen() {
                 }
             }
 
+            setIsSubmitting(false);
             router.replace(`/checklist/${lastChecklistRealizado.insertedRowId}`)
         } catch (error) {
             dialog.show('Atenção', 'Erro ao criar o registro. Tente novamente.');
