@@ -482,7 +482,7 @@ export default function ItensScreen(props: {
                                 </Text>
                             ) : filteredGroupedItems.length === 0 ? (
                                 <Text style={styles.emptyText}>
-                                    Nenhum item encontrado para "{searchQuery}".
+                                    Nenhum item encontrado para &quot;{searchQuery}&quot;.
                                 </Text>
                             ) : (
                                 filteredGroupedItems.map((group) => (

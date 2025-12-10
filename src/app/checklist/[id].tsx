@@ -265,7 +265,7 @@ export default function EditChecklistRealizado() {
                 <Dialog.Title>Finalizar Registro</Dialog.Title>
                 <Dialog.Content>
                   <Text variant="bodySmall" style={{ textAlign: 'justify' }}>
-                    Antes de finalizar confira se todas as informações estão corretas. Se o botão "Atualizar" estiver habilitado é porque
+                    Antes de finalizar confira se todas as informações estão corretas. Se o botão &quot;Atualizar&quot; estiver habilitado é porque
                     o formulário possui alterações não salvas.
                   </Text>
                   {isChecklistRealizadoTipoObservacao && (
