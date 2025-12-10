@@ -211,8 +211,7 @@ export default function EditChecklistRealizado() {
 
     checklistRealizadoDb.updateFinished(checklistRealizado.id, user.id, isUserDeclarouConformidade)
       .then(() => {
-        router.dismissAll();
-        router.push('/checklist-list');
+        router.replace('/checklist-list');
       })
       .catch((error) => {
         console.error('Erro ao finalizar checklist:', error);

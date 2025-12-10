@@ -70,7 +70,7 @@ export default function ReportsScreen() {
 
         return [
             {
-                title: 'Checklists Finalizados',
+                title: 'Total',
                 value: summary.total_checklists.toLocaleString('pt-BR'),
                 subtitle: periodLabels[timeFilter],
                 icon: 'clipboard-check',
@@ -83,7 +83,7 @@ export default function ReportsScreen() {
             {
                 title: 'Média Diária',
                 value: summary.daily_average.toFixed(1),
-                subtitle: 'Checklists/dia',
+                subtitle: 'Total/dia',
                 icon: 'calendar-today',
                 colors: ['#4facfe', '#00f2fe'] as [string, string],
                 top: {
