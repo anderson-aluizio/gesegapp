@@ -55,7 +55,10 @@
           "organization": "dinamo-engenharia"
         }
       ],
-      "expo-location"
+      "expo-location",
+      "expo-font",
+      "expo-sqlite",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
