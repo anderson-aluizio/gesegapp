@@ -1,13 +1,8 @@
-import { memo, useMemo, useState } from 'react';
-import { StyleSheet, View, Pressable, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { memo, useMemo } from 'react';
+import { StyleSheet, View, Pressable, LayoutAnimation } from 'react-native';
 import { Text } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
-
-// Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface CollapsibleSectionProps {
     title: string;
