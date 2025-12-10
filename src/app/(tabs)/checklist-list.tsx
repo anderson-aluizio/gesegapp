@@ -48,7 +48,7 @@ export default function ChecklistListScreen() {
 
     const list = async () => {
         try {
-            const response = await checklistDb.getAll();
+            const response = await checklistDb.getAllNotSynced();
             setChecklistRealizados(response);
             setFilteredChecklists(response);
 

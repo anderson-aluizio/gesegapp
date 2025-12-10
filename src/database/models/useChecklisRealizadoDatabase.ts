@@ -165,6 +165,41 @@ export const useChecklisRealizadoDatabase = () => {
     }
   }
 
+  const getAllNotSynced = async () => {
+    try {
+      const query =
+        `SELECT
+          checklist_realizados.*,
+          equipes.nome AS equipe_nome,
+          veiculos.nome AS veiculo_nome,
+          localidade_cidades.nome AS localidade_cidade_nome,
+          centro_custos.nome AS centro_custo_nome,
+          checklist_grupos.nome AS checklist_grupo_nome,
+          checklist_estruturas.modelo AS checklist_estrutura_nome
+        FROM checklist_realizados
+          INNER JOIN equipes ON checklist_realizados.equipe_id = equipes.id
+          INNER JOIN veiculos ON checklist_realizados.veiculo_id = veiculos.id
+          INNER JOIN localidade_cidades ON checklist_realizados.localidade_cidade_id = localidade_cidades.id
+          INNER JOIN centro_custos ON checklist_realizados.centro_custo_id = centro_custos.id
+          INNER JOIN checklist_grupos ON checklist_realizados.checklist_grupo_id = checklist_grupos.id
+          INNER JOIN checklist_estruturas ON checklist_realizados.checklist_estrutura_id = checklist_estruturas.id
+        WHERE checklist_realizados.is_synced = 0
+        ORDER BY checklist_realizados.date DESC`;
+
+      const response = await database.getAllAsync<ChecklistRealizadoDatabase>(query, []);
+      const transformedResponse: ChecklistRealizadoDatabase[] = response.map(item => ({
+        ...item,
+        is_finalizado: Boolean(item.is_finalizado),
+        date: new Date(item.date),
+        date_fim: item.date_fim ? new Date(item.date_fim) : undefined
+      }));
+
+      return transformedResponse;
+    } catch (error) {
+      throw error
+    }
+  }
+
   const markAsSynced = async (id: number) => {
     const statement = await database.prepareAsync(
       `UPDATE checklist_realizados SET is_synced = 1 WHERE id = $id`
@@ -513,6 +548,7 @@ export const useChecklisRealizadoDatabase = () => {
   return {
     create,
     getAll,
+    getAllNotSynced,
     getFinalizados,
     getFinalizadosNotSynced,
     markAsSynced,

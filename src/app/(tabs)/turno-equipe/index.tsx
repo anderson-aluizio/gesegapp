@@ -48,7 +48,7 @@ export default function TurnoEquipeScreen() {
 
     const list = async () => {
         try {
-            const response = await turnoDb.getAll();
+            const response = await turnoDb.getNotSynced();
             setTurnos(response);
 
             Animated.timing(fadeAnim, {
