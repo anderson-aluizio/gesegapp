@@ -12,6 +12,7 @@ import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 import { useDialog } from '@/hooks/useDialog';
+import { usePendingSyncAlert } from '@/hooks/usePendingSyncAlert';
 
 const { width } = Dimensions.get('window');
 const CARD_SPACING = 12;
@@ -49,6 +50,7 @@ export default function HomeScreen() {
   const turnoDb = useEquipeTurnoDatabase();
   const checklistEstruturaItemsDb = useChecklisEstruturaItemsDatabase();
   const centroCustoDb = useCentroCustoDatabase();
+  const { showAlert: showSyncAlert, dismissAlert: dismissSyncAlert, getAlertMessage } = usePendingSyncAlert();
 
   useEffect(() => {
     Animated.parallel([
@@ -313,6 +315,19 @@ export default function HomeScreen() {
         description={dialog.description}
         title={dialog.title}
         onDismiss={dialog.hide}
+      />
+
+      <ConfirmDialog
+        visible={showSyncAlert}
+        title="Dados pendentes de sincronização"
+        description={getAlertMessage()}
+        onConfirm={() => {
+          dismissSyncAlert();
+          router.push('/sync-data');
+        }}
+        onDismiss={dismissSyncAlert}
+        confirmText="Sincronizar"
+        cancelText="Depois"
       />
     </View>
   );
