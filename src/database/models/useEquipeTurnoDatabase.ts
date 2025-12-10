@@ -1,4 +1,5 @@
 import { useSQLiteContext } from "expo-sqlite"
+import { toLocalISOString, getLocalDateString } from "@/utils/dateUtils"
 
 export type EquipeTurnoDatabase = {
   id: number;
@@ -105,7 +106,7 @@ export const useEquipeTurnoDatabase = () => {
 
   const getTodayTurno = async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       const query = `
         SELECT
           et.*,
@@ -145,9 +146,9 @@ export const useEquipeTurnoDatabase = () => {
 
       const result = await statement.executeAsync([
         data.equipe_id,
-        data.date.toISOString(),
+        toLocalISOString(data.date),
         data.veiculo_id,
-        new Date().toISOString()
+        toLocalISOString(new Date())
       ]);
 
       await statement.finalizeAsync();

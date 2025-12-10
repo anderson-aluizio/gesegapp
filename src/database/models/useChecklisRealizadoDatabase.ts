@@ -3,6 +3,7 @@ import { useChecklisRealizadoItemsDatabase } from "./useChecklisRealizadoItemsDa
 import { useChecklisEstruturaItemsDatabase } from "./useChecklisEstruturaItemsDatabase"
 import { useChecklistRealizadoFuncionarioDatabase } from "./useChecklistRealizadoFuncionarioDatabase"
 import { ChecklistEstruturaDatabase } from "./useChecklistEstruturaDatabase"
+import { toLocalISOString, getLocalDateString, toLocalDateTimeString } from "@/utils/dateUtils"
 
 export type ChecklistRealizadoDatabase = {
   id: number
@@ -61,7 +62,7 @@ export const useChecklisRealizadoDatabase = () => {
       VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
               $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
               NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
-              NULLIF($gerente_cpf, ''), datetime('now'), $latitude, $longitude)`
+              NULLIF($gerente_cpf, ''), $created_at, $latitude, $longitude)`
     );
 
     try {
@@ -75,14 +76,15 @@ export const useChecklisRealizadoDatabase = () => {
           $equipe_id: data.equipe_id,
           $veiculo_id: data.veiculo_id,
           $area: data.area,
-          $date: data.date.toISOString(),
-          $date_fim: data.date_fim ? data.date_fim.toISOString() : null,
+          $date: toLocalISOString(data.date),
+          $date_fim: data.date_fim ? toLocalISOString(data.date_fim) : null,
           $observacao: data.observacao || "",
           $encarregado_cpf: data.encarregado_cpf,
           $supervisor_cpf: data.supervisor_cpf,
           $coordenador_cpf: data.coordenador_cpf,
           $gerente_cpf: data.gerente_cpf,
           $is_finalizado: data.is_finalizado ? 1 : 0,
+          $created_at: toLocalISOString(new Date()),
           $latitude: data.latitude || null,
           $longitude: data.longitude || null,
         });
@@ -333,15 +335,17 @@ export const useChecklisRealizadoDatabase = () => {
           is_user_declarou_conformidade = $is_user_declarou_conformidade,
           is_finalizado = 1,
           date_fim = $date_fim,
-          finalizado_at = datetime('now'),
+          finalizado_at = $finalizado_at,
           finalizado_by = $user_id
         WHERE id = $id`
     )
 
     try {
+      const now = new Date();
       await statement.executeAsync({
         $is_user_declarou_conformidade: is_user_declarou_conformidade ? 1 : 0,
-        $date_fim: new Date().toISOString(),
+        $date_fim: toLocalISOString(now),
+        $finalizado_at: toLocalDateTimeString(now),
         $user_id: user_id,
         $id: id
       })
@@ -388,7 +392,7 @@ export const useChecklisRealizadoDatabase = () => {
 
   const hasAutoChecklistToday = async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       const query = `
         SELECT cr.*
         FROM checklist_realizados cr
@@ -438,10 +442,11 @@ export const useChecklisRealizadoDatabase = () => {
           VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
                   $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
                   NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
-                  NULLIF($gerente_cpf, ''), datetime('now'), $latitude, $longitude)`
+                  NULLIF($gerente_cpf, ''), $created_at, $latitude, $longitude)`
         );
 
         try {
+          const now = new Date();
           const result = await statement.executeAsync({
             $checklist_grupo_id: newChecklistEstrutura.checklist_grupo_id,
             $checklist_estrutura_id: newChecklistEstrutura.id,
@@ -450,7 +455,8 @@ export const useChecklisRealizadoDatabase = () => {
             $equipe_id: originalChecklist.equipe_id,
             $veiculo_id: originalChecklist.veiculo_id,
             $area: originalChecklist.area,
-            $date: new Date().toISOString(),
+            $date: toLocalISOString(now),
+            $created_at: toLocalISOString(now),
             $encarregado_cpf: originalChecklist.encarregado_cpf,
             $supervisor_cpf: originalChecklist.supervisor_cpf,
             $coordenador_cpf: originalChecklist.coordenador_cpf,
