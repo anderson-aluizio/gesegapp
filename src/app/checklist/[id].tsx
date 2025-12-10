@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { BottomNavigation, Button, Dialog, Portal, Text, ActivityIndicator, MD2Colors } from 'react-native-paper';
+import { BottomNavigation, Button, Dialog, Portal, Text, ActivityIndicator, MD2Colors, IconButton } from 'react-native-paper';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DadosGeraisScreen from '@/components/checklist/dadosGerais';
 import LiderancaScreen from '@/components/checklist/lideranca';
@@ -233,6 +233,16 @@ export default function EditChecklistRealizado() {
             <Stack.Screen
               options={{
                 title: 'Editar',
+                headerLeft: () => (
+                  <IconButton
+                    icon="arrow-left"
+                    size={24}
+                    onPress={() => {
+                      router.dismissAll();
+                      router.push('/checklist-list');
+                    }}
+                  />
+                ),
                 headerRight: () => (
                   <Button icon="checkbox-marked-circle-outline" onPress={() => setIsdialogFinishShow(true)} textColor={colors.success}>
                     Finalizar

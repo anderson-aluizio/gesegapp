@@ -4,8 +4,11 @@ export const validateItemIsRespondido = (
     isDescricaoRequired: boolean,
     isDescricaoFilled: boolean,
     isFotoObrigatoria: boolean = false,
-    fotoPath?: string
+    fotoPath?: string,
+    resposta?: string
 ): boolean => {
+    if (!resposta || resposta.trim() === '') return false;
+
     if (isFotoObrigatoria && !fotoPath) return false;
 
     if (!isInconforme) return true;

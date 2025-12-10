@@ -117,7 +117,8 @@ export default function ItensScreen(props: {
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
                     Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
-                    updatedItem.foto_path
+                    updatedItem.foto_path,
+                    updatedItem.resposta
                 );
 
                 return updatedItem;
@@ -154,7 +155,8 @@ export default function ItensScreen(props: {
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
                     Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
-                    updatedItem.foto_path
+                    updatedItem.foto_path,
+                    updatedItem.resposta
                 );
 
                 return updatedItem;
@@ -191,7 +193,8 @@ export default function ItensScreen(props: {
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
                     Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
-                    updatedItem.foto_path
+                    updatedItem.foto_path,
+                    updatedItem.resposta
                 );
 
                 return updatedItem;
@@ -249,7 +252,8 @@ export default function ItensScreen(props: {
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
                     Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
-                    fotoPath
+                    fotoPath,
+                    updatedItem.resposta
                 );
 
                 return updatedItem;
@@ -286,7 +290,8 @@ export default function ItensScreen(props: {
                     Boolean(updatedItem.is_desc_nconf_required),
                     isDescricaoFilled,
                     Boolean(isInconforme && updatedItem.is_foto_obrigatoria),
-                    undefined
+                    undefined,
+                    updatedItem.resposta
                 );
 
                 return updatedItem;

@@ -171,6 +171,7 @@ const ChecklistItem = memo(({
                                 value={item.descricao || ''}
                                 onChangeText={handleDescricaoChange}
                                 mode="outlined"
+                                style={styles.textInput}
                                 theme={{ roundness: 8 }}
                                 outlineColor={colors.border}
                                 activeOutlineColor={colors.primary}
@@ -185,7 +186,7 @@ const ChecklistItem = memo(({
                     fotoPath={item.foto_path}
                     onPhotoSelect={handlePhotoSelect}
                     onPhotoRemove={handlePhotoRemove}
-                    isFotoObrigatoria={item.is_gera_nao_conformidade && item.is_foto_obrigatoria}
+                    isFotoObrigatoria={isInconforme && item.is_foto_obrigatoria}
                 />
             </View>
         </View>
@@ -298,6 +299,9 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     required: {
         color: colors.error,
+    },
+    textInput: {
+        backgroundColor: colors.cardBackground,
     },
 });
 
