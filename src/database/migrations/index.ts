@@ -8,6 +8,7 @@
 import { Migration } from './types';
 import { migration_001_initial_schema } from './001_initial_schema';
 import { migration_002_add_is_synced_fields } from './002_add_is_synced_fields';
+import { migration_003_add_lideranca_to_equipe_turnos } from './003_add_lideranca_to_equipe_turnos';
 
 /**
  * All migrations in sequential order
@@ -16,8 +17,8 @@ import { migration_002_add_is_synced_fields } from './002_add_is_synced_fields';
 export const allMigrations: Migration[] = [
     migration_001_initial_schema,
     migration_002_add_is_synced_fields,
+    migration_003_add_lideranca_to_equipe_turnos,
     // Add new migrations here
-    // migration_003_modify_table,
 ];
 
 // Re-export types and manager

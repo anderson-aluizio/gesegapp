@@ -182,6 +182,8 @@ export default function CreateChecklistRealizadoScreen() {
 
     const createChecklistWithCoordinates = async (equipe: any, coords: { latitude: number; longitude: number } | null) => {
         try {
+            const liderancaSource = isUserOperacao && todayTurno ? todayTurno : equipe;
+
             const createdChecklist = {
                 checklist_grupo_id: Number(selectedGrupo),
                 checklist_estrutura_id: Number(selectedEstrutura),
@@ -192,10 +194,10 @@ export default function CreateChecklistRealizadoScreen() {
                 area: selectedArea!,
                 date: new Date(),
                 observacao: "",
-                encarregado_cpf: equipe.encarregado_cpf,
-                supervisor_cpf: equipe.supervisor_cpf || '',
-                coordenador_cpf: equipe.coordenador_cpf || '',
-                gerente_cpf: equipe.gerente_cpf || '',
+                encarregado_cpf: liderancaSource.encarregado_cpf || '',
+                supervisor_cpf: liderancaSource.supervisor_cpf || '',
+                coordenador_cpf: liderancaSource.coordenador_cpf || '',
+                gerente_cpf: liderancaSource.gerente_cpf || '',
                 is_finalizado: false,
                 is_user_declarou_conformidade: false,
                 latitude: coords?.latitude,

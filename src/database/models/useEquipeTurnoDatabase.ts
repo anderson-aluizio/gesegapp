@@ -8,6 +8,10 @@ export type EquipeTurnoDatabase = {
   veiculo_id: string;
   created_at: string;
   is_synced?: number;
+  encarregado_cpf?: string;
+  supervisor_cpf?: string;
+  coordenador_cpf?: string;
+  gerente_cpf?: string;
 }
 
 export type EquipeTurnoDatabaseWithRelations = EquipeTurnoDatabase & {
@@ -20,6 +24,10 @@ export type CreateEquipeTurnoInput = {
   equipe_id: number;
   date: Date;
   veiculo_id: string;
+  encarregado_cpf?: string;
+  supervisor_cpf?: string;
+  coordenador_cpf?: string;
+  gerente_cpf?: string;
 }
 
 export const useEquipeTurnoDatabase = () => {
@@ -140,15 +148,19 @@ export const useEquipeTurnoDatabase = () => {
   const create = async (data: CreateEquipeTurnoInput) => {
     try {
       const statement = await database.prepareAsync(
-        `INSERT INTO equipe_turnos (equipe_id, date, veiculo_id, created_at)
-         VALUES (?, ?, ?, ?)`
+        `INSERT INTO equipe_turnos (equipe_id, date, veiculo_id, created_at, encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
       );
 
       const result = await statement.executeAsync([
         data.equipe_id,
         toLocalISOString(data.date),
         data.veiculo_id,
-        toLocalISOString(new Date())
+        toLocalISOString(new Date()),
+        data.encarregado_cpf || null,
+        data.supervisor_cpf || null,
+        data.coordenador_cpf || null,
+        data.gerente_cpf || null
       ]);
 
       await statement.finalizeAsync();

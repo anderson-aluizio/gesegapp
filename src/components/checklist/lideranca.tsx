@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button } from 'react-native-paper';
+import { Button, Text } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
@@ -8,7 +8,7 @@ import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
-export default function LiderancaScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void }) {
+export default function LiderancaScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void; isUserOperacao: boolean }) {
     const { colors } = useTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -16,6 +16,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
     const dialog = useDialog();
+    const isUserOperacao = props.isUserOperacao;
 
     useEffect(() => {
         setChecklistRealizado(props.checklistRealizado);
@@ -133,6 +134,48 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
             dialog.show('Atenção', 'Erro ao atualizar os dados. Tente novamente.');
         }
     }
+    if (isUserOperacao) {
+        return (
+            <View style={styles.container}>
+                <ScrollView>
+                    <View style={styles.inner}>
+                        <View style={styles.infoCard}>
+                            <View style={styles.infoRow}>
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>Encarregado</Text>
+                                    <Text style={styles.infoValue}>{checklistRealizado?.encarregado_nome || '-'}</Text>
+                                </View>
+                            </View>
+                            <View style={styles.infoRow}>
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>Supervisor</Text>
+                                    <Text style={styles.infoValue}>{checklistRealizado?.supervisor_nome || '-'}</Text>
+                                </View>
+                            </View>
+                            <View style={styles.infoRow}>
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>Coordenador</Text>
+                                    <Text style={styles.infoValue}>{checklistRealizado?.coordenador_nome || '-'}</Text>
+                                </View>
+                            </View>
+                            <View style={[styles.infoRow, { marginBottom: 0 }]}>
+                                <View style={styles.infoItem}>
+                                    <Text style={styles.infoLabel}>Gerente</Text>
+                                    <Text style={styles.infoValue}>{checklistRealizado?.gerente_nome || '-'}</Text>
+                                </View>
+                            </View>
+                            <View style={styles.lockNotice}>
+                                <Text style={styles.lockNoticeText}>
+                                    Dados preenchidos na abertura do turno. Para alterar, edite o turno.
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                </ScrollView>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <ScrollView>
@@ -195,5 +238,54 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     btnNext: {
         margin: 16,
-    }
+    },
+    infoCard: {
+        backgroundColor: colors.surfaceVariant,
+        borderRadius: 12,
+        padding: 16,
+        borderLeftWidth: 4,
+        borderLeftColor: colors.primary,
+        shadowColor: colors.shadow,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    infoRow: {
+        marginBottom: 12,
+    },
+    infoItem: {
+        flex: 1,
+    },
+    infoLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.textTertiary,
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+        marginBottom: 4,
+    },
+    infoValue: {
+        fontSize: 16,
+        fontWeight: '500',
+        color: colors.text,
+        lineHeight: 22,
+    },
+    lockNotice: {
+        backgroundColor: colors.warning + '22',
+        borderRadius: 8,
+        padding: 6,
+        marginTop: 12,
+        borderWidth: 1,
+        borderColor: colors.warning,
+    },
+    lockNoticeText: {
+        fontSize: 13,
+        color: colors.warning,
+        textAlign: 'center',
+        fontWeight: '500',
+    },
 });

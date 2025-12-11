@@ -16,6 +16,11 @@ type FuncionarioSelected = {
     is_blocked?: boolean;
 };
 
+type LiderancaSelected = {
+    cpf: string;
+    nome: string;
+};
+
 export default function CreateTurnoEquipeScreen() {
     const { user } = useAuth();
     const { colors } = useTheme();
@@ -34,6 +39,12 @@ export default function CreateTurnoEquipeScreen() {
     const [searchFuncionario, setSearchFuncionario] = useState<string>('');
     const [dialogDesc, setDialogDesc] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Liderança fields
+    const [selectedEncarregado, setSelectedEncarregado] = useState<LiderancaSelected | null>(null);
+    const [selectedSupervisor, setSelectedSupervisor] = useState<LiderancaSelected | null>(null);
+    const [selectedCoordenador, setSelectedCoordenador] = useState<LiderancaSelected | null>(null);
+    const [selectedGerente, setSelectedGerente] = useState<LiderancaSelected | null>(null);
 
     const equipeTurnoDb = useEquipeTurnoDatabase();
     const equipeTurnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
@@ -89,6 +100,50 @@ export default function CreateTurnoEquipeScreen() {
         })));
     };
 
+    const handleChangeEncarregado = (value: string | object | null) => {
+        if (value && typeof value === 'object') {
+            const option = value as AutocompleteDropdownOption;
+            if (option.id && option.title) {
+                setSelectedEncarregado({ cpf: option.id, nome: option.title });
+            }
+        } else {
+            setSelectedEncarregado(null);
+        }
+    };
+
+    const handleChangeSupervisor = (value: string | object | null) => {
+        if (value && typeof value === 'object') {
+            const option = value as AutocompleteDropdownOption;
+            if (option.id && option.title) {
+                setSelectedSupervisor({ cpf: option.id, nome: option.title });
+            }
+        } else {
+            setSelectedSupervisor(null);
+        }
+    };
+
+    const handleChangeCoordenador = (value: string | object | null) => {
+        if (value && typeof value === 'object') {
+            const option = value as AutocompleteDropdownOption;
+            if (option.id && option.title) {
+                setSelectedCoordenador({ cpf: option.id, nome: option.title });
+            }
+        } else {
+            setSelectedCoordenador(null);
+        }
+    };
+
+    const handleChangeGerente = (value: string | object | null) => {
+        if (value && typeof value === 'object') {
+            const option = value as AutocompleteDropdownOption;
+            if (option.id && option.title) {
+                setSelectedGerente({ cpf: option.id, nome: option.title });
+            }
+        } else {
+            setSelectedGerente(null);
+        }
+    };
+
     const handleSubmit = async () => {
         if (!selectedEquipe) {
             setDialogDesc('Selecione uma equipe.');
@@ -111,6 +166,26 @@ export default function CreateTurnoEquipeScreen() {
             return;
         }
 
+        if (!selectedEncarregado) {
+            setDialogDesc('Selecione um encarregado.');
+            return;
+        }
+
+        if (!selectedSupervisor) {
+            setDialogDesc('Selecione um supervisor.');
+            return;
+        }
+
+        if (!selectedCoordenador) {
+            setDialogDesc('Selecione um coordenador.');
+            return;
+        }
+
+        if (!selectedGerente) {
+            setDialogDesc('Selecione um gerente.');
+            return;
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -126,7 +201,11 @@ export default function CreateTurnoEquipeScreen() {
             const turnoResult = await equipeTurnoDb.create({
                 equipe_id: Number(selectedEquipe),
                 date: selectedDate,
-                veiculo_id: selectedVeiculo
+                veiculo_id: selectedVeiculo,
+                encarregado_cpf: selectedEncarregado?.cpf || '',
+                supervisor_cpf: selectedSupervisor?.cpf || '',
+                coordenador_cpf: selectedCoordenador?.cpf || '',
+                gerente_cpf: selectedGerente?.cpf || ''
             });
 
             if (!turnoResult.lastInsertRowId) {
@@ -266,6 +345,46 @@ export default function CreateTurnoEquipeScreen() {
                                     </Text>
                                 </Surface>
                             ) : null}
+
+                            <Text variant="labelLarge" style={[styles.sectionTitle, { marginTop: 24 }]}>
+                                Liderança
+                            </Text>
+
+                            <AutocompleteSearchDropdown
+                                label="Encarregado *"
+                                placeholder="Digite o nome do encarregado"
+                                value={selectedEncarregado?.cpf || null}
+                                listName="funcionarios"
+                                returnObject={true}
+                                onValueChange={handleChangeEncarregado}
+                            />
+
+                            <AutocompleteSearchDropdown
+                                label="Supervisor *"
+                                placeholder="Digite o nome do supervisor"
+                                value={selectedSupervisor?.cpf || null}
+                                listName="funcionarios"
+                                returnObject={true}
+                                onValueChange={handleChangeSupervisor}
+                            />
+
+                            <AutocompleteSearchDropdown
+                                label="Coordenador *"
+                                placeholder="Digite o nome do coordenador"
+                                value={selectedCoordenador?.cpf || null}
+                                listName="funcionarios"
+                                returnObject={true}
+                                onValueChange={handleChangeCoordenador}
+                            />
+
+                            <AutocompleteSearchDropdown
+                                label="Gerente *"
+                                placeholder="Digite o nome do gerente"
+                                value={selectedGerente?.cpf || null}
+                                listName="funcionarios"
+                                returnObject={true}
+                                onValueChange={handleChangeGerente}
+                            />
                         </View>
                     </Surface>
 

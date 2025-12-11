@@ -223,12 +223,18 @@ export async function initializeDatabaseLegacy(database: SQLiteDatabase) {
       date text NOT NULL,
       veiculo_id text NOT NULL,
       created_at text NOT NULL,
+      is_synced integer DEFAULT 0 NOT NULL,
+      encarregado_cpf text,
+      supervisor_cpf text,
+      coordenador_cpf text,
+      gerente_cpf text,
       FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON UPDATE no action ON DELETE no action,
       FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON UPDATE no action ON DELETE no action
     );
     CREATE INDEX IF NOT EXISTS et_equipe_id_idx ON equipe_turnos (equipe_id);
     CREATE INDEX IF NOT EXISTS et_date_idx ON equipe_turnos (date);
     CREATE INDEX IF NOT EXISTS et_veiculo_id_idx ON equipe_turnos (veiculo_id);
+    CREATE INDEX IF NOT EXISTS et_is_synced_idx ON equipe_turnos (is_synced);
     CREATE TABLE IF NOT EXISTS equipe_turno_funcionarios (
       id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
       equipe_turno_id integer NOT NULL,

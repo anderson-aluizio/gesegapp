@@ -82,7 +82,7 @@ export default function EditChecklistRealizado() {
       case 'dadosGerais':
         return <DadosGeraisScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} isUserOperacao={user?.is_operacao || false} />;
       case 'lideranca':
-        return <LiderancaScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
+        return <LiderancaScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} isUserOperacao={user?.is_operacao || false} />;
       case 'colaborador':
         return <FuncionariosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} setReloadList={setisReloadList} />;
       case 'itens':
