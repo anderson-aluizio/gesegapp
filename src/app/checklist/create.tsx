@@ -197,7 +197,6 @@ export default function CreateChecklistRealizadoScreen() {
                 encarregado_cpf: liderancaSource.encarregado_cpf || '',
                 supervisor_cpf: liderancaSource.supervisor_cpf || '',
                 coordenador_cpf: liderancaSource.coordenador_cpf || '',
-                gerente_cpf: liderancaSource.gerente_cpf || '',
                 is_finalizado: false,
                 is_user_declarou_conformidade: false,
                 latitude: coords?.latitude,

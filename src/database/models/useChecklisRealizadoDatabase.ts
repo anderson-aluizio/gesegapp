@@ -24,8 +24,6 @@ export type ChecklistRealizadoDatabase = {
   supervisor_nome?: string
   coordenador_cpf: string
   coordenador_nome?: string
-  gerente_cpf: string
-  gerente_nome?: string
   is_finalizado: boolean
   is_synced?: number
   checklist_grupo_nome?: string
@@ -58,11 +56,11 @@ export const useChecklisRealizadoDatabase = () => {
       `INSERT INTO checklist_realizados
       (checklist_grupo_id, checklist_estrutura_id, centro_custo_id,
       localidade_cidade_id, equipe_id, veiculo_id, area, date,
-      encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf, created_at, latitude, longitude)
+      encarregado_cpf, supervisor_cpf, coordenador_cpf, created_at, latitude, longitude)
       VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
               $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
               NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
-              NULLIF($gerente_cpf, ''), $created_at, $latitude, $longitude)`
+              $created_at, $latitude, $longitude)`
     );
 
     try {
@@ -82,7 +80,6 @@ export const useChecklisRealizadoDatabase = () => {
           $encarregado_cpf: data.encarregado_cpf,
           $supervisor_cpf: data.supervisor_cpf,
           $coordenador_cpf: data.coordenador_cpf,
-          $gerente_cpf: data.gerente_cpf,
           $is_finalizado: data.is_finalizado ? 1 : 0,
           $created_at: toLocalISOString(new Date()),
           $latitude: data.latitude || null,
@@ -232,8 +229,7 @@ export const useChecklisRealizadoDatabase = () => {
           checklist_estruturas.is_gera_nao_conformidade,
           encarregados.nome AS encarregado_nome,
           supervisores.nome AS supervisor_nome,
-          coordenadores.nome AS coordenador_nome,
-          gerentes.nome AS gerente_nome
+          coordenadores.nome AS coordenador_nome
         FROM checklist_realizados
           INNER JOIN equipes ON checklist_realizados.equipe_id = equipes.id
           INNER JOIN veiculos ON checklist_realizados.veiculo_id = veiculos.id
@@ -244,7 +240,6 @@ export const useChecklisRealizadoDatabase = () => {
           LEFT JOIN funcionarios as encarregados ON checklist_realizados.encarregado_cpf = encarregados.cpf
           LEFT JOIN funcionarios as supervisores ON checklist_realizados.supervisor_cpf = supervisores.cpf
           LEFT JOIN funcionarios as coordenadores ON checklist_realizados.coordenador_cpf = coordenadores.cpf
-          LEFT JOIN funcionarios as gerentes ON checklist_realizados.gerente_cpf = gerentes.cpf
           WHERE checklist_realizados.id = $id`;
 
       const response = await database.getFirstAsync<ChecklistRealizadoDatabaseWithRelations>(query, [id]);
@@ -277,8 +272,7 @@ export const useChecklisRealizadoDatabase = () => {
           observacao = $observacao,
           encarregado_cpf = $encarregado_cpf,
           supervisor_cpf = $supervisor_cpf,
-          coordenador_cpf = $coordenador_cpf,
-          gerente_cpf = $gerente_cpf
+          coordenador_cpf = $coordenador_cpf
         WHERE id = $id`
     )
 
@@ -292,7 +286,6 @@ export const useChecklisRealizadoDatabase = () => {
         $encarregado_cpf: data.encarregado_cpf,
         $supervisor_cpf: data.supervisor_cpf,
         $coordenador_cpf: data.coordenador_cpf,
-        $gerente_cpf: data.gerente_cpf,
         $id: data.id
       })
     } catch (error) {
@@ -304,12 +297,11 @@ export const useChecklisRealizadoDatabase = () => {
 
   const updateLideranca = async (data: ChecklistRealizadoDatabase) => {
     const statement = await database.prepareAsync(
-      `UPDATE checklist_realizados 
-        SET 
-          encarregado_cpf = $encarregado_cpf, 
-          supervisor_cpf = $supervisor_cpf, 
-          coordenador_cpf = $coordenador_cpf, 
-          gerente_cpf = $gerente_cpf
+      `UPDATE checklist_realizados
+        SET
+          encarregado_cpf = $encarregado_cpf,
+          supervisor_cpf = $supervisor_cpf,
+          coordenador_cpf = $coordenador_cpf
         WHERE id = $id`
     )
 
@@ -318,7 +310,6 @@ export const useChecklisRealizadoDatabase = () => {
         $encarregado_cpf: data.encarregado_cpf,
         $supervisor_cpf: data.supervisor_cpf,
         $coordenador_cpf: data.coordenador_cpf,
-        $gerente_cpf: data.gerente_cpf,
         $id: data.id
       })
     } catch (error) {
@@ -438,11 +429,11 @@ export const useChecklisRealizadoDatabase = () => {
           `INSERT INTO checklist_realizados
           (checklist_grupo_id, checklist_estrutura_id, centro_custo_id,
           localidade_cidade_id, equipe_id, veiculo_id, area, date,
-          encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf, created_at, latitude, longitude)
+          encarregado_cpf, supervisor_cpf, coordenador_cpf, created_at, latitude, longitude)
           VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
                   $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
                   NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
-                  NULLIF($gerente_cpf, ''), $created_at, $latitude, $longitude)`
+                  $created_at, $latitude, $longitude)`
         );
 
         try {
@@ -460,7 +451,6 @@ export const useChecklisRealizadoDatabase = () => {
             $encarregado_cpf: originalChecklist.encarregado_cpf,
             $supervisor_cpf: originalChecklist.supervisor_cpf,
             $coordenador_cpf: originalChecklist.coordenador_cpf,
-            $gerente_cpf: originalChecklist.gerente_cpf,
             $latitude: latitude || null,
             $longitude: longitude || null,
           });

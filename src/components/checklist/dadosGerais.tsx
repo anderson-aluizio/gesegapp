@@ -124,8 +124,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
             observacao: observacao,
             encarregado_cpf: equipe.encarregado_cpf,
             supervisor_cpf: equipe.supervisor_cpf,
-            coordenador_cpf: equipe.coordenador_cpf,
-            gerente_cpf: equipe.gerente_cpf
+            coordenador_cpf: equipe.coordenador_cpf
         };
         await checklistRealizadoDb.updateDadosGerais(updatedChecklist);
         setChecklistRealizado(updatedChecklist);

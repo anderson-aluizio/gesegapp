@@ -26,7 +26,6 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
     const [selectedEncarregado, setSelectedEncarregado] = useState<string | null>();
     const [selectedSupervisor, setSelectedSupervisor] = useState<string | null>();
     const [selectedCoordenador, setSelectedCoordenador] = useState<string | null>();
-    const [selectedGerente, setSelectedGerente] = useState<string | null>();
 
     useEffect(() => {
         setSelectedEncarregado(
@@ -42,11 +41,6 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
         setSelectedCoordenador(
             checklistRealizado?.coordenador_cpf !== undefined
                 ? String(checklistRealizado.coordenador_cpf)
-                : null
-        );
-        setSelectedGerente(
-            checklistRealizado?.gerente_cpf !== undefined
-                ? String(checklistRealizado.gerente_cpf)
                 : null
         );
     }, [checklistRealizado]);
@@ -87,21 +81,9 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
         }
         setIsFormDirty(true);
     }
-    const gerenteInitialItem = checklistRealizado?.gerente_nome ? [{
-        id: String(checklistRealizado.gerente_cpf),
-        title: checklistRealizado.gerente_nome
-    }] : [];
-    const handleChangeGerente = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedGerente(value);
-        } else {
-            setSelectedGerente(String(value));
-        }
-        setIsFormDirty(true);
-    }
 
     const handleNext = async () => {
-        if (!selectedEncarregado || !selectedSupervisor || !selectedCoordenador || !selectedGerente) {
+        if (!selectedEncarregado || !selectedSupervisor || !selectedCoordenador) {
             dialog.show('Atenção', 'Preencha todos os campos obrigatórios.');
             return;
         }
@@ -109,8 +91,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
             ...checklistRealizado,
             encarregado_cpf: selectedEncarregado,
             supervisor_cpf: selectedSupervisor,
-            coordenador_cpf: selectedCoordenador,
-            gerente_cpf: selectedGerente
+            coordenador_cpf: selectedCoordenador
         };
 
         try {
@@ -121,8 +102,7 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
                     checklistRealizado.equipe_id,
                     selectedEncarregado,
                     selectedSupervisor,
-                    selectedCoordenador,
-                    selectedGerente
+                    selectedCoordenador
                 );
             }
 
@@ -152,16 +132,10 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
                                     <Text style={styles.infoValue}>{checklistRealizado?.supervisor_nome || '-'}</Text>
                                 </View>
                             </View>
-                            <View style={styles.infoRow}>
+                            <View style={[styles.infoRow, { marginBottom: 0 }]}>
                                 <View style={styles.infoItem}>
                                     <Text style={styles.infoLabel}>Coordenador</Text>
                                     <Text style={styles.infoValue}>{checklistRealizado?.coordenador_nome || '-'}</Text>
-                                </View>
-                            </View>
-                            <View style={[styles.infoRow, { marginBottom: 0 }]}>
-                                <View style={styles.infoItem}>
-                                    <Text style={styles.infoLabel}>Gerente</Text>
-                                    <Text style={styles.infoValue}>{checklistRealizado?.gerente_nome || '-'}</Text>
                                 </View>
                             </View>
                             <View style={styles.lockNotice}>
@@ -201,13 +175,6 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
                         value={selectedCoordenador}
                         onValueChange={handleChangeCoordenador}
                         initialItems={coordenadorInitialItem} />
-                    <AutocompleteSearchDropdown
-                        listName="funcionarios"
-                        label="Gerente"
-                        placeholder="Digite o nome do gerente"
-                        value={selectedGerente}
-                        onValueChange={handleChangeGerente}
-                        initialItems={gerenteInitialItem} />
                 </View>
             </ScrollView>
 

@@ -106,7 +106,7 @@ export default function EditChecklistRealizado() {
   }
 
   const checkliderancaIsValid = async () => {
-    if (!checklistRealizado.supervisor_cpf || !checklistRealizado.coordenador_cpf || !checklistRealizado.gerente_cpf) {
+    if (!checklistRealizado.supervisor_cpf || !checklistRealizado.coordenador_cpf) {
       dialog.show('⚠️ Atenção', 'Preencha todos os campos obrigatórios em Liderança.');
       return false;
     }

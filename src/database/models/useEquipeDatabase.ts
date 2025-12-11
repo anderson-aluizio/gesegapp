@@ -10,8 +10,6 @@ export type EquipeDatabase = {
   supervisor_nome: string;
   coordenador_cpf: string;
   coordenador_nome: string;
-  gerente_cpf: string;
-  gerente_nome: string;
 }
 
 export const useEquipeDatabase = () => {
@@ -69,7 +67,6 @@ export const useEquipeDatabase = () => {
     encarregadoCpf: string,
     supervisorCpf: string,
     coordenadorCpf: string,
-    gerenteCpf: string,
   ) => {
     try {
       const query = `
@@ -77,8 +74,7 @@ export const useEquipeDatabase = () => {
         SET
           encarregado_cpf = ?,
           supervisor_cpf = ?,
-          coordenador_cpf = ?,
-          gerente_cpf = ?
+          coordenador_cpf = ?
         WHERE id = ?
       `;
 
@@ -86,7 +82,6 @@ export const useEquipeDatabase = () => {
         encarregadoCpf,
         supervisorCpf,
         coordenadorCpf,
-        gerenteCpf,
         equipeId,
       ]);
 

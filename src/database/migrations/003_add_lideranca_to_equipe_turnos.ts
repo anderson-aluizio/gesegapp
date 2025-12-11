@@ -8,11 +8,11 @@ import { Migration } from './types';
  * automatically used when creating checklists.
  *
  * Tables affected:
- * - equipe_turnos: Add encarregado_cpf, supervisor_cpf, coordenador_cpf, gerente_cpf columns
+ * - equipe_turnos: Add encarregado_cpf, supervisor_cpf, coordenador_cpf columns
  */
 export const migration_003_add_lideranca_to_equipe_turnos: Migration = {
     version: 3,
-    description: 'Add liderança fields (encarregado, supervisor, coordenador, gerente) to equipe_turnos table',
+    description: 'Add liderança fields (encarregado, supervisor, coordenador) to equipe_turnos table',
 
     up: async (database) => {
         await database.execAsync(`
@@ -20,7 +20,6 @@ export const migration_003_add_lideranca_to_equipe_turnos: Migration = {
             ALTER TABLE equipe_turnos ADD COLUMN encarregado_cpf text;
             ALTER TABLE equipe_turnos ADD COLUMN supervisor_cpf text;
             ALTER TABLE equipe_turnos ADD COLUMN coordenador_cpf text;
-            ALTER TABLE equipe_turnos ADD COLUMN gerente_cpf text;
         `);
     },
 

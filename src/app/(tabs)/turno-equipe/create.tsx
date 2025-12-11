@@ -44,7 +44,6 @@ export default function CreateTurnoEquipeScreen() {
     const [selectedEncarregado, setSelectedEncarregado] = useState<LiderancaSelected | null>(null);
     const [selectedSupervisor, setSelectedSupervisor] = useState<LiderancaSelected | null>(null);
     const [selectedCoordenador, setSelectedCoordenador] = useState<LiderancaSelected | null>(null);
-    const [selectedGerente, setSelectedGerente] = useState<LiderancaSelected | null>(null);
 
     const equipeTurnoDb = useEquipeTurnoDatabase();
     const equipeTurnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
@@ -133,17 +132,6 @@ export default function CreateTurnoEquipeScreen() {
         }
     };
 
-    const handleChangeGerente = (value: string | object | null) => {
-        if (value && typeof value === 'object') {
-            const option = value as AutocompleteDropdownOption;
-            if (option.id && option.title) {
-                setSelectedGerente({ cpf: option.id, nome: option.title });
-            }
-        } else {
-            setSelectedGerente(null);
-        }
-    };
-
     const handleSubmit = async () => {
         if (!selectedEquipe) {
             setDialogDesc('Selecione uma equipe.');
@@ -181,11 +169,6 @@ export default function CreateTurnoEquipeScreen() {
             return;
         }
 
-        if (!selectedGerente) {
-            setDialogDesc('Selecione um gerente.');
-            return;
-        }
-
         setIsSubmitting(true);
 
         try {
@@ -204,8 +187,7 @@ export default function CreateTurnoEquipeScreen() {
                 veiculo_id: selectedVeiculo,
                 encarregado_cpf: selectedEncarregado?.cpf || '',
                 supervisor_cpf: selectedSupervisor?.cpf || '',
-                coordenador_cpf: selectedCoordenador?.cpf || '',
-                gerente_cpf: selectedGerente?.cpf || ''
+                coordenador_cpf: selectedCoordenador?.cpf || ''
             });
 
             if (!turnoResult.lastInsertRowId) {
@@ -377,14 +359,6 @@ export default function CreateTurnoEquipeScreen() {
                                 onValueChange={handleChangeCoordenador}
                             />
 
-                            <AutocompleteSearchDropdown
-                                label="Gerente *"
-                                placeholder="Digite o nome do gerente"
-                                value={selectedGerente?.cpf || null}
-                                listName="funcionarios"
-                                returnObject={true}
-                                onValueChange={handleChangeGerente}
-                            />
                         </View>
                     </Surface>
 

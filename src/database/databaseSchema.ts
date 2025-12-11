@@ -227,7 +227,6 @@ export async function initializeDatabaseLegacy(database: SQLiteDatabase) {
       encarregado_cpf text,
       supervisor_cpf text,
       coordenador_cpf text,
-      gerente_cpf text,
       FOREIGN KEY (equipe_id) REFERENCES equipes(id) ON UPDATE no action ON DELETE no action,
       FOREIGN KEY (veiculo_id) REFERENCES veiculos(id) ON UPDATE no action ON DELETE no action
     );
