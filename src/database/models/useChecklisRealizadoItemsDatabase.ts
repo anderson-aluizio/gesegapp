@@ -59,10 +59,10 @@ export const useChecklisRealizadoItemsDatabase = () => {
         is_desc_nconf_required: Boolean(item.is_desc_nconf_required),
         is_gera_nao_conformidade: Boolean(item.is_gera_nao_conformidade),
         is_respostas_obrigatoria: Boolean(item.is_respostas_obrigatoria),
-        checklist_alternativas_array: item.checklist_alternativas?.length > 0
-          ? item.checklist_alternativas.split(',').map((alt: string) => alt.trim()) : undefined,
-        alternativa_inconformidades_array: item.alternativa_inconformidades?.length > 0
-          ? item.alternativa_inconformidades.split(',').map((alt: string) => alt.trim()) : undefined,
+        checklist_alternativas_array: item.checklist_alternativas?.length > 0 && item.checklist_alternativas !== '[]'
+          ? item.checklist_alternativas.split(',').map((alt: string) => alt.trim()).filter((alt: string) => alt && alt !== '[]') : undefined,
+        alternativa_inconformidades_array: item.alternativa_inconformidades?.length > 0 && item.alternativa_inconformidades !== '[]'
+          ? item.alternativa_inconformidades.split(',').map((alt: string) => alt.trim()).filter((alt: string) => alt && alt !== '[]') : undefined,
         inconformidade_funcionarios_array: item.inconformidade_funcionarios?.length > 0
           ? item.inconformidade_funcionarios.split(',').map((funcionario: string) => funcionario.trim()) : undefined
       }));
