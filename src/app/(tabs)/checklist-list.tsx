@@ -135,6 +135,12 @@ export default function ChecklistListScreen() {
         router.push(`/checklist/${checklist.id}`);
     };
 
+    const handleViewChecklist = () => {
+        if (!selectedChecklist) return;
+        setIsShowEditDialog(false);
+        router.push(`/checklist/view/${selectedChecklist.id}`);
+    };
+
     const handleEditChecklist = async () => {
         if (!selectedChecklist) return;
         setSelectedChecklist(null);
@@ -267,9 +273,19 @@ export default function ChecklistListScreen() {
                         <View style={styles.containerButtonsVertical}>
                             <Button
                                 mode="contained"
+                                buttonColor={colors.primary}
+                                onPress={handleViewChecklist}
+                                style={styles.dialogButtonFull}
+                                icon="eye"
+                            >
+                                Visualizar
+                            </Button>
+                            <Button
+                                mode="contained"
                                 buttonColor={colors.buttonSecondary}
                                 onPress={handleEditChecklist}
                                 style={styles.dialogButtonFull}
+                                icon="pencil"
                             >
                                 Editar
                             </Button>
@@ -278,6 +294,7 @@ export default function ChecklistListScreen() {
                                 buttonColor={colors.warning}
                                 onPress={handleDuplicateChecklist}
                                 style={styles.dialogButtonFull}
+                                icon="content-copy"
                             >
                                 Duplicar
                             </Button>
