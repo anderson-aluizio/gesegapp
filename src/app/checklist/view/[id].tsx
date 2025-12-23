@@ -291,10 +291,15 @@ export default function ChecklistViewScreen() {
                                             {item.inconformidade_funcionarios_array && item.inconformidade_funcionarios_array.length > 0 && (
                                                 <View style={styles.funcionariosInconformeContainer}>
                                                     <Text style={styles.funcionariosInconformeLabel}>
-                                                        Funcionários envolvidos:
+                                                        Colaboradores envolvidos:
                                                     </Text>
                                                     <Text style={styles.funcionariosInconformeText}>
-                                                        {item.inconformidade_funcionarios_array.join(', ')}
+                                                        {item.inconformidade_funcionarios_array
+                                                            .map(cpf => {
+                                                                const func = funcionarios.find(f => f.funcionario_cpf === cpf);
+                                                                return func?.funcionario_nome || cpf;
+                                                            })
+                                                            .join(', ')}
                                                     </Text>
                                                 </View>
                                             )}
