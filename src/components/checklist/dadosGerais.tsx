@@ -14,6 +14,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
     const isUserOperacao = props.isUserOperacao;
+    const isAprChecklist = checklistRealizado?.checklist_grupo_nome_interno === 'checklist_apr';
 
     useEffect(() => {
         setChecklistRealizado(props.checklistRealizado);
@@ -117,6 +118,10 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
             setDialogDesc('Preencha todos os campos.');
             return;
         }
+        if (isAprChecklist && !ordemServico.trim()) {
+            setDialogDesc('Ordem de Serviço é obrigatória para APR.');
+            return;
+        }
         const equipe = await equipeDb.show(Number(selectedEquipe));
         if (!equipe) {
             setDialogDesc('Equipe não encontrada.');
@@ -130,9 +135,9 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
             area: selectedArea,
             observacao: observacao,
             ordem_servico: ordemServico,
-            encarregado_cpf: equipe.encarregado_cpf,
-            supervisor_cpf: equipe.supervisor_cpf,
-            coordenador_cpf: equipe.coordenador_cpf
+            encarregado_cpf: isUserOperacao ? checklistRealizado.encarregado_cpf : equipe.encarregado_cpf,
+            supervisor_cpf: isUserOperacao ? checklistRealizado.supervisor_cpf : equipe.supervisor_cpf,
+            coordenador_cpf: isUserOperacao ? checklistRealizado.coordenador_cpf : equipe.coordenador_cpf
         };
         await checklistRealizadoDb.updateDadosGerais(updatedChecklist);
         setChecklistRealizado(updatedChecklist);
@@ -220,9 +225,11 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         onValueChange={handleChangeArea}
                         initialItems={areas} />
                     <View style={styles.container}>
-                        <RNText style={styles.label}>Ordem de Serviço</RNText>
+                        <RNText style={styles.label}>
+                            Ordem de Serviço{isAprChecklist ? ' *' : ''}
+                        </RNText>
                         <TextInput
-                            placeholder="Digite a ordem de serviço (opcional)"
+                            placeholder={isAprChecklist ? "Digite a ordem de serviço (obrigatório)" : "Digite a ordem de serviço (opcional)"}
                             value={ordemServico}
                             onChangeText={handleChangeOrdemServico}
                             mode="outlined"

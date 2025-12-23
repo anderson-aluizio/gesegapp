@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { ScrollView, StyleSheet, View, Modal, ActivityIndicator } from 'react-native';
+import { ScrollView, StyleSheet, View, Modal, ActivityIndicator, Text as RNText } from 'react-native';
 import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/ui/inputs/AutocompleteSearchDropdown';
 import { router, Stack } from 'expo-router';
-import { Button, IconButton, Text } from 'react-native-paper';
+import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/models/useChecklistGrupoDatabase';
 import { CentroCustoDatabase, useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
@@ -32,6 +32,7 @@ export default function CreateChecklistRealizadoScreen() {
     const [selectedEquipe, setSelectedEquipe] = useState<string | null>(null);
     const [selectedVeiculo, setSelectedVeiculo] = useState<string | null>(null);
     const [selectedArea, setSelectedArea] = useState<string | null>(null);
+    const [ordemServico, setOrdemServico] = useState<string>('');
     const [isFromTurno, setIsFromTurno] = useState(false);
     const [todayTurno, setTodayTurno] = useState<EquipeTurnoDatabase | null>(null);
     const [todayEquipeTurnoFuncionarios, setTodayEquipeTurnoFuncionarios] = useState<EquipeTurnoFuncionarioDatabaseWithRelations[] | null>(null);
@@ -53,6 +54,9 @@ export default function CreateChecklistRealizadoScreen() {
     const { user } = useAuth();
     const isUserOperacao = user?.is_operacao;
     const { getCurrentLocation } = useLocation();
+
+    const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
+    const isAprChecklist = selectedGrupoData?.nome_interno === 'checklist_apr';
 
     const areas: AutocompleteDropdownOption[] = [
         { id: 'URBANA', title: 'URBANA' },
@@ -180,6 +184,10 @@ export default function CreateChecklistRealizadoScreen() {
         }
     };
 
+    const handleChangeOrdemServico = (value: string) => {
+        setOrdemServico(value);
+    };
+
     const createChecklistWithCoordinates = async (equipe: any, coords: { latitude: number; longitude: number } | null) => {
         try {
             const liderancaSource = isUserOperacao && todayTurno ? todayTurno : equipe;
@@ -194,6 +202,7 @@ export default function CreateChecklistRealizadoScreen() {
                 area: selectedArea!,
                 date: new Date(),
                 observacao: "",
+                ordem_servico: ordemServico,
                 encarregado_cpf: liderancaSource.encarregado_cpf || '',
                 supervisor_cpf: liderancaSource.supervisor_cpf || '',
                 coordenador_cpf: liderancaSource.coordenador_cpf || '',
@@ -241,6 +250,11 @@ export default function CreateChecklistRealizadoScreen() {
 
         if (!selectedGrupo || !selectedCentroCusto || !selectedEstrutura || !selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
             dialog.show('Atenção', 'Preencha todos os campos.');
+            return;
+        }
+
+        if (isAprChecklist && !ordemServico.trim()) {
+            dialog.show('Atenção', 'Ordem de Serviço é obrigatória para APR.');
             return;
         }
 
@@ -368,6 +382,22 @@ export default function CreateChecklistRealizadoScreen() {
                                 value={selectedArea}
                                 onValueChange={handleChangeArea}
                                 initialItems={areas} />
+                            <View>
+                                <RNText style={styles.label}>
+                                    Ordem de Serviço{isAprChecklist ? ' *' : ''}
+                                </RNText>
+                                <TextInput
+                                    placeholder={isAprChecklist ? "Digite a ordem de serviço (obrigatório)" : "Digite a ordem de serviço (opcional)"}
+                                    value={ordemServico}
+                                    onChangeText={handleChangeOrdemServico}
+                                    mode="outlined"
+                                    style={styles.textInput}
+                                    theme={{ roundness: 8 }}
+                                    outlineColor={colors.border}
+                                    activeOutlineColor={colors.primary}
+                                    textColor={colors.text}
+                                />
+                            </View>
                         </View>
                     </View>
                 </ScrollView>
@@ -498,5 +528,15 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontSize: 14,
         color: colors.textSecondary,
         textAlign: 'center',
+    },
+    label: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.textSecondary,
+        marginBottom: 0,
+        paddingHorizontal: 4,
+    },
+    textInput: {
+        backgroundColor: colors.cardBackground,
     },
 });
