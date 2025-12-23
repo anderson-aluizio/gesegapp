@@ -18,6 +18,7 @@ export type ChecklistRealizadoDatabase = {
   date: Date
   date_fim?: Date
   observacao: string
+  ordem_servico: string
   encarregado_cpf: string
   encarregado_nome?: string
   supervisor_cpf: string
@@ -270,6 +271,7 @@ export const useChecklisRealizadoDatabase = () => {
           veiculo_id = $veiculo_id,
           area = $area,
           observacao = $observacao,
+          ordem_servico = $ordem_servico,
           encarregado_cpf = $encarregado_cpf,
           supervisor_cpf = $supervisor_cpf,
           coordenador_cpf = $coordenador_cpf
@@ -283,6 +285,7 @@ export const useChecklisRealizadoDatabase = () => {
         $veiculo_id: data.veiculo_id,
         $area: data.area,
         $observacao: data.observacao || '',
+        $ordem_servico: data.ordem_servico || '',
         $encarregado_cpf: data.encarregado_cpf,
         $supervisor_cpf: data.supervisor_cpf,
         $coordenador_cpf: data.coordenador_cpf,
@@ -429,11 +432,11 @@ export const useChecklisRealizadoDatabase = () => {
           `INSERT INTO checklist_realizados
           (checklist_grupo_id, checklist_estrutura_id, centro_custo_id,
           localidade_cidade_id, equipe_id, veiculo_id, area, date,
-          encarregado_cpf, supervisor_cpf, coordenador_cpf, created_at, latitude, longitude)
+          encarregado_cpf, supervisor_cpf, coordenador_cpf, created_at, latitude, longitude, ordem_servico)
           VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
                   $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
                   NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
-                  $created_at, $latitude, $longitude)`
+                  $created_at, $latitude, $longitude, $ordem_servico)`
         );
 
         try {
@@ -453,6 +456,7 @@ export const useChecklisRealizadoDatabase = () => {
             $coordenador_cpf: originalChecklist.coordenador_cpf,
             $latitude: latitude || null,
             $longitude: longitude || null,
+            $ordem_servico: originalChecklist.ordem_servico || '',
           });
 
           newChecklistId = result.lastInsertRowId.toLocaleString();

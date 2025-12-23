@@ -25,6 +25,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     const [selectedVeiculo, setSelectedVeiculo] = useState<string | null>();
     const [selectedArea, setSelectedArea] = useState<string | null>(null);
     const [observacao, setObservacao] = useState<string>('');
+    const [ordemServico, setOrdemServico] = useState<string>('');
     const [dialogDesc, setDialogDesc] = useState<string>('');
 
     const areas: AutocompleteDropdownOption[] = [
@@ -53,6 +54,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                 : null
         );
         setObservacao(checklistRealizado?.observacao || '');
+        setOrdemServico(checklistRealizado?.ordem_servico || '');
     }, [checklistRealizado]);
 
     const municipioInitialItem = checklistRealizado?.localidade_cidade_id ? [{
@@ -105,6 +107,11 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
         setIsFormDirty(true);
     };
 
+    const handleChangeOrdemServico = (value: string) => {
+        setOrdemServico(value);
+        setIsFormDirty(true);
+    };
+
     const handleUpdate = async () => {
         if (!selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
             setDialogDesc('Preencha todos os campos.');
@@ -122,6 +129,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
             veiculo_id: selectedVeiculo,
             area: selectedArea,
             observacao: observacao,
+            ordem_servico: ordemServico,
             encarregado_cpf: equipe.encarregado_cpf,
             supervisor_cpf: equipe.supervisor_cpf,
             coordenador_cpf: equipe.coordenador_cpf
@@ -211,6 +219,20 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         value={selectedArea}
                         onValueChange={handleChangeArea}
                         initialItems={areas} />
+                    <View style={styles.container}>
+                        <RNText style={styles.label}>Ordem de Serviço</RNText>
+                        <TextInput
+                            placeholder="Digite a ordem de serviço (opcional)"
+                            value={ordemServico}
+                            onChangeText={handleChangeOrdemServico}
+                            mode="outlined"
+                            style={styles.textInput}
+                            theme={{ roundness: 8 }}
+                            outlineColor={colors.border}
+                            activeOutlineColor={colors.primary}
+                            textColor={colors.text}
+                        />
+                    </View>
                     <View style={styles.container}>
                         <RNText style={styles.label}>Observação</RNText>
                         <TextInput
