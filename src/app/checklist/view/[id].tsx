@@ -5,6 +5,8 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { ChecklistRealizadoDatabaseWithRelations, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { ChecklistRealizadoItemsDatabaseWithItem, useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
 import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
+import { ChecklistRealizadoRiscosDatabaseWithRelations, useChecklisRealizadoRiscosDatabase } from '@/database/models/useChecklisRealizadoRiscosDatabase';
+import { ChecklistRealizadoControleRiscosDatabaseWithRelations, useChecklisRealizadoControleRiscosDatabase } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 
@@ -22,10 +24,14 @@ export default function ChecklistViewScreen() {
     const [checklist, setChecklist] = useState<ChecklistRealizadoDatabaseWithRelations | null>(null);
     const [items, setItems] = useState<ChecklistRealizadoItemsDatabaseWithItem[]>([]);
     const [funcionarios, setFuncionarios] = useState<ChecklistRealizadoFuncionarioDatabase[]>([]);
+    const [riscos, setRiscos] = useState<ChecklistRealizadoRiscosDatabaseWithRelations[]>([]);
+    const [controles, setControles] = useState<ChecklistRealizadoControleRiscosDatabaseWithRelations[]>([]);
 
     const checklistDb = useChecklisRealizadoDatabase();
     const itemsDb = useChecklisRealizadoItemsDatabase();
     const funcionariosDb = useChecklistRealizadoFuncionarioDatabase();
+    const riscosDb = useChecklisRealizadoRiscosDatabase();
+    const controlesDb = useChecklisRealizadoControleRiscosDatabase();
 
     const loadData = useCallback(async () => {
         if (!id) return;
@@ -38,6 +44,10 @@ export default function ChecklistViewScreen() {
                 setItems(itemsData);
                 const funcionariosData = await funcionariosDb.getByChecklistRealizadoId(Number(id));
                 setFuncionarios(funcionariosData);
+                const riscosData = await riscosDb.getByChecklistRealizadoId(Number(id));
+                setRiscos(riscosData);
+                const controlesData = await controlesDb.getByChecklistRealizadoId(Number(id));
+                setControles(controlesData);
             }
         } catch (error) {
             console.error('Error loading checklist:', error);
@@ -79,6 +89,10 @@ export default function ChecklistViewScreen() {
         const inconformes = items.filter(i => i.is_inconforme).length;
         return { total, respondidos, inconformes };
     }, [items]);
+
+    const getControlesByRiscoId = useCallback((riscoRealizadoId: number) => {
+        return controles.filter(c => c.checklist_realizado_apr_risco_id === riscoRealizadoId);
+    }, [controles]);
 
     if (isLoading) {
         return (
@@ -236,6 +250,43 @@ export default function ChecklistViewScreen() {
                                     {index < funcionarios.length - 1 && <Divider style={styles.itemDivider} />}
                                 </View>
                             ))}
+                        </Surface>
+                    )}
+
+                    {/* Riscos Section */}
+                    {riscos.length > 0 && (
+                        <Surface style={styles.section} elevation={1}>
+                            <View style={styles.sectionHeader}>
+                                <IconButton icon="alert-circle-outline" size={20} iconColor={colors.primary} style={styles.sectionIcon} />
+                                <Text style={styles.sectionTitle}>Riscos Identificados ({riscos.length})</Text>
+                            </View>
+                            <Divider style={styles.divider} />
+
+                            {riscos.map((risco, index) => {
+                                const riscoControles = getControlesByRiscoId(risco.id);
+                                return (
+                                    <View key={risco.id} style={styles.riscoItem}>
+                                        <View style={styles.riscoHeader}>
+                                            <View style={styles.riscoIndicator} />
+                                            <Text style={styles.riscoNome}>{risco.nome}</Text>
+                                        </View>
+
+                                        {riscoControles.length > 0 && (
+                                            <View style={styles.controlesContainer}>
+                                                <Text style={styles.controlesLabel}>Medidas de controle:</Text>
+                                                {riscoControles.map((controle) => (
+                                                    <View key={controle.id} style={styles.controleItem}>
+                                                        <Text style={styles.controleBullet}>•</Text>
+                                                        <Text style={styles.controleNome}>{controle.nome}</Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        )}
+
+                                        {index < riscos.length - 1 && <Divider style={styles.itemDivider} />}
+                                    </View>
+                                );
+                            })}
                         </Surface>
                     )}
 
@@ -665,6 +716,59 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         height: 200,
         borderRadius: 8,
         backgroundColor: colors.surfaceVariant,
+    },
+    riscoItem: {
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+    },
+    riscoHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+    riscoIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        marginTop: 6,
+        marginRight: 10,
+        backgroundColor: colors.warning,
+    },
+    riscoNome: {
+        flex: 1,
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.text,
+        lineHeight: 20,
+    },
+    controlesContainer: {
+        marginLeft: 18,
+        marginTop: 8,
+        padding: 10,
+        backgroundColor: colors.surfaceVariant,
+        borderRadius: 6,
+    },
+    controlesLabel: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: colors.textSecondary,
+        marginBottom: 6,
+    },
+    controleItem: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        marginBottom: 4,
+    },
+    controleBullet: {
+        fontSize: 14,
+        color: colors.primary,
+        marginRight: 6,
+        lineHeight: 18,
+    },
+    controleNome: {
+        flex: 1,
+        fontSize: 13,
+        color: colors.text,
+        lineHeight: 18,
     },
     bottomSpacer: {
         height: 32,
