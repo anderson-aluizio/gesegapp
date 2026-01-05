@@ -585,7 +585,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     pendingChip: {
         backgroundColor: colors.warning,
-        height: 26,
+        height: 34,
     },
     chipTextSmall: {
         fontSize: 11,
