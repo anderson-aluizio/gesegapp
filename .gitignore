@@ -45,3 +45,5 @@ apk
 .env.local
 
 .env.local
+
+credentials.json
