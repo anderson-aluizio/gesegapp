@@ -13,7 +13,9 @@ import { useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useC
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDialog } from '@/hooks/useDialog';
+import { useErrorDialog } from '@/hooks/useErrorDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
+import ErrorDetailsDialog from '@/components/ui/dialogs/ErrorDetailsDialog';
 import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 import { useLocation } from '@/hooks/useLocation';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
@@ -44,6 +46,7 @@ export default function CreateChecklistRealizadoScreen() {
     const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
     const municipioRef = useRef<AutocompleteSearchDropdownRef>(null);
     const dialog = useDialog();
+    const errorDialog = useErrorDialog();
     const grupoDb = useChecklistGrupoDatabase();
     const centroCustoDb = useCentroCustoDatabase();
     const equipeDb = useEquipeDatabase();
@@ -123,6 +126,12 @@ export default function CreateChecklistRealizadoScreen() {
                     }, 4000);
                 }
             } catch (error) {
+                errorDialog.show(
+                    'Erro',
+                    'Falha ao carregar dados do turno. Tente novamente.',
+                    error,
+                    { location: 'loadTurnoData', userId: user?.id }
+                );
                 console.error('Error loading turno data:', error);
             }
         }
@@ -213,7 +222,22 @@ export default function CreateChecklistRealizadoScreen() {
             }
             const lastChecklistRealizado = await checklistRealizadoDb.create(createdChecklist);
             if (!lastChecklistRealizado) {
-                dialog.show('Atenção', 'Erro ao criar registro. Tente novamente.');
+                errorDialog.show(
+                    'Erro',
+                    'Erro ao criar registro. Tente novamente.',
+                    new Error('checklistRealizadoDb.create retornou null'),
+                    {
+                        location: 'createChecklistWithCoordinates',
+                        checklistData: {
+                            checklist_grupo_id: selectedGrupo,
+                            checklist_estrutura_id: selectedEstrutura,
+                            centro_custo_id: selectedCentroCusto,
+                            equipe_id: selectedEquipe,
+                            veiculo_id: selectedVeiculo,
+                            hasCoords: !!coords,
+                        }
+                    }
+                );
                 setIsSubmitting(false);
                 return;
             }
@@ -231,7 +255,17 @@ export default function CreateChecklistRealizadoScreen() {
                 } catch (funcionarioError) {
                     console.error('Error creating checklist funcionarios:', funcionarioError);
                     await checklistRealizadoDb.remove(Number(lastChecklistRealizado.insertedRowId));
-                    dialog.show('Atenção', 'Erro ao associar funcionários ao checklist. Tente novamente.');
+                    errorDialog.show(
+                        'Erro',
+                        'Erro ao associar funcionários ao checklist. Tente novamente.',
+                        funcionarioError,
+                        {
+                            location: 'createChecklistWithCoordinates.funcionarios',
+                            checklistId: lastChecklistRealizado.insertedRowId,
+                            turnoId: todayTurno?.id,
+                            funcionariosCount: todayEquipeTurnoFuncionarios?.length,
+                        }
+                    );
                     setIsSubmitting(false);
                     return;
                 }
@@ -240,7 +274,21 @@ export default function CreateChecklistRealizadoScreen() {
             setIsSubmitting(false);
             router.replace(`/checklist/${lastChecklistRealizado.insertedRowId}`)
         } catch (error) {
-            dialog.show('Atenção', 'Erro ao criar o registro. Tente novamente.');
+            errorDialog.show(
+                'Erro',
+                'Falha ao criar registro. Tente novamente.',
+                error,
+                {
+                    location: 'createChecklistWithCoordinates',
+                    hasCoords: !!coords,
+                    selectedGrupo,
+                    selectedEstrutura,
+                    selectedCentroCusto,
+                    selectedEquipe,
+                    selectedVeiculo,
+                    isFromTurno,
+                }
+            );
             setIsSubmitting(false);
         }
     };
@@ -289,7 +337,21 @@ export default function CreateChecklistRealizadoScreen() {
 
             await createChecklistWithCoordinates(equipe, locationResult.coords);
         } catch (error) {
-            dialog.show('Atenção', 'Erro ao criar o registro. Tente novamente.');
+            errorDialog.show(
+                'Erro',
+                'Falha ao criar registro. Tente novamente.',
+                error,
+                {
+                    location: 'handleNext',
+                    selectedGrupo,
+                    selectedCentroCusto,
+                    selectedEstrutura,
+                    selectedMunicipio,
+                    selectedEquipe,
+                    selectedVeiculo,
+                    selectedArea,
+                }
+            );
             setIsSubmitting(false);
         }
     };
@@ -407,6 +469,14 @@ export default function CreateChecklistRealizadoScreen() {
                     description={dialog.description}
                     title={dialog.title}
                     onDismiss={dialog.hide}
+                />
+
+                <ErrorDetailsDialog
+                    visible={errorDialog.visible}
+                    title={errorDialog.title}
+                    description={errorDialog.description}
+                    errorDetails={errorDialog.errorDetails}
+                    onDismiss={errorDialog.hide}
                 />
 
                 <ConfirmDialog

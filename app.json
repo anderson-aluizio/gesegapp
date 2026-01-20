@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Geseg",
-    "slug": "geseg",
+    "slug": "gesegapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/img/icon.png",
@@ -14,14 +14,18 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dinamo.geseg"
+      "bundleIdentifier": "com.dinamo.gesegapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/img/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.dinamo.geseg"
+      "package": "com.dinamo.gesegapp",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -38,14 +42,14 @@
           "backgroundColor": "#ffffff",
           "ios": {
             "supportsTablet": true,
-            "bundleIdentifier": "com.dinamo.geseg"
+            "bundleIdentifier": "com.dinamo.gesegapp"
           },
           "android": {
             "adaptiveIcon": {
               "foregroundImage": "./assets/img/adaptive-icon.png",
               "backgroundColor": "#ffffff"
             },
-            "package": "com.dinamo.geseg"
+            "package": "com.dinamo.gesegapp"
           }
         }
       ],
@@ -68,7 +72,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "410d37af-c4a6-4b0e-a17d-1aa4448400ff"
+        "projectId": "56bea8cc-f60f-4b61-95a7-c59d86d42890"
       }
     }
   }
