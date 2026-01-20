@@ -56,10 +56,10 @@ export const useChecklisRealizadoDatabase = () => {
     const statement = await database.prepareAsync(
       `INSERT INTO checklist_realizados
       (checklist_grupo_id, checklist_estrutura_id, centro_custo_id,
-      localidade_cidade_id, equipe_id, veiculo_id, area, date,
+      localidade_cidade_id, equipe_id, veiculo_id, area, date, ordem_servico,
       encarregado_cpf, supervisor_cpf, coordenador_cpf, created_at, latitude, longitude)
       VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
-              $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date,
+              $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date, NULLIF($ordem_servico, '')
               NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
               $created_at, $latitude, $longitude)`
     );
@@ -78,6 +78,7 @@ export const useChecklisRealizadoDatabase = () => {
           $date: toLocalISOString(data.date),
           $date_fim: data.date_fim ? toLocalISOString(data.date_fim) : null,
           $observacao: data.observacao || "",
+          $ordem_servico: data.ordem_servico || "",
           $encarregado_cpf: data.encarregado_cpf,
           $supervisor_cpf: data.supervisor_cpf,
           $coordenador_cpf: data.coordenador_cpf,
