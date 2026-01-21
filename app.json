@@ -53,14 +53,6 @@
           }
         }
       ],
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "gesegapp",
-          "organization": "dinamo-engenharia"
-        }
-      ],
       "expo-location",
       "expo-font",
       "expo-sqlite",

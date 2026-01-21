@@ -59,7 +59,7 @@ export const useChecklisRealizadoDatabase = () => {
       localidade_cidade_id, equipe_id, veiculo_id, area, date, ordem_servico,
       encarregado_cpf, supervisor_cpf, coordenador_cpf, created_at, latitude, longitude)
       VALUES ($checklist_grupo_id, $checklist_estrutura_id, $centro_custo_id,
-              $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date, NULLIF($ordem_servico, '')
+              $localidade_cidade_id, $equipe_id, $veiculo_id, $area, $date, NULLIF($ordem_servico, ''),
               NULLIF($encarregado_cpf, ''), NULLIF($supervisor_cpf, ''), NULLIF($coordenador_cpf, ''),
               $created_at, $latitude, $longitude)`
     );
