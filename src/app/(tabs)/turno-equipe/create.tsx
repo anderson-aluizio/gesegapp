@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import ModalSearchSelect, { SearchSelectOption } from '@/components/ui/inputs/ModalSearchSelect';
 import { router, Stack } from 'expo-router';
 import { Button, Dialog, Portal, Text, Chip, Surface, IconButton } from 'react-native-paper';
 import { useEquipeTurnoDatabase } from '@/database/models/useEquipeTurnoDatabase';
@@ -68,7 +68,7 @@ export default function CreateTurnoEquipeScreen() {
     const handleAddFuncionario = async (value: string | object | null) => {
 
         if (value && typeof value === 'object') {
-            const cpf = (value as AutocompleteDropdownOption).id;
+            const cpf = (value as SearchSelectOption).id;
             const existingFuncionario = selectedFuncionarios.find(colaborador => colaborador.cpf === cpf);
             if (existingFuncionario) {
                 setDialogDesc('Este funcionário já foi adicionado.');
@@ -76,7 +76,7 @@ export default function CreateTurnoEquipeScreen() {
             }
             const funcionario = {
                 cpf: cpf,
-                nome: (value as AutocompleteDropdownOption).title,
+                nome: (value as SearchSelectOption).title,
                 is_lider: false
             } as FuncionarioSelected;
 
@@ -101,7 +101,7 @@ export default function CreateTurnoEquipeScreen() {
 
     const handleChangeEncarregado = (value: string | object | null) => {
         if (value && typeof value === 'object') {
-            const option = value as AutocompleteDropdownOption;
+            const option = value as SearchSelectOption;
             if (option.id && option.title) {
                 setSelectedEncarregado({ cpf: option.id, nome: option.title });
             }
@@ -112,7 +112,7 @@ export default function CreateTurnoEquipeScreen() {
 
     const handleChangeSupervisor = (value: string | object | null) => {
         if (value && typeof value === 'object') {
-            const option = value as AutocompleteDropdownOption;
+            const option = value as SearchSelectOption;
             if (option.id && option.title) {
                 setSelectedSupervisor({ cpf: option.id, nome: option.title });
             }
@@ -123,7 +123,7 @@ export default function CreateTurnoEquipeScreen() {
 
     const handleChangeCoordenador = (value: string | object | null) => {
         if (value && typeof value === 'object') {
-            const option = value as AutocompleteDropdownOption;
+            const option = value as SearchSelectOption;
             if (option.id && option.title) {
                 setSelectedCoordenador({ cpf: option.id, nome: option.title });
             }
@@ -255,7 +255,7 @@ export default function CreateTurnoEquipeScreen() {
                                 </Text>
                             </View>
 
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 listName="equipes"
                                 label="Equipe"
                                 value={selectedEquipe}
@@ -263,7 +263,7 @@ export default function CreateTurnoEquipeScreen() {
                                 onValueChange={handleChangeEquipe}
                             />
 
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 listName="veiculos"
                                 label="Veículo"
                                 value={selectedVeiculo}
@@ -275,7 +275,7 @@ export default function CreateTurnoEquipeScreen() {
                                 Colaboradores do Turno
                             </Text>
 
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 label="Adicionar Colaborador"
                                 placeholder="Digite o nome do colaborador"
                                 value={searchFuncionario}
@@ -332,7 +332,7 @@ export default function CreateTurnoEquipeScreen() {
                                 Liderança
                             </Text>
 
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 label="Encarregado *"
                                 placeholder="Digite o nome do encarregado"
                                 value={selectedEncarregado?.cpf || null}
@@ -341,7 +341,7 @@ export default function CreateTurnoEquipeScreen() {
                                 onValueChange={handleChangeEncarregado}
                             />
 
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 label="Supervisor *"
                                 placeholder="Digite o nome do supervisor"
                                 value={selectedSupervisor?.cpf || null}
@@ -350,7 +350,7 @@ export default function CreateTurnoEquipeScreen() {
                                 onValueChange={handleChangeSupervisor}
                             />
 
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 label="Coordenador *"
                                 placeholder="Digite o nome do coordenador"
                                 value={selectedCoordenador?.cpf || null}

@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
 import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import ModalSearchSelect, { SearchSelectOption } from '@/components/ui/inputs/ModalSearchSelect';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
 export default function DadosGeraisScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void; isUserOperacao: boolean }) {
@@ -29,7 +29,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     const [ordemServico, setOrdemServico] = useState<string>('');
     const [dialogDesc, setDialogDesc] = useState<string>('');
 
-    const areas: AutocompleteDropdownOption[] = [
+    const areas: SearchSelectOption[] = [
         { id: 'URBANA', title: 'URBANA' },
         { id: 'RURAL', title: 'RURAL' },
     ];
@@ -190,7 +190,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                             </Text>
                         </View>
                     </View>
-                    <AutocompleteSearchDropdown
+                    <ModalSearchSelect
                         listName="cidades"
                         label="Município"
                         placeholder="Digite o nome do município"
@@ -200,7 +200,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         initialItems={municipioInitialItem} />
                     {!isUserOperacao && (
                         <>
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 listName="equipes"
                                 label="Equipe"
                                 placeholder="Digite o nome da equipe"
@@ -208,7 +208,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                                 value={selectedEquipe}
                                 onValueChange={handleChangeEquipe}
                                 initialItems={equipeInitialItem} />
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 listName="veiculos"
                                 initialSearch={checklistRealizado?.veiculo_id || ''}
                                 label="Veiculo"
@@ -218,28 +218,30 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                                 initialItems={veiculoInitialItem} />
                         </>
                     )}
-                    <AutocompleteSearchDropdown
+                    <ModalSearchSelect
                         label="Area"
                         placeholder="Digite o nome do município"
                         value={selectedArea}
                         onValueChange={handleChangeArea}
                         initialItems={areas} />
-                    <View style={styles.container}>
-                        <RNText style={styles.label}>
-                            Ordem de Serviço{isAprChecklist ? ' *' : ''}
-                        </RNText>
-                        <TextInput
-                            placeholder={isAprChecklist ? "Digite a ordem de serviço (obrigatório)" : "Digite a ordem de serviço (opcional)"}
-                            value={ordemServico}
-                            onChangeText={handleChangeOrdemServico}
-                            mode="outlined"
-                            style={styles.textInput}
-                            theme={{ roundness: 8 }}
-                            outlineColor={colors.border}
-                            activeOutlineColor={colors.primary}
-                            textColor={colors.text}
-                        />
-                    </View>
+                    {isAprChecklist && (
+                        <View style={styles.container}>
+                            <RNText style={styles.label}>
+                                Ordem de Serviço *
+                            </RNText>
+                            <TextInput
+                                placeholder="Digite a ordem de serviço (obrigatório)"
+                                value={ordemServico}
+                                onChangeText={handleChangeOrdemServico}
+                                mode="outlined"
+                                style={styles.textInput}
+                                theme={{ roundness: 8 }}
+                                outlineColor={colors.border}
+                                activeOutlineColor={colors.primary}
+                                textColor={colors.text}
+                            />
+                        </View>
+                    )}
                     <View style={styles.container}>
                         <RNText style={styles.label}>Observação</RNText>
                         <TextInput

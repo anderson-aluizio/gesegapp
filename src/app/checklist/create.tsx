@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { ScrollView, StyleSheet, View, Modal, ActivityIndicator, Text as RNText } from 'react-native';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import ModalSearchSelect, { SearchSelectOption, ModalSearchSelectRef } from '@/components/ui/inputs/ModalSearchSelect';
 import { router, Stack } from 'expo-router';
 import { Button, IconButton, Text, TextInput } from 'react-native-paper';
 import { ChecklistGrupoDatabase, useChecklistGrupoDatabase } from '@/database/models/useChecklistGrupoDatabase';
@@ -24,10 +24,10 @@ export default function CreateChecklistRealizadoScreen() {
     const { colors } = useTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
-    const [grupos, setGrupos] = useState<AutocompleteDropdownOption[]>([]);
+    const [grupos, setGrupos] = useState<SearchSelectOption[]>([]);
     const [allGrupos, setAllGrupos] = useState<ChecklistGrupoDatabase[]>([]);
     const [selectedGrupo, setSelectedGrupo] = useState<string | null>(null);
-    const [centroCustos, setCentroCustos] = useState<AutocompleteDropdownOption[]>([]);
+    const [centroCustos, setCentroCustos] = useState<SearchSelectOption[]>([]);
     const [selectedCentroCusto, setSelectedCentroCusto] = useState<string | null>(null);
     const [selectedEstrutura, setSelectedEstrutura] = useState<string | null>(null);
     const [selectedMunicipio, setSelectedMunicipio] = useState<string | null>(null);
@@ -42,9 +42,9 @@ export default function CreateChecklistRealizadoScreen() {
     const [showLocationFailedDialog, setShowLocationFailedDialog] = useState(false);
     const [pendingEquipe, setPendingEquipe] = useState<any>(null);
 
-    const centroCustoRef = useRef<AutocompleteSearchDropdownRef>(null);
-    const estruturaRef = useRef<AutocompleteSearchDropdownRef>(null);
-    const municipioRef = useRef<AutocompleteSearchDropdownRef>(null);
+    const centroCustoRef = useRef<ModalSearchSelectRef>(null);
+    const estruturaRef = useRef<ModalSearchSelectRef>(null);
+    const municipioRef = useRef<ModalSearchSelectRef>(null);
     const dialog = useDialog();
     const errorDialog = useErrorDialog();
     const grupoDb = useChecklistGrupoDatabase();
@@ -61,7 +61,7 @@ export default function CreateChecklistRealizadoScreen() {
     const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
     const isAprChecklist = selectedGrupoData?.nome_interno === 'checklist_apr';
 
-    const areas: AutocompleteDropdownOption[] = [
+    const areas: SearchSelectOption[] = [
         { id: 'URBANA', title: 'URBANA' },
         { id: 'RURAL', title: 'RURAL' },
     ];
@@ -102,7 +102,7 @@ export default function CreateChecklistRealizadoScreen() {
             id: String(item.id),
             title: String(item.nome),
         }));
-        if (formatted.length == 1) {
+        if (formatted.length === 1) {
             setSelectedCentroCusto(formatted[0].id)
         }
         setCentroCustos(formatted);
@@ -391,19 +391,32 @@ export default function CreateChecklistRealizadoScreen() {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     <View style={styles.formCard}>
                         <View style={styles.inner}>
-                            <AutocompleteSearchDropdown
-                                label="Grupo"
-                                placeholder="Digite o nome do grupo"
-                                value={selectedGrupo}
-                                onValueChange={handleChangeGrupo}
-                                initialItems={grupos} />
-                            <AutocompleteSearchDropdown
-                                label="Centro de Custo"
-                                placeholder="Digite o centro de custo"
-                                value={selectedCentroCusto}
-                                onValueChange={handleChangeCentroCusto}
-                                initialItems={centroCustos} />
-                            <AutocompleteSearchDropdown
+                            {isUserOperacao ? (
+                                <View>
+                                    <RNText style={styles.label}>Grupo</RNText>
+                                    <View style={styles.readOnlyField}>
+                                        <RNText style={styles.readOnlyText}>
+                                            {selectedGrupoData?.nome || 'Carregando...'}
+                                        </RNText>
+                                    </View>
+                                </View>
+                            ) : (
+                                <ModalSearchSelect
+                                    label="Grupo"
+                                    placeholder="Digite o nome do grupo"
+                                    value={selectedGrupo}
+                                    onValueChange={handleChangeGrupo}
+                                    initialItems={grupos} />
+                            )}
+                            {centroCustos.length > 1 && (
+                                <ModalSearchSelect
+                                    label="Centro de Custo"
+                                    placeholder="Digite o centro de custo"
+                                    value={selectedCentroCusto}
+                                    onValueChange={handleChangeCentroCusto}
+                                    initialItems={centroCustos} />
+                            )}
+                            <ModalSearchSelect
                                 ref={estruturaRef}
                                 label="Estrutura Modelo"
                                 listName="estruturas"
@@ -413,7 +426,7 @@ export default function CreateChecklistRealizadoScreen() {
                                 disable={!selectedGrupo || !selectedCentroCusto}
                                 onValueChange={changeEstrutura}
                             />
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 ref={municipioRef}
                                 listName="cidades"
                                 extraParam={{ centro_custo_id: selectedCentroCusto || '' }}
@@ -423,7 +436,7 @@ export default function CreateChecklistRealizadoScreen() {
                                 disable={!selectedCentroCusto}
                                 onValueChange={handleChangeMunicipio}
                             />
-                            {!isFromTurno ? <AutocompleteSearchDropdown
+                            {!isFromTurno ? <ModalSearchSelect
                                 listName="equipes"
                                 label="Equipe"
                                 extraParam={{ centro_custo_id: selectedCentroCusto || '' }}
@@ -431,35 +444,37 @@ export default function CreateChecklistRealizadoScreen() {
                                 placeholder="Digite para pesquisar equipe"
                                 onValueChange={handleChangeEquipe}
                             /> : null}
-                            {!isFromTurno ? <AutocompleteSearchDropdown
+                            {!isFromTurno ? <ModalSearchSelect
                                 listName="veiculos"
                                 label="Veiculo"
                                 value={selectedVeiculo}
                                 placeholder="Digite para pesquisar veículo"
                                 onValueChange={handleChangeVeiculo}
                             /> : null}
-                            <AutocompleteSearchDropdown
+                            <ModalSearchSelect
                                 label="Area"
                                 placeholder="Digite a área"
                                 value={selectedArea}
                                 onValueChange={handleChangeArea}
                                 initialItems={areas} />
-                            <View>
-                                <RNText style={styles.label}>
-                                    Ordem de Serviço{isAprChecklist ? ' *' : ''}
-                                </RNText>
-                                <TextInput
-                                    placeholder={isAprChecklist ? "Digite a ordem de serviço (obrigatório)" : "Digite a ordem de serviço (opcional)"}
-                                    value={ordemServico}
-                                    onChangeText={handleChangeOrdemServico}
-                                    mode="outlined"
-                                    style={styles.textInput}
-                                    theme={{ roundness: 8 }}
-                                    outlineColor={colors.border}
-                                    activeOutlineColor={colors.primary}
-                                    textColor={colors.text}
-                                />
-                            </View>
+                            {isAprChecklist && (
+                                <View>
+                                    <RNText style={styles.label}>
+                                        Ordem de Serviço *
+                                    </RNText>
+                                    <TextInput
+                                        placeholder="Digite a ordem de serviço (obrigatório)"
+                                        value={ordemServico}
+                                        onChangeText={handleChangeOrdemServico}
+                                        mode="outlined"
+                                        style={styles.textInput}
+                                        theme={{ roundness: 8 }}
+                                        outlineColor={colors.border}
+                                        activeOutlineColor={colors.primary}
+                                        textColor={colors.text}
+                                    />
+                                </View>
+                            )}
                         </View>
                     </View>
                 </ScrollView>
@@ -608,5 +623,19 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     textInput: {
         backgroundColor: colors.cardBackground,
+    },
+    readOnlyField: {
+        padding: 12,
+        backgroundColor: colors.surfaceVariant,
+        borderRadius: 10,
+        borderWidth: 1.2,
+        borderColor: colors.cardBorder,
+        minHeight: 48,
+        justifyContent: 'center' as const,
+    },
+    readOnlyText: {
+        fontSize: 14,
+        color: colors.text,
+        fontWeight: '500' as const,
     },
 });

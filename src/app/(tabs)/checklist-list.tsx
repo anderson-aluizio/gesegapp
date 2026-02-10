@@ -227,6 +227,7 @@ export default function ChecklistListScreen() {
                                     renderItem={({ item }) => (
                                         <ChecklistRealizado
                                             data={item}
+                                            isUserOperacao={user?.is_operacao}
                                             onOpen={() => handleClickChecklist(item)}
                                             onLongPress={() => handleLongPressChecklist(item)}
                                         />

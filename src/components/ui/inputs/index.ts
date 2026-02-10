@@ -1,3 +1,3 @@
-export { default as AutocompleteSearchDropdown } from './AutocompleteSearchDropdown';
-export type { AutocompleteDropdownOption, AutocompleteSearchDropdownRef } from './AutocompleteSearchDropdown';
+export { default as ModalSearchSelect } from './ModalSearchSelect';
+export type { SearchSelectOption, ModalSearchSelectRef } from './ModalSearchSelect';
 export { default as PhotoPicker } from './PhotoPicker';

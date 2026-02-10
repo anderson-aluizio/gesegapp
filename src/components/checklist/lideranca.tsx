@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
-import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import ModalSearchSelect from '@/components/ui/inputs/ModalSearchSelect';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
@@ -154,21 +154,21 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
         <View style={styles.container}>
             <ScrollView>
                 <View style={styles.inner}>
-                    <AutocompleteSearchDropdown
+                    <ModalSearchSelect
                         listName="funcionarios"
                         label="Encarregado"
                         placeholder="Digite o nome do encarregado"
                         value={selectedEncarregado}
                         onValueChange={handleChangeEncarregado}
                         initialItems={encarregadoInitialItem} />
-                    <AutocompleteSearchDropdown
+                    <ModalSearchSelect
                         listName="funcionarios"
                         label="Supervisor"
                         placeholder="Digite o nome do supervisor"
                         value={selectedSupervisor}
                         onValueChange={handleChangeSupervisor}
                         initialItems={supervisorInitialItem} />
-                    <AutocompleteSearchDropdown
+                    <ModalSearchSelect
                         listName="funcionarios"
                         label="Coordenador"
                         placeholder="Digite o nome do coordenador"

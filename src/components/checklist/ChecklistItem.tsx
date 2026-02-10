@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { RadioButton, Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoItemsDatabaseWithItem } from '@/database/models/useChecklisRealizadoItemsDatabase';
 import { ChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
-import AutocompleteSearchDropdown from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import ModalSearchSelect from '@/components/ui/inputs/ModalSearchSelect';
 import PhotoPicker from '@/components/ui/inputs/PhotoPicker';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
@@ -142,7 +142,7 @@ const ChecklistItem = memo(({
 
                 {isInconforme && (
                     <View style={styles.funcionarioSelection}>
-                        <AutocompleteSearchDropdown
+                        <ModalSearchSelect
                             isMultiple={true}
                             label="Colaborador(es)"
                             placeholder="Selecione os colaboradores"

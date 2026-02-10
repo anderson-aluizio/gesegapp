@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Dialog, IconButton, Portal, Text } from 'react-native-paper';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
-import AutocompleteSearchDropdown, { AutocompleteDropdownOption } from '@/components/ui/inputs/AutocompleteSearchDropdown';
+import ModalSearchSelect, { SearchSelectOption } from '@/components/ui/inputs/ModalSearchSelect';
 import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
@@ -55,7 +55,7 @@ export default function FuncionariosScreen(props: {
         setIsLoading(true);
         props.setReloadList(true);
         if (value && typeof value === 'object') {
-            const cpf = (value as AutocompleteDropdownOption).id;
+            const cpf = (value as SearchSelectOption).id;
             const existingFuncionario = funcionarios.find(colaborador => colaborador.funcionario_cpf === cpf);
             if (!existingFuncionario) {
                 await checklistRealizadoFuncionarioDb.create(checklistRealizado.id, cpf);
@@ -124,7 +124,7 @@ export default function FuncionariosScreen(props: {
                     <View style={styles.inner}>
                         {checklistRealizado.checklist_grupo_nome_interno !== 'checklist_apr' &&
                             checklistRealizado.checklist_grupo_nome_interno !== 'checklist_auto_checklist' && (
-                                <AutocompleteSearchDropdown
+                                <ModalSearchSelect
                                     listName="funcionarios"
                                     label="Colaborador"
                                     placeholder="Digite o nome do colaborador"

@@ -7,7 +7,6 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { UpdateProvider } from "@/contexts/UpdateContext"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
-import { AutocompleteDropdownContextProvider } from 'react-native-autocomplete-dropdown'
 
 function AppContent() {
   const { isDark, colors } = useTheme();
@@ -36,23 +35,21 @@ function AppContent() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <AutocompleteDropdownContextProvider>
-        <UpdateProvider>
-          <SQLiteProvider databaseName="myDatabase.db" onInit={safeInitializeDatabase}>
-            <AuthProvider>
-              <PaperProvider theme={paperTheme}>
-                <Stack>
-                  <Stack.Screen name="index" options={{ headerShown: false }} />
-                  <Stack.Screen name="login" options={{ headerShown: false }} />
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="checklist/duplicate/[id]" options={{ headerShown: false }} />
-                  <Stack.Screen name="+not-found" />
-                </Stack>
-              </PaperProvider>
-            </AuthProvider>
-          </SQLiteProvider>
-        </UpdateProvider>
-      </AutocompleteDropdownContextProvider>
+      <UpdateProvider>
+        <SQLiteProvider databaseName="myDatabase.db" onInit={safeInitializeDatabase}>
+          <AuthProvider>
+            <PaperProvider theme={paperTheme}>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="login" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="checklist/duplicate/[id]" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </PaperProvider>
+          </AuthProvider>
+        </SQLiteProvider>
+      </UpdateProvider>
     </SafeAreaView>
   );
 }
