@@ -311,6 +311,14 @@ export default function CreateChecklistRealizadoScreen() {
             const isAutoChecklistGroup = selectedGrupoData?.nome_interno === 'checklist_auto_checklist';
             const hasAutoChecklist = await checklistRealizadoDb.hasAutoChecklistToday();
 
+            if (isAutoChecklistGroup) {
+                const hasAnyAutoChecklist = await checklistRealizadoDb.hasAnyAutoChecklistToday();
+                if (hasAnyAutoChecklist) {
+                    dialog.show('Atenção', 'Já existe um Auto Checklist criado para hoje. Finalize o existente antes de criar outro.');
+                    return;
+                }
+            }
+
             if (!isAutoChecklistGroup && !hasAutoChecklist) {
                 dialog.show('Atenção', 'Você deve criar e finalizar um Auto Checklist primeiro antes de criar outros tipos de checklist.');
                 return;

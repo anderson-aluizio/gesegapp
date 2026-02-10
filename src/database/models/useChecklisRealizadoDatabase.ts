@@ -405,6 +405,25 @@ export const useChecklisRealizadoDatabase = () => {
     }
   }
 
+  const hasAnyAutoChecklistToday = async () => {
+    try {
+      const today = getLocalDateString();
+      const query = `
+        SELECT cr.*
+        FROM checklist_realizados cr
+        INNER JOIN checklist_grupos cg ON cr.checklist_grupo_id = cg.id
+        WHERE cg.nome_interno = 'checklist_auto_checklist'
+        AND DATE(cr.date) = DATE(?)
+        LIMIT 1
+      `;
+
+      const response = await database.getFirstAsync<ChecklistRealizadoDatabase>(query, [today]);
+      return !!response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   const hasChecklistsByDate = async (date: string) => {
     try {
       const query = `
@@ -560,6 +579,7 @@ export const useChecklisRealizadoDatabase = () => {
     updatedUnfinished,
     remove,
     hasAutoChecklistToday,
+    hasAnyAutoChecklistToday,
     hasChecklistsByDate,
     duplicate,
     cleanOldSyncedData
