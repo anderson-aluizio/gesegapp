@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
 import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
+import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import ModalSearchSelect, { SearchSelectOption } from '@/components/ui/inputs/ModalSearchSelect';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
@@ -13,6 +14,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
+    const centroCustoDb = useCentroCustoDatabase();
     const isUserOperacao = props.isUserOperacao;
     const isAprChecklist = checklistRealizado?.checklist_grupo_nome_interno === 'checklist_apr';
 
@@ -28,6 +30,18 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     const [observacao, setObservacao] = useState<string>('');
     const [ordemServico, setOrdemServico] = useState<string>('');
     const [dialogDesc, setDialogDesc] = useState<string>('');
+    const [localidadeEstadoId, setLocalidadeEstadoId] = useState<number | undefined>();
+
+    useEffect(() => {
+        const loadLocalidadeEstadoId = async () => {
+            if (checklistRealizado?.centro_custo_id) {
+                const allCentros = await centroCustoDb.getAll();
+                const centro = allCentros.find(c => String(c.id) === String(checklistRealizado.centro_custo_id));
+                setLocalidadeEstadoId(centro?.localidade_estado_id);
+            }
+        };
+        loadLocalidadeEstadoId();
+    }, [checklistRealizado?.centro_custo_id]);
 
     const areas: SearchSelectOption[] = [
         { id: 'URBANA', title: 'URBANA' },
@@ -194,7 +208,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         listName="cidades"
                         label="Município"
                         placeholder="Digite o nome do município"
-                        extraParam={{ centro_custo_id: checklistRealizado.centro_custo_id }}
+                        extraParam={{ localidade_estado_id: localidadeEstadoId }}
                         value={selectedMunicipio}
                         onValueChange={handleChangeMunicipio}
                         initialItems={municipioInitialItem} />

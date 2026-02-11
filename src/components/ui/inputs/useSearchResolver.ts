@@ -13,6 +13,7 @@ export type SearchSelectOption = {
 type ExtraParam = {
     centro_custo_id?: string;
     grupo_id?: string;
+    localidade_estado_id?: number;
 };
 
 export function useSearchResolver(
@@ -29,7 +30,7 @@ export function useSearchResolver(
         switch (listName) {
             case 'cidades': {
                 const res = await localidadeCidadeDb.getByParams({
-                    centro_custo_id: extraParam?.centro_custo_id || '',
+                    localidade_estado_id: extraParam?.localidade_estado_id || 0,
                     query,
                 });
                 if (!res || res.length === 0) return [];
@@ -80,7 +81,7 @@ export function useSearchResolver(
             default:
                 return [];
         }
-    }, [listName, extraParam?.centro_custo_id, extraParam?.grupo_id]);
+    }, [listName, extraParam?.centro_custo_id, extraParam?.grupo_id, extraParam?.localidade_estado_id]);
 
     if (!listName) return null;
 

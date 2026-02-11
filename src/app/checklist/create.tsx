@@ -28,6 +28,7 @@ export default function CreateChecklistRealizadoScreen() {
     const [allGrupos, setAllGrupos] = useState<ChecklistGrupoDatabase[]>([]);
     const [selectedGrupo, setSelectedGrupo] = useState<string | null>(null);
     const [centroCustos, setCentroCustos] = useState<SearchSelectOption[]>([]);
+    const [allCentroCustos, setAllCentroCustos] = useState<CentroCustoDatabase[]>([]);
     const [selectedCentroCusto, setSelectedCentroCusto] = useState<string | null>(null);
     const [selectedEstrutura, setSelectedEstrutura] = useState<string | null>(null);
     const [selectedMunicipio, setSelectedMunicipio] = useState<string | null>(null);
@@ -60,6 +61,8 @@ export default function CreateChecklistRealizadoScreen() {
 
     const selectedGrupoData = allGrupos.find(g => String(g.id) === selectedGrupo);
     const isAprChecklist = selectedGrupoData?.nome_interno === 'checklist_apr';
+    const selectedCentroCustoData = allCentroCustos.find(c => String(c.id) === selectedCentroCusto);
+    const selectedLocalidadeEstadoId = selectedCentroCustoData?.localidade_estado_id;
 
     const areas: SearchSelectOption[] = [
         { id: 'URBANA', title: 'URBANA' },
@@ -98,6 +101,7 @@ export default function CreateChecklistRealizadoScreen() {
         if (!res || res.length === 0) {
             return [];
         }
+        setAllCentroCustos(res);
         let formatted = res.map((item: CentroCustoDatabase) => ({
             id: String(item.id),
             title: String(item.nome),
@@ -437,7 +441,7 @@ export default function CreateChecklistRealizadoScreen() {
                             <ModalSearchSelect
                                 ref={municipioRef}
                                 listName="cidades"
-                                extraParam={{ centro_custo_id: selectedCentroCusto || '' }}
+                                extraParam={{ localidade_estado_id: selectedLocalidadeEstadoId }}
                                 label="Município"
                                 value={selectedMunicipio}
                                 placeholder={!selectedCentroCusto ? 'Selecione uma estrutura modelo primeiro' : 'Digite para pesquisar'}

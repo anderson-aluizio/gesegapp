@@ -23,7 +23,7 @@ export interface ModalSearchSelectRef {
 
 type ModalSearchSelectProps = {
     listName?: string;
-    extraParam?: { centro_custo_id?: string; grupo_id?: string };
+    extraParam?: { centro_custo_id?: string; grupo_id?: string; localidade_estado_id?: number };
     initialSearch?: string;
     label: string;
     placeholder?: string;

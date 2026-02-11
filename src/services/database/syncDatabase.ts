@@ -198,8 +198,8 @@ export class DatabaseSyncService {
         await this.database.withTransactionAsync(async () => {
             for (const item of data) {
                 await this.database.runAsync(
-                    `INSERT OR REPLACE INTO localidade_cidades (id, nome, centro_custo_id) VALUES (?, ?, ?)`,
-                    [item.id, item.nome, item.centro_custo_id]
+                    `INSERT OR REPLACE INTO localidade_cidades (id, nome, centro_custo_id, localidade_estado_id) VALUES (?, ?, ?, ?)`,
+                    [item.id, item.nome, item.centro_custo_id, item.localidade_estado_id ?? null]
                 );
             }
         });

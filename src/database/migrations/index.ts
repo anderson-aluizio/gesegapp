@@ -10,6 +10,7 @@ import { migration_001_initial_schema } from './001_initial_schema';
 import { migration_002_add_is_synced_fields } from './002_add_is_synced_fields';
 import { migration_003_add_lideranca_to_equipe_turnos } from './003_add_lideranca_to_equipe_turnos';
 import { migration_004_add_ordem_servico_to_checklist_realizados } from './004_add_ordem_servico_to_checklist_realizados';
+import { migration_005_add_localidade_estado_id } from './005_add_localidade_estado_id';
 
 /**
  * All migrations in sequential order
@@ -20,6 +21,7 @@ export const allMigrations: Migration[] = [
     migration_002_add_is_synced_fields,
     migration_003_add_lideranca_to_equipe_turnos,
     migration_004_add_ordem_servico_to_checklist_realizados,
+    migration_005_add_localidade_estado_id,
     // Add new migrations here
 ];
 

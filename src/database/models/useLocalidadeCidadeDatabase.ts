@@ -4,6 +4,7 @@ export type LocalidadeCidadeDatabase = {
   id: number;
   nome: string;
   centro_custo_id: string;
+  localidade_estado_id?: number;
 }
 
 export const useLocalidadeCidadeDatabase = () => {
@@ -21,12 +22,12 @@ export const useLocalidadeCidadeDatabase = () => {
     }
   }
 
-  const getByParams = async (params: { centro_custo_id: string, query: string }) => {
+  const getByParams = async (params: { localidade_estado_id: number, query: string }) => {
     try {
-      const query = `SELECT * FROM localidade_cidades WHERE centro_custo_id = ? AND nome LIKE ? ORDER BY nome LIMIT 10`;
+      const query = `SELECT * FROM localidade_cidades WHERE localidade_estado_id = ? AND nome LIKE ? ORDER BY nome LIMIT 10`;
 
       const response = await database.getAllAsync<LocalidadeCidadeDatabase>(query, [
-        params.centro_custo_id,
+        params.localidade_estado_id,
         `%${params.query}%`
       ]);
 

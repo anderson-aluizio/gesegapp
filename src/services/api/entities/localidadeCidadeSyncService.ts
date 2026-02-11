@@ -6,6 +6,7 @@ export interface LocalidadeCidade {
     id: number;
     nome: string;
     centro_custo_id: string;
+    localidade_estado_id?: number;
 }
 
 export class LocalidadeCidadeSyncService extends BaseSyncService {
