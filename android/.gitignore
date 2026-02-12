@@ -11,7 +11,7 @@ local.properties
 *.iml
 *.hprof
 .cxx/
-.properties
+*.properties
 
 # Bundle artifacts
 *.jsbundle
