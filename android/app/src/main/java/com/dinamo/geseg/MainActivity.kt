@@ -1,4 +1,4 @@
-package com.dinamo.gesegapp
+package com.dinamo.geseg
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

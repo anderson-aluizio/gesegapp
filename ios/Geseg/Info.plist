@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>myapp</string>
-          <string>com.dinamo.gesegapp</string>
+          <string>com.dinamo.geseg</string>
         </array>
       </dict>
     </array>

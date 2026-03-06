@@ -48,3 +48,4 @@ apk
 .env.local
 
 credentials.json
+keystore.properties

@@ -14,14 +14,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dinamo.gesegapp"
+      "bundleIdentifier": "com.dinamo.geseg"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/img/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.dinamo.gesegapp",
+      "package": "com.dinamo.geseg",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
@@ -42,14 +42,14 @@
           "backgroundColor": "#ffffff",
           "ios": {
             "supportsTablet": true,
-            "bundleIdentifier": "com.dinamo.gesegapp"
+            "bundleIdentifier": "com.dinamo.geseg"
           },
           "android": {
             "adaptiveIcon": {
               "foregroundImage": "./assets/img/adaptive-icon.png",
               "backgroundColor": "#ffffff"
             },
-            "package": "com.dinamo.gesegapp"
+            "package": "com.dinamo.geseg"
           }
         }
       ],
