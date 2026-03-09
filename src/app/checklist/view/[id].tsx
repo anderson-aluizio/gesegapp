@@ -124,6 +124,7 @@ export default function ChecklistViewScreen() {
                         headerLeft: () => (
                             <IconButton
                                 icon="arrow-left"
+                                iconColor={colors.text}
                                 size={24}
                                 onPress={() => router.back()}
                             />

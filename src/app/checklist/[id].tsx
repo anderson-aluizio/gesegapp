@@ -235,6 +235,7 @@ export default function EditChecklistRealizado() {
                 headerLeft: () => (
                   <IconButton
                     icon="arrow-left"
+                    iconColor={colors.text}
                     size={24}
                     onPress={() => {
                       router.dismissAll();

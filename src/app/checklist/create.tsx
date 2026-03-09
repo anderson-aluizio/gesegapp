@@ -388,6 +388,7 @@ export default function CreateChecklistRealizadoScreen() {
                         headerLeft: () => (
                             <IconButton
                                 icon="arrow-left"
+                                iconColor={colors.text}
                                 size={24}
                                 onPress={() => {
                                     if (router.canGoBack()) {

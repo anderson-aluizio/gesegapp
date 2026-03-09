@@ -1,5 +1,6 @@
 import { Stack } from "expo-router"
 import { SQLiteProvider } from "expo-sqlite"
+import { StatusBar } from "expo-status-bar"
 
 import { safeInitializeDatabase } from "@/database/databaseSchema"
 import { PaperProvider, MD3DarkTheme, MD3LightTheme } from "react-native-paper"
@@ -35,11 +36,18 @@ function AppContent() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <UpdateProvider>
         <SQLiteProvider databaseName="myDatabase.db" onInit={safeInitializeDatabase}>
           <AuthProvider>
             <PaperProvider theme={paperTheme}>
-              <Stack>
+              <Stack
+                screenOptions={{
+                  headerStyle: { backgroundColor: colors.surface },
+                  headerTintColor: colors.text,
+                  headerTitleStyle: { color: colors.text },
+                }}
+              >
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="login" options={{ headerShown: false }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
