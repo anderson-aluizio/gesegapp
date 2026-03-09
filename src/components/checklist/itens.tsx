@@ -30,6 +30,8 @@ export default function ItensScreen(props: {
     const [selectedSubGrupo, setSelectedSubGrupo] = useState<string | null>(null);
     const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
+    const scrollViewRef = useRef<ScrollView>(null);
+    const sectionRefs = useRef<{ [key: string]: View | null }>({});
     const isMountedRef = useRef(true);
     const lastChecklistIdRef = useRef<number | null>(null);
 
@@ -370,8 +372,28 @@ export default function ItensScreen(props: {
     }, [checklistEstruturaItems]);
 
     // Handle section toggle - only one can be expanded at a time
+    // After expanding, scroll to the section so the user sees the header
     const handleSectionToggle = useCallback((sectionName: string) => {
-        setExpandedSection(prev => prev === sectionName ? null : sectionName);
+        setExpandedSection(prev => {
+            const newExpanded = prev === sectionName ? null : sectionName;
+
+            if (newExpanded) {
+                setTimeout(() => {
+                    const sectionView = sectionRefs.current[sectionName];
+                    if (sectionView && scrollViewRef.current) {
+                        sectionView.measureLayout(
+                            scrollViewRef.current.getInnerViewRef(),
+                            (_x, y) => {
+                                scrollViewRef.current?.scrollTo({ y, animated: true });
+                            },
+                            () => {}
+                        );
+                    }
+                }, 350);
+            }
+
+            return newExpanded;
+        });
     }, []);
 
     // Reset filters and collapse all sections
@@ -474,7 +496,7 @@ export default function ItensScreen(props: {
                             )}
                         </View>
                     )}
-                    <ScrollView showsVerticalScrollIndicator={false}>
+                    <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false}>
                         <View style={styles.inner}>
                             {checklistEstruturaItems.length === 0 ? (
                                 <Text style={styles.emptyText}>
@@ -486,8 +508,11 @@ export default function ItensScreen(props: {
                                 </Text>
                             ) : (
                                 filteredGroupedItems.map((group) => (
-                                    <CollapsibleSection
+                                    <View
                                         key={group.name}
+                                        ref={(ref) => { sectionRefs.current[group.name] = ref; }}
+                                    >
+                                    <CollapsibleSection
                                         title={group.name}
                                         answeredCount={group.answeredCount}
                                         totalCount={group.totalCount}
@@ -508,6 +533,7 @@ export default function ItensScreen(props: {
                                             />
                                         ))}
                                     </CollapsibleSection>
+                                    </View>
                                 ))
                             )}
                         </View>
