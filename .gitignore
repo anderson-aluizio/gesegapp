@@ -48,4 +48,5 @@ apk
 .env.local
 
 credentials.json
+credentials/
 keystore.properties
