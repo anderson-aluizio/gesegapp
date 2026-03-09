@@ -3,12 +3,12 @@ import { useColorScheme } from 'react-native';
 
 export const lightColors = {
     // Primary colors
-    primary: '#2980ef',
-    primaryDark: '#667eea',
+    primary: '#004583',
+    primaryDark: '#0062a7',
 
     // Background colors
-    background: '#f8f9fa',
-    backgroundAlt: '#2980ef',
+    background: '#e2f2f9',
+    backgroundAlt: '#f8f9fa',
     surface: '#ffffff',
     surfaceVariant: '#f5f7fa',
 
@@ -24,8 +24,8 @@ export const lightColors = {
     divider: '#e1e8ed',
 
     // Button colors
-    buttonPrimary: '#2980ef',
-    buttonSecondary: '#667eea',
+    buttonPrimary: '#0062a7',
+    buttonSecondary: '#00ace9',
     buttonDanger: '#e74c3c',
     buttonText: '#ffffff',
 
@@ -60,12 +60,22 @@ export const lightColors = {
 
     // Shadow
     shadow: '#000000',
+
+    // home module colors
+    checklistBackgroundFrom: '#00ace9',
+    checklistBackgroundTo: '#0062a7',
+    turnoBackgroundFrom: '#53e38f',
+    turnoBackgroundTo: '#27ae60',
+    syncBackgroundFrom: '#f9b851',
+    syncBackgroundTo: '#f39c12',
+    reportsBackgroundFrom: '#7fc1f7',
+    reportsBackgroundTo: '#2196f3',
 };
 
 export const darkColors = {
     // Primary colors
-    primary: '#4a9af5',
-    primaryDark: '#7b93ed',
+    primary: '#00396c',
+    primaryDark: '#002743',
 
     // Background colors
     background: '#121212',
@@ -121,6 +131,16 @@ export const darkColors = {
 
     // Shadow
     shadow: '#000000',
+
+    // home module colors
+    checklistBackgroundFrom: '#004863',
+    checklistBackgroundTo: '#01243d',
+    turnoBackgroundFrom: '#006d2e',
+    turnoBackgroundTo: '#00491f',
+    syncBackgroundFrom: '#be7500',
+    syncBackgroundTo: '#895400',
+    reportsBackgroundFrom: '#004b89',
+    reportsBackgroundTo: '#004781',
 };
 
 export type ThemeColors = typeof lightColors;

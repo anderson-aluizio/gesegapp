@@ -14,9 +14,6 @@ import ConfirmDialog from '@/components/ui/dialogs/ConfirmDialog';
 import { useDialog } from '@/hooks/useDialog';
 import { usePendingSyncAlert } from '@/hooks/usePendingSyncAlert';
 
-const { width } = Dimensions.get('window');
-const CARD_SPACING = 12;
-const CARD_WIDTH = (width - 48 - CARD_SPACING) / 2;
 
 type ModuleCardData = {
   id: string;
@@ -74,7 +71,7 @@ export default function HomeScreen() {
       description: 'Realizar e visualizar checklists',
       icon: 'clipboard-check-outline',
       route: '/checklist-list',
-      colors: ['#667eea', '#764ba2'],
+      colors: [colors.checklistBackgroundTo, colors.checklistBackgroundFrom],
     },
     {
       id: 'turno',
@@ -82,7 +79,7 @@ export default function HomeScreen() {
       description: 'Gerenciar turnos de trabalho',
       icon: 'clock-outline',
       route: '/turno-equipe',
-      colors: ['#ffb444ff', '#ff7300ff'],
+      colors: [colors.turnoBackgroundTo, colors.turnoBackgroundFrom],
       requiresOperational: true,
     },
     {
@@ -91,7 +88,7 @@ export default function HomeScreen() {
       description: 'Atualizar dados do servidor',
       icon: 'sync',
       route: '/sync-data',
-      colors: ['#4facfe', '#00e4f0ff'],
+      colors: [colors.syncBackgroundTo, colors.syncBackgroundFrom],
     },
     {
       id: 'reports',
@@ -99,7 +96,7 @@ export default function HomeScreen() {
       description: 'Visualizar estatísticas e análises',
       icon: 'chart-bar',
       route: '/reports',
-      colors: ['#30bb5eff', '#00c09dff'],
+      colors: [colors.reportsBackgroundTo, colors.reportsBackgroundFrom],
     },
   ];
 
@@ -174,14 +171,12 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <View style={styles.headerTop}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('../../../assets/images/geseg-logo-nobg.png')}
-              style={styles.headerLogo}
-              resizeMode="contain"
-            />
-          </View>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../../../assets/img/geseg-logo-white-nobg.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
         <View style={styles.userInfoContainer}>
@@ -250,14 +245,12 @@ export default function HomeScreen() {
                     style={styles.cardGradient}
                   >
                     <View style={styles.cardContent}>
-                      <View style={styles.iconContainer}>
-                        <IconButton
-                          icon={module.icon}
-                          size={30}
-                          iconColor="#ffffff"
-                          style={styles.moduleIcon}
-                        />
-                      </View>
+                      <IconButton
+                        icon={module.icon}
+                        size={30}
+                        iconColor="#ffffff"
+                        style={styles.moduleIcon}
+                      />
 
                       <View style={styles.cardTextContainer}>
                         <Text style={styles.cardTitle} numberOfLines={2}>
@@ -351,20 +344,12 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 6,
   },
-  headerTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
   logoContainer: {
-    flex: 1,
     alignItems: 'center',
+    paddingBottom: 12,
   },
-  headerLogo: {
-    width: 140,
+  logo: {
     height: 70,
-    borderRadius: 8,
   },
   userInfoContainer: {
     alignItems: 'center',
@@ -395,27 +380,14 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 6,
+    paddingTop: 12,
     paddingBottom: 100,
   },
-  welcomeSection: {
-    marginBottom: 14,
-    paddingHorizontal: 4,
-  },
-  welcomeSubtitle: {
-    fontSize: 16,
-    color: colors.textTertiary,
-    lineHeight: 22,
-  },
   modulesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: CARD_SPACING,
-    justifyContent: 'space-between',
+    gap: 12,
   },
   cardWrapper: {
-    width: CARD_WIDTH,
-    marginBottom: 12,
+    width: '100%',
   },
   cardPressable: {
     borderRadius: 16,
@@ -437,16 +409,15 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     opacity: 0.6,
   },
   cardGradient: {
-    minHeight: 135,
-    padding: 8,
-    justifyContent: 'space-between',
+    minHeight: 90,
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   cardContent: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  iconContainer: {
-    marginBottom: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   moduleIcon: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
@@ -459,13 +430,13 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#ffffff',
+    color: colors.textOnPrimary,
     marginBottom: 6,
     lineHeight: 22,
   },
   cardDescription: {
     fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: colors.textOnPrimary,
     lineHeight: 18,
   },
   chevronIcon: {

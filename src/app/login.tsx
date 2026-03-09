@@ -139,7 +139,7 @@ export default function LoginScreen() {
             <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <View style={styles.logoContainer}>
                     <Image
-                        source={require('../../assets/images/geseg-logo-nobg.png')}
+                        source={require('../../assets/img/geseg-logo-nobg.png')}
                         style={styles.logo}
                         resizeMode="contain"
                     />
@@ -248,7 +248,7 @@ export default function LoginScreen() {
                     >
                         {loading ? 'Acessando...' : 'Acessar'}
                     </Button>
-                    <Text style={{ textAlign: 'center', marginTop: 8, color: colors.textTertiary }}>
+                    <Text style={styles.versionText}>
                         Versão: {process.env.EXPO_PUBLIC_LOCAL_VERSION}
                     </Text>
                 </View>
@@ -276,39 +276,37 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     scrollContainer: {
         flexGrow: 1,
         justifyContent: 'center',
-        padding: 20,
+        paddingHorizontal: 24,
+        paddingVertical: 16,
     },
     logoContainer: {
         alignItems: 'center',
-        marginBottom: 10,
-    },
-    resetDataContainer: {
-        marginTop: 20,
-        alignItems: 'flex-end',
     },
     logo: {
-        width: 320,
-        height: 100,
-        borderRadius: 8,
+        width: '80%',
+    },
+    resetDataContainer: {
+        marginTop: 12,
+        alignItems: 'flex-end',
     },
     formContainer: {
         backgroundColor: colors.surface,
-        borderRadius: 12,
-        padding: 24,
-        elevation: 4,
+        borderRadius: 16,
+        padding: 20,
+        elevation: 3,
         shadowColor: colors.shadow,
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 1,
         },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
     },
     sectionTitle: {
-        fontSize: 14,
+        fontSize: 13,
         fontWeight: '600',
         color: colors.textTertiary,
-        marginBottom: 12,
+        marginBottom: 10,
         textTransform: 'uppercase',
         letterSpacing: 0.5,
     },
@@ -318,7 +316,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         justifyContent: 'space-between',
         backgroundColor: colors.surfaceVariant,
         borderRadius: 8,
-        padding: 12,
+        padding: 10,
         borderWidth: 1,
         borderColor: colors.border,
     },
@@ -329,7 +327,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         gap: 8,
     },
     toggleLabel: {
-        fontSize: 15,
+        fontSize: 14,
         color: colors.text,
         fontWeight: '500',
         flex: 1,
@@ -337,47 +335,52 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     divider: {
         height: 1,
         backgroundColor: colors.divider,
-        marginVertical: 10,
+        marginVertical: 8,
     },
     credentialsSection: {
-        marginBottom: 4,
+        marginBottom: 0,
     },
     input: {
-        marginBottom: 16,
+        marginBottom: 12,
         backgroundColor: colors.inputBackground,
     },
     rememberRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginTop: 4,
-        marginBottom: 8,
+        marginBottom: 4,
         paddingHorizontal: 4,
     },
     rememberTextWrapper: {
         flex: 1,
     },
     rememberText: {
-        fontSize: 15,
+        fontSize: 14,
         color: colors.textSecondary,
     },
     forgotPasswordContainer: {
-        marginTop: 12,
+        marginTop: 8,
         alignItems: 'center',
     },
     forgotPasswordText: {
-        fontSize: 14,
+        fontSize: 13,
         color: colors.link,
         fontWeight: '500',
         textDecorationLine: 'underline',
     },
     loginButton: {
-        marginTop: 16,
-        marginBottom: 8,
+        marginTop: 12,
+        marginBottom: 4,
         backgroundColor: colors.buttonPrimary,
-        borderRadius: 8,
+        borderRadius: 10,
     },
     loginButtonContent: {
-        height: 50,
+        height: 48,
+    },
+    versionText: {
+        textAlign: 'center',
+        marginTop: 6,
+        fontSize: 12,
+        color: colors.textTertiary,
     },
 });
