@@ -143,8 +143,8 @@ export default function CreateTurnoEquipeScreen() {
             return;
         }
 
-        if (selectedFuncionarios.length === 0) {
-            setDialogDesc('Adicione pelo menos um funcionário ao turno.');
+        if (selectedFuncionarios.length <= 1) {
+            setDialogDesc('Adicione pelo menos um colaborador além de você para o turno.');
             return;
         }
 
