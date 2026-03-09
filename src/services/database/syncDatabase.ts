@@ -9,6 +9,7 @@ import type {
     LocalidadeCidade,
     Equipe,
     Veiculo,
+    AcaoCampo,
 } from '../api/syncService';
 import { ChecklistEstruturaControleRisco } from '../api/entities';
 
@@ -260,6 +261,37 @@ export class DatabaseSyncService {
         );
     }
 
+    private async insertAcaoCampos(data: AcaoCampo[]) {
+        if (data.length === 0) return;
+
+        await this.database.withTransactionAsync(async () => {
+            for (const item of data) {
+                await this.database.runAsync(
+                    `INSERT OR REPLACE INTO acao_campos (id, grupo_caderno_preco_id, caderno_preco_id, centro_custo_id, processo_id, tipo_servico_id, tipo_acao, nome, valor, codigo_descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        item.id,
+                        item.grupo_caderno_preco_id,
+                        item.caderno_preco_id,
+                        item.centro_custo_id,
+                        item.processo_id,
+                        item.tipo_servico_id,
+                        item.tipo_acao,
+                        item.nome,
+                        item.valor,
+                        item.codigo_descricao
+                    ]
+                );
+            }
+        });
+    }
+
+    async clearAcaoCampos(centroCustoId: string) {
+        await this.database.runAsync(
+            `DELETE FROM acao_campos WHERE centro_custo_id = ?`,
+            [centroCustoId]
+        );
+    }
+
     async insertFuncionariosPage(data: Funcionario[]) {
         await this.insertFuncionarios(data);
     }
@@ -300,6 +332,10 @@ export class DatabaseSyncService {
         await this.insertVeiculos(data);
     }
 
+    async insertAcaoCamposPage(data: AcaoCampo[]) {
+        await this.insertAcaoCampos(data);
+    }
+
     private async updateCentroCustoSyncedAt(centroCustoId: string) {
         try {
             const query = `UPDATE centro_custos SET synced_at = datetime('now') WHERE id = ?`;
@@ -326,6 +362,7 @@ export class DatabaseSyncService {
                 { name: 'Cidades', fn: () => syncService.syncLocalidadeCidades(this, centroCustoId) },
                 { name: 'Equipes', fn: () => syncService.syncEquipes(this, centroCustoId) },
                 { name: 'Veículos', fn: () => syncService.syncVeiculos(this, centroCustoId) },
+                { name: 'Ações de Campo', fn: () => syncService.syncAcaoCampos(this, centroCustoId) },
             ];
 
             const totalSteps = syncSteps.length;

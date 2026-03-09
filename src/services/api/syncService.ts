@@ -10,6 +10,7 @@ import {
     localidadeCidadeSyncService,
     equipeSyncService,
     veiculoSyncService,
+    acaoCampoSyncService,
 } from './entities';
 
 export type {
@@ -23,6 +24,7 @@ export type {
     LocalidadeCidade,
     Equipe,
     Veiculo,
+    AcaoCampo,
     PaginatedResponse,
 } from './entities';
 
@@ -65,6 +67,10 @@ export class SyncService {
 
     async syncVeiculos(dbService: DatabaseSyncService, centroCustoId: string): Promise<number> {
         return await veiculoSyncService.syncVeiculos(dbService, centroCustoId);
+    }
+
+    async syncAcaoCampos(dbService: DatabaseSyncService, centroCustoId: string): Promise<number> {
+        return await acaoCampoSyncService.syncAcaoCampos(dbService, centroCustoId);
     }
 }
 

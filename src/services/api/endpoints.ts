@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
     VEICULOS: '/veiculos',
     CHECKLIST_REALIZADOS: '/checklist-realizados',
     CHECKLIST_DASHBOARD: '/checklist-dashboard',
+    ACAO_CAMPOS: '/acao-campos',
 } as const;
 
 export type ApiEndpoint = typeof API_ENDPOINTS[keyof typeof API_ENDPOINTS];

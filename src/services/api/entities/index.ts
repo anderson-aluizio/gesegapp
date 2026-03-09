@@ -9,3 +9,4 @@ export * from './checklistEstruturaControleRiscoSyncService';
 export * from './localidadeCidadeSyncService';
 export * from './equipeSyncService';
 export * from './veiculoSyncService';
+export * from './acaoCampoSyncService';
