@@ -16,6 +16,9 @@ export interface AcaoCampo {
     nome: string;
     valor: number;
     codigo_descricao: string;
+    tipo_servico?: {
+        nome: string;
+    };
 }
 
 export class AcaoCampoSyncService extends BaseSyncService {

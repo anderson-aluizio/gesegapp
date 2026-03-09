@@ -4,6 +4,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import DadosGeraisScreen from '@/components/checklist/dadosGerais';
 import LiderancaScreen from '@/components/checklist/lideranca';
 import RiscosScreen from '@/components/checklist/riscos';
+import AcaoCamposScreen from '@/components/checklist/acaoCampos';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ChecklistRealizadoDatabaseWithRelations, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import FuncionariosScreen from '@/components/checklist/funcionarios';
@@ -31,6 +32,7 @@ export default function EditChecklistRealizado() {
     { key: 'colaborador', title: 'Colaboradores', focusedIcon: 'account-group', unfocusedIcon: 'account-group-outline' },
     { key: 'itens', title: 'Itens', focusedIcon: 'clipboard-list', unfocusedIcon: 'clipboard-list-outline' },
     { key: 'riscos', title: 'Riscos', focusedIcon: 'alert', unfocusedIcon: 'alert-outline' },
+    { key: 'acaoCampos', title: 'Ações', focusedIcon: 'hammer-wrench', unfocusedIcon: 'hammer-wrench' },
   ];
 
   const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabaseWithRelations>({} as ChecklistRealizadoDatabaseWithRelations);
@@ -41,6 +43,7 @@ export default function EditChecklistRealizado() {
 
     return allRoutes.filter(route => {
       if (route.key === 'riscos' && (!isUserOperacao || !isAprChecklist)) return false;
+      if (route.key === 'acaoCampos' && (!isUserOperacao || !isAprChecklist)) return false;
       return true;
     });
   }, [user?.is_operacao, checklistRealizado.checklist_grupo_nome_interno]);
@@ -90,6 +93,8 @@ export default function EditChecklistRealizado() {
           isActive={isActive} reloadList={isReloadList} setReloadList={setisReloadList} />;
       case 'riscos':
         return <RiscosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
+      case 'acaoCampos':
+        return <AcaoCamposScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
       default:
         return null;
     }

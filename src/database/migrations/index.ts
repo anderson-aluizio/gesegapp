@@ -12,6 +12,8 @@ import { migration_003_add_lideranca_to_equipe_turnos } from './003_add_lideranc
 import { migration_004_add_ordem_servico_to_checklist_realizados } from './004_add_ordem_servico_to_checklist_realizados';
 import { migration_005_add_localidade_estado_id } from './005_add_localidade_estado_id';
 import { migration_006_create_acao_campos } from './006_create_acao_campos';
+import { migration_007_create_checklist_realizado_acao_campos } from './007_create_checklist_realizado_acao_campos';
+import { migration_008_add_tipo_servico_nome_to_acao_campos } from './008_add_tipo_servico_nome_to_acao_campos';
 
 /**
  * All migrations in sequential order
@@ -24,6 +26,8 @@ export const allMigrations: Migration[] = [
     migration_004_add_ordem_servico_to_checklist_realizados,
     migration_005_add_localidade_estado_id,
     migration_006_create_acao_campos,
+    migration_007_create_checklist_realizado_acao_campos,
+    migration_008_add_tipo_servico_nome_to_acao_campos,
 ];
 
 // Re-export types and manager

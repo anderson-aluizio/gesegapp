@@ -11,6 +11,7 @@ export type AcaoCampoDatabase = {
     nome: string;
     valor: number;
     codigo_descricao: string;
+    tipo_servico_nome?: string;
 }
 
 export const useAcaoCampoDatabase = () => {
@@ -20,6 +21,18 @@ export const useAcaoCampoDatabase = () => {
         const query = `SELECT * FROM acao_campos WHERE centro_custo_id = ? ORDER BY nome`;
         const response = await database.getAllAsync<AcaoCampoDatabase>(query, [centroCustoId]);
         return response;
+    }
+
+    const getByCentroCustoIdAndTipoServico = async (centroCustoId: string, tipoServicoNome: string) => {
+        const query = `SELECT * FROM acao_campos WHERE centro_custo_id = ? AND tipo_servico_nome = ? ORDER BY nome`;
+        const response = await database.getAllAsync<AcaoCampoDatabase>(query, [centroCustoId, tipoServicoNome]);
+        return response;
+    }
+
+    const getTipoServicosByCentroCustoId = async (centroCustoId: string) => {
+        const query = `SELECT DISTINCT tipo_servico_nome FROM acao_campos WHERE centro_custo_id = ? AND tipo_servico_nome IS NOT NULL ORDER BY tipo_servico_nome`;
+        const response = await database.getAllAsync<{ tipo_servico_nome: string }>(query, [centroCustoId]);
+        return response.map(r => r.tipo_servico_nome);
     }
 
     const getAll = async () => {
@@ -34,5 +47,5 @@ export const useAcaoCampoDatabase = () => {
         return response;
     }
 
-    return { getByCentroCustoId, getAll, getOneRow };
+    return { getByCentroCustoId, getByCentroCustoIdAndTipoServico, getTipoServicosByCentroCustoId, getAll, getOneRow };
 }

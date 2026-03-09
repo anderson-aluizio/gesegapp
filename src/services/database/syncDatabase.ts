@@ -267,7 +267,7 @@ export class DatabaseSyncService {
         await this.database.withTransactionAsync(async () => {
             for (const item of data) {
                 await this.database.runAsync(
-                    `INSERT OR REPLACE INTO acao_campos (id, grupo_caderno_preco_id, caderno_preco_id, centro_custo_id, processo_id, tipo_servico_id, tipo_acao, nome, valor, codigo_descricao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    `INSERT OR REPLACE INTO acao_campos (id, grupo_caderno_preco_id, caderno_preco_id, centro_custo_id, processo_id, tipo_servico_id, tipo_acao, nome, valor, codigo_descricao, tipo_servico_nome) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         item.id,
                         item.grupo_caderno_preco_id,
@@ -278,7 +278,8 @@ export class DatabaseSyncService {
                         item.tipo_acao,
                         item.nome,
                         item.valor,
-                        item.codigo_descricao
+                        item.codigo_descricao,
+                        item.tipo_servico?.nome ?? null
                     ]
                 );
             }
