@@ -11,6 +11,13 @@ export type ChecklistRealizadoAcaoCampoDatabaseWithRelations = ChecklistRealizad
     nome: string;
     codigo_descricao: string;
     valor: number;
+    tipo_acao: string;
+    tipo_servico_id: number;
+    tipo_servico_nome?: string;
+    grupo_caderno_preco_id: string;
+    caderno_preco_id: string;
+    centro_custo_id: string;
+    processo_id: string;
 }
 
 export const useChecklistRealizadoAcaoCampoDatabase = () => {
@@ -22,7 +29,14 @@ export const useChecklistRealizadoAcaoCampoDatabase = () => {
                 crac.*,
                 ac.nome,
                 ac.codigo_descricao,
-                ac.valor
+                ac.valor,
+                ac.tipo_acao,
+                ac.tipo_servico_id,
+                ac.tipo_servico_nome,
+                ac.grupo_caderno_preco_id,
+                ac.caderno_preco_id,
+                ac.centro_custo_id,
+                ac.processo_id
             FROM checklist_realizado_acao_campos AS crac
             INNER JOIN acao_campos AS ac ON crac.acao_campo_id = ac.id
             WHERE crac.checklist_realizado_id = $checklistRealizadoId

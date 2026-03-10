@@ -1,6 +1,7 @@
 import { useChecklisRealizadoDatabase } from "@/database/models/useChecklisRealizadoDatabase";
 import { useChecklisRealizadoItemsDatabase } from "@/database/models/useChecklisRealizadoItemsDatabase";
 import { useChecklistRealizadoFuncionarioDatabase } from "@/database/models/useChecklistRealizadoFuncionarioDatabase";
+import { useChecklistRealizadoAcaoCampoDatabase } from "@/database/models/useChecklistRealizadoAcaoCampoDatabase";
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState } from "react";
@@ -13,6 +14,7 @@ const SendChecklistRealizado = () => {
     const checklistDb = useChecklisRealizadoDatabase();
     const checklistFuncionarios = useChecklistRealizadoFuncionarioDatabase();
     const checklistItemsDb = useChecklisRealizadoItemsDatabase();
+    const realizadoAcaoCamposDb = useChecklistRealizadoAcaoCampoDatabase();
     const [loading, setLoading] = useState(false);
     const dialog = useDialog();
 
@@ -45,7 +47,7 @@ const SendChecklistRealizado = () => {
                     const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
                     const hasPhotos = items.some(item => item.foto_path);
 
-                    const checklistData: any = { ...checklist, funcionarios, items: [] };
+                    const acao_campos = await realizadoAcaoCamposDb.getByChecklistRealizadoId(checklist.id);
 
                     const itemsWithPhotos = items.map(item => {
                         if (item.foto_path && item.foto_path.startsWith('file://')) {
@@ -57,7 +59,12 @@ const SendChecklistRealizado = () => {
                         return item;
                     });
 
-                    checklistData.items = itemsWithPhotos;
+                    const checklistData: any = {
+                        ...checklist,
+                        funcionarios,
+                        items: itemsWithPhotos,
+                        acao_campos,
+                    };
 
                     if (hasPhotos) {
                         await apiClientWrapper.postWithFiles('/store-checklist-realizado', checklistData);

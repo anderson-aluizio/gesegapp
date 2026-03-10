@@ -4,6 +4,7 @@ import { useChecklisRealizadoDatabase, ChecklistRealizadoDatabase } from "@/data
 import { useChecklisRealizadoItemsDatabase, ChecklistRealizadoItemsDatabaseWithItem } from "@/database/models/useChecklisRealizadoItemsDatabase";
 import { useChecklistRealizadoFuncionarioDatabase, ChecklistRealizadoFuncionarioDatabase } from "@/database/models/useChecklistRealizadoFuncionarioDatabase";
 import { useChecklisRealizadoControleRiscosDatabase, ChecklistRealizadoControleRiscosDatabaseWithRelations } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
+import { useChecklistRealizadoAcaoCampoDatabase, ChecklistRealizadoAcaoCampoDatabaseWithRelations } from '@/database/models/useChecklistRealizadoAcaoCampoDatabase';
 import { apiClientWrapper } from "@/services";
 import { getErrorMessage } from "@/services/api/apiErrors";
 import { useState, useMemo } from "react";
@@ -31,6 +32,7 @@ type ChecklistRealizadoPayload = ChecklistRealizadoDatabase & {
     funcionarios: ChecklistRealizadoFuncionarioDatabase[];
     items: ChecklistRealizadoItemWithPhoto[];
     controle_riscos: ChecklistRealizadoControleRiscosDatabaseWithRelations[];
+    acao_campos: ChecklistRealizadoAcaoCampoDatabaseWithRelations[];
 }
 
 const SendAllData = () => {
@@ -40,6 +42,7 @@ const SendAllData = () => {
     const checklistFuncionarios = useChecklistRealizadoFuncionarioDatabase();
     const checklistItemsDb = useChecklisRealizadoItemsDatabase();
     const realizadoControlesDb = useChecklisRealizadoControleRiscosDatabase();
+    const realizadoAcaoCamposDb = useChecklistRealizadoAcaoCampoDatabase();
 
     const [loading, setLoading] = useState(false);
     const dialog = useDialog();
@@ -99,6 +102,7 @@ const SendAllData = () => {
                 const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
                 const hasPhotos = items.some(item => item.foto_path);
                 const controle_riscos = await realizadoControlesDb.getByChecklistRealizadoId(checklist.id);
+                const acao_campos = await realizadoAcaoCamposDb.getByChecklistRealizadoId(checklist.id);
 
                 const itemsWithPhotos: ChecklistRealizadoItemWithPhoto[] = items.map(item => {
                     if (item.foto_path && item.foto_path.startsWith('file://')) {
@@ -114,7 +118,8 @@ const SendAllData = () => {
                     ...checklist,
                     funcionarios,
                     items: itemsWithPhotos,
-                    controle_riscos
+                    controle_riscos,
+                    acao_campos,
                 };
 
                 if (hasPhotos) {
