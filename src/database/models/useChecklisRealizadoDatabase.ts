@@ -565,6 +565,11 @@ export const useChecklisRealizadoDatabase = () => {
         ids
       );
 
+      await database.runAsync(
+        `DELETE FROM checklist_realizado_acao_campos WHERE checklist_realizado_id IN (${placeholders})`,
+        ids
+      );
+
       const result = await database.runAsync(
         `DELETE FROM checklist_realizados WHERE id IN (${placeholders})`,
         ids

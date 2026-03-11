@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Animated, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { Dialog, Portal, Text, ProgressBar, Surface } from 'react-native-paper';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 
@@ -8,7 +8,6 @@ interface SyncProgressDialogProps {
     progress: string[];
     percentage: number;
     currentStep: string;
-    fadeAnim: Animated.Value;
 }
 
 export default function SyncProgressDialog({
@@ -16,7 +15,6 @@ export default function SyncProgressDialog({
     progress,
     percentage,
     currentStep,
-    fadeAnim
 }: SyncProgressDialogProps) {
     const { colors } = useTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
@@ -38,13 +36,13 @@ export default function SyncProgressDialog({
                                     {percentage}%
                                 </Text>
                             </View>
-                            <Animated.View style={styles.progressBarContainer}>
+                            <View style={styles.progressBarContainer}>
                                 <ProgressBar
                                     progress={percentage / 100}
                                     color={colors.buttonPrimary}
                                     style={styles.progressBar}
                                 />
-                            </Animated.View>
+                            </View>
                         </View>
                     )}
 
@@ -54,17 +52,11 @@ export default function SyncProgressDialog({
                         </Text>
                         <ScrollView style={styles.logScroll} showsVerticalScrollIndicator={false}>
                             {[...progress].reverse().map((item, index) => (
-                                <Animated.View
-                                    key={index}
-                                    style={[
-                                        styles.logItem,
-                                        { opacity: fadeAnim }
-                                    ]}
-                                >
+                                <View key={index} style={styles.logItem}>
                                     <Text variant="bodySmall" style={styles.logText}>
                                         {item}
                                     </Text>
-                                </Animated.View>
+                                </View>
                             ))}
                         </ScrollView>
                     </Surface>

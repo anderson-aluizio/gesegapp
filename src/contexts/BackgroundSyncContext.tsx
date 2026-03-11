@@ -134,14 +134,12 @@ export function BackgroundSyncProvider({ children }: { children: React.ReactNode
                 }
             }
 
-            // Clean old synced data
-            if (!hasError) {
-                try {
-                    await turnoDb.cleanOldSyncedData(7);
-                    await checklistDb.cleanOldSyncedData(7);
-                } catch {
-                    // silent
-                }
+            // Clean old synced data (always runs — only deletes already-synced records older than 7 days)
+            try {
+                await turnoDb.cleanOldSyncedData(7);
+                await checklistDb.cleanOldSyncedData(7);
+            } catch {
+                // silent
             }
 
             setSyncStatus(hasError ? 'error' : 'success');

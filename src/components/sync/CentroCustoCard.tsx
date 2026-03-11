@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Card, Text, IconButton } from 'react-native-paper';
 import { CentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
@@ -8,16 +8,12 @@ interface CentroCustoCardProps {
     centroCusto: CentroCustoDatabase;
     onSync: (id: string) => void;
     disabled?: boolean;
-    index: number;
-    slideAnim: Animated.Value;
 }
 
 export default function CentroCustoCard({
     centroCusto,
     onSync,
     disabled = false,
-    index,
-    slideAnim
 }: CentroCustoCardProps) {
     const { colors } = useTheme();
     const styles = useMemo(() => createStyles(colors), [colors]);
@@ -36,20 +32,7 @@ export default function CentroCustoCard({
     };
 
     return (
-        <Animated.View
-            style={[
-                styles.cardWrapper,
-                {
-                    transform: [{
-                        translateY: slideAnim.interpolate({
-                            inputRange: [0, 50],
-                            outputRange: [0, 50 + (index * 20)],
-                            extrapolate: 'clamp',
-                        })
-                    }]
-                }
-            ]}
-        >
+        <View style={styles.cardWrapper}>
             <Card style={styles.card} elevation={2}>
                 <Card.Content style={styles.cardContent}>
                     <View style={styles.cardRow}>
@@ -77,7 +60,7 @@ export default function CentroCustoCard({
                     </View>
                 </Card.Content>
             </Card>
-        </Animated.View>
+        </View>
     );
 }
 

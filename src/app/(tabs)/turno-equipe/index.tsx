@@ -48,7 +48,7 @@ export default function TurnoEquipeScreen() {
 
     const list = async () => {
         try {
-            const response = await turnoDb.getNotSynced();
+            const response = await turnoDb.getAll();
             setTurnos(response);
 
             Animated.timing(fadeAnim, {
@@ -148,9 +148,10 @@ export default function TurnoEquipeScreen() {
         const isExpanded = expandedCards.has(item.id);
         const funcionarios = funcionariosByTurno.get(item.id) || [];
         const isPast = isBeforeToday(item.date);
+        const isSynced = Boolean(item.is_synced);
 
         return (
-            <Card style={styles.turnoCard}>
+            <Card style={[styles.turnoCard, { borderLeftColor: isSynced ? colors.textMuted : colors.primaryDark }]}>
                 <Card.Content>
                     <View style={styles.cardHeader}>
                         <View style={styles.headerLeft}>
@@ -167,7 +168,7 @@ export default function TurnoEquipeScreen() {
                             </Text>
                         </View>
                         <View style={styles.headerRight}>
-                            {!isPast ? (
+                            {!isSynced && !isPast ? (
                                 <IconButton
                                     icon="delete"
                                     size={20}
@@ -197,6 +198,17 @@ export default function TurnoEquipeScreen() {
                             <IconButton icon="account-group" size={16} style={styles.infoIcon} />
                             <Text variant="bodySmall" style={styles.infoText}>
                                 {Number(item.total_funcionarios) || 0} colaboradores(s)
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.statusRow}>
+                        <View style={[styles.statusBadge, {
+                            backgroundColor: (isSynced ? colors.textMuted : colors.primary) + '22',
+                            borderColor: isSynced ? colors.textMuted : colors.primary,
+                        }]}>
+                            <Text style={[styles.statusText, { color: isSynced ? colors.textMuted : colors.primary }]}>
+                                {isSynced ? 'Enviado' : 'Pendente'}
                             </Text>
                         </View>
                     </View>
@@ -430,7 +442,6 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginBottom: 12,
         borderRadius: 12,
         borderLeftWidth: 4,
-        borderLeftColor: colors.primaryDark,
         backgroundColor: colors.surface,
     },
     cardHeader: {
@@ -474,6 +485,23 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     infoText: {
         color: colors.textSecondary,
+    },
+    statusRow: {
+        flexDirection: 'row',
+        marginTop: 8,
+    },
+    statusBadge: {
+        borderRadius: 12,
+        borderWidth: 1,
+        paddingHorizontal: 10,
+        paddingVertical: 2,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    statusText: {
+        fontWeight: '600',
+        fontSize: 12,
+        letterSpacing: 0.2,
     },
     expandedSection: {
         marginTop: 12,

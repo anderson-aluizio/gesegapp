@@ -1,335 +1,105 @@
-import { useEquipeTurnoDatabase } from "@/database/models/useEquipeTurnoDatabase";
-import { useEquipeTurnoFuncionarioDatabase } from "@/database/models/useEquipeTurnoFuncionarioDatabase";
-import { useChecklisRealizadoDatabase, ChecklistRealizadoDatabase } from "@/database/models/useChecklisRealizadoDatabase";
-import { useChecklisRealizadoItemsDatabase, ChecklistRealizadoItemsDatabaseWithItem } from "@/database/models/useChecklisRealizadoItemsDatabase";
-import { useChecklistRealizadoFuncionarioDatabase, ChecklistRealizadoFuncionarioDatabase } from "@/database/models/useChecklistRealizadoFuncionarioDatabase";
-import { useChecklisRealizadoControleRiscosDatabase, ChecklistRealizadoControleRiscosDatabaseWithRelations } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
-import { useChecklistRealizadoAcaoCampoDatabase, ChecklistRealizadoAcaoCampoDatabaseWithRelations } from '@/database/models/useChecklistRealizadoAcaoCampoDatabase';
-import { apiClientWrapper } from "@/services";
-import { getErrorMessage } from "@/services/api/apiErrors";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { Button, Surface, Text } from "react-native-paper";
-import InfoDialog from "@/components/ui/dialogs/InfoDialog";
-import { checkNetworkConnection, useDialog } from "@/hooks";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useTheme, ThemeColors } from "@/contexts/ThemeContext";
 import { useBackgroundSync } from "@/contexts/BackgroundSyncContext";
 
-type EquipeTurnoFormatted = {
-    equipe_id: number;
-    date: string;
-    veiculo_id: string;
-    funcionarios: {
-        funcionario_cpf: string;
-        is_lider: number;
-    }[];
-}
-
-type ChecklistRealizadoItemWithPhoto = ChecklistRealizadoItemsDatabaseWithItem & {
-    foto?: { uri: string };
-}
-
-type ChecklistRealizadoPayload = ChecklistRealizadoDatabase & {
-    funcionarios: ChecklistRealizadoFuncionarioDatabase[];
-    items: ChecklistRealizadoItemWithPhoto[];
-    controle_riscos: ChecklistRealizadoControleRiscosDatabaseWithRelations[];
-    acao_campos: ChecklistRealizadoAcaoCampoDatabaseWithRelations[];
-}
-
 const SendAllData = () => {
-    const turnoDb = useEquipeTurnoDatabase();
-    const turnoFuncionarioDb = useEquipeTurnoFuncionarioDatabase();
-    const checklistDb = useChecklisRealizadoDatabase();
-    const checklistFuncionarios = useChecklistRealizadoFuncionarioDatabase();
-    const checklistItemsDb = useChecklisRealizadoItemsDatabase();
-    const realizadoControlesDb = useChecklisRealizadoControleRiscosDatabase();
-    const realizadoAcaoCamposDb = useChecklistRealizadoAcaoCampoDatabase();
-
-    const [loading, setLoading] = useState(false);
-    const dialog = useDialog();
     const { colors } = useTheme();
-    const { syncStatus, lastSyncAt, pendingCount } = useBackgroundSync();
-
+    const { syncStatus, lastSyncAt, pendingCount, syncNow } = useBackgroundSync();
     const styles = useMemo(() => createStyles(colors), [colors]);
 
-    const handleSendTurnos = async () => {
-        const turnos = await turnoDb.getNotSynced();
-        if (turnos.length === 0) {
-            return { success: 0, error: 0, errorDetails: [] };
-        }
+    const isSyncing = syncStatus === 'syncing';
 
-        let successCount = 0;
-        let errorCount = 0;
-        const errorDetails: string[] = [];
-
-        for (const turno of turnos) {
-            try {
-                const funcionarios = await turnoFuncionarioDb.getByEquipeTurnoId(turno.id);
-                const turnoData: EquipeTurnoFormatted = {
-                    equipe_id: turno.equipe_id,
-                    date: turno.date,
-                    veiculo_id: turno.veiculo_id,
-                    funcionarios: funcionarios.map(func => ({
-                        funcionario_cpf: func.funcionario_cpf,
-                        is_lider: func.is_lider,
-                    })),
-                };
-
-                await apiClientWrapper.post('/store-equipe-turno', turnoData);
-                await turnoDb.markAsSynced(turno.id);
-                successCount++;
-            } catch (error) {
-                errorCount++;
-                const errorMessage = getErrorMessage(error);
-                errorDetails.push(`Turno ID ${turno.id}: ${errorMessage}`);
-            }
-        }
-
-        return { success: successCount, error: errorCount, errorDetails };
-    };
-
-    const handleSendChecklists = async () => {
-        const checklists = await checklistDb.getFinalizadosNotSynced();
-        if (checklists.length === 0) {
-            return { success: 0, error: 0, errorDetails: [] };
-        }
-
-        let successCount = 0;
-        let errorCount = 0;
-        const errorDetails: string[] = [];
-
-        for (const checklist of checklists) {
-            try {
-                const funcionarios = await checklistFuncionarios.getByChecklistRealizadoId(checklist.id);
-                const items = await checklistItemsDb.getByChecklistRealizadoId(checklist.id);
-                const hasPhotos = items.some(item => item.foto_path);
-                const controle_riscos = await realizadoControlesDb.getByChecklistRealizadoId(checklist.id);
-                const acao_campos = await realizadoAcaoCamposDb.getByChecklistRealizadoId(checklist.id);
-
-                const itemsWithPhotos: ChecklistRealizadoItemWithPhoto[] = items.map(item => {
-                    if (item.foto_path && item.foto_path.startsWith('file://')) {
-                        return {
-                            ...item,
-                            foto: { uri: item.foto_path }
-                        };
-                    }
-                    return item;
-                });
-
-                const checklistData: ChecklistRealizadoPayload = {
-                    ...checklist,
-                    funcionarios,
-                    items: itemsWithPhotos,
-                    controle_riscos,
-                    acao_campos,
-                };
-
-                if (hasPhotos) {
-                    await apiClientWrapper.postWithFiles('/store-checklist-realizado', checklistData);
-                } else {
-                    await apiClientWrapper.post('/store-checklist-realizado', checklistData);
-                }
-
-                await checklistDb.markAsSynced(checklist.id);
-                successCount++;
-            } catch (error) {
-                errorCount++;
-                const errorMessage = getErrorMessage(error);
-                errorDetails.push(`Checklist ID ${checklist.id}: ${errorMessage}`);
-            }
-        }
-
-        return { success: successCount, error: errorCount, errorDetails };
-    };
-
-    const handleSendAllData = async () => {
-        setLoading(true);
-        try {
-            try {
-                await checkNetworkConnection();
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Erro ao verificar conexão';
-                dialog.show('❌ Erro', errorMessage);
-                setLoading(false);
-                return;
-            }
-
-            const turnoResults = await handleSendTurnos();
-
-            const checklistResults = await handleSendChecklists();
-
-            const totalSuccess = turnoResults.success + checklistResults.success;
-            const totalErrors = turnoResults.error + checklistResults.error;
-            const allErrorDetails = [
-                ...turnoResults.errorDetails.map(e => `[Turno] ${e}`),
-                ...checklistResults.errorDetails.map(e => `[Checklist] ${e}`)
-            ];
-
-            if (totalSuccess === 0 && totalErrors === 0) {
-                dialog.show('ℹ️ Informação', "Não há dados finalizados para enviar.");
-                setLoading(false);
-                return;
-            }
-
-            // Limpar dados sincronizados com mais de 7 dias
-            try {
-                await turnoDb.cleanOldSyncedData(7);
-                await checklistDb.cleanOldSyncedData(7);
-            } catch (cleanError) {
-                console.error("Erro ao limpar dados antigos:", cleanError);
-            }
-
-            if (totalErrors === 0) {
-                const turnoMsg = turnoResults.success > 0 ? `${turnoResults.success} turno(s)` : '';
-                const checklistMsg = checklistResults.success > 0 ? `${checklistResults.success} checklist(s)` : '';
-                const items = [turnoMsg, checklistMsg].filter(Boolean).join(' e ');
-                dialog.show('✅ Sucesso', `${items} enviado(s) com sucesso!`);
-            } else {
-                const errorList = allErrorDetails.join('\n\n');
-                const messageParts = [`⚠️ Envio ${totalSuccess > 0 ? 'Parcial' : 'com Erros'}\n`];
-
-                if (totalSuccess > 0) {
-                    messageParts.push(`✅ ${totalSuccess} registro(s) enviado(s) com sucesso.\n`);
-                }
-
-                if (totalErrors > 0) {
-                    messageParts.push(`❌ ${totalErrors} registro(s) com erro.\n`);
-                }
-
-                messageParts.push(`\nDetalhes dos erros:\n${errorList}`);
-
-                dialog.show('⚠️ Envio Parcial', messageParts.join(''));
-            }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            dialog.show(
-                '❌ Erro ao enviar',
-                `Ocorreu um erro ao enviar os dados finalizados.\n\n` +
-                `Detalhes: ${errorMessage}\n\n` +
-                `Por favor, tente novamente.`
-            );
-            console.error("Erro ao enviar dados:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const statusConfig = {
+        syncing: { color: colors.warning, icon: 'sync' as const, label: 'Sincronizando...' },
+        success: { color: colors.success, icon: 'check-circle-outline' as const, label: 'Sincronizado' },
+        error: { color: colors.error, icon: 'alert-circle-outline' as const, label: 'Erro na sincronização' },
+        idle: { color: colors.textMuted, icon: 'clock-outline' as const, label: 'Aguardando' },
+    }[syncStatus];
 
     return (
-        <>
-            <Surface style={styles.infoCard} elevation={2}>
-                <View style={styles.infoHeader}>
-                    <Text variant="titleMedium" style={styles.infoTitle}>
-                        Enviar Dados Finalizados
+        <Surface style={styles.card} elevation={1}>
+            <View style={styles.row}>
+                <MaterialCommunityIcons name={statusConfig.icon} size={20} color={statusConfig.color} />
+                <View style={styles.info}>
+                    <Text style={[styles.statusLabel, { color: statusConfig.color }]}>
+                        {statusConfig.label}
                     </Text>
-                </View>
-                <Text variant="bodySmall" style={styles.infoDescription}>
-                    Envie todos os turnos e checklists finalizados para o servidor.
-                </Text>
-
-                <View style={styles.syncStatusRow}>
-                    <View style={[styles.syncIndicator, {
-                        backgroundColor: syncStatus === 'syncing' ? colors.warning
-                            : syncStatus === 'success' ? colors.success
-                                : syncStatus === 'error' ? colors.error
-                                    : colors.textMuted
-                    }]} />
-                    <Text style={styles.syncStatusText}>
-                        {syncStatus === 'syncing' ? 'Sincronizando...'
-                            : syncStatus === 'success' ? 'Sincronizado'
-                                : syncStatus === 'error' ? 'Erro na sincronização'
-                                    : 'Aguardando'}
-                    </Text>
-                    {pendingCount > 0 && (
-                        <Text style={styles.pendingBadge}>
-                            {pendingCount} pendente{pendingCount !== 1 ? 's' : ''}
+                    {lastSyncAt && (
+                        <Text style={styles.lastSync}>
+                            Última: {lastSyncAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </Text>
                     )}
                 </View>
-                {lastSyncAt && (
-                    <Text style={styles.lastSyncText}>
-                        Última sincronização: {lastSyncAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                    </Text>
+                {pendingCount > 0 && (
+                    <View style={[styles.badge, { backgroundColor: colors.warning + '22' }]}>
+                        <Text style={[styles.badgeText, { color: colors.warning }]}>
+                            {pendingCount}
+                        </Text>
+                    </View>
                 )}
-
                 <Button
                     mode="contained"
-                    icon="send"
-                    onPress={handleSendAllData}
-                    style={styles.sendButton}
+                    icon="sync"
+                    onPress={syncNow}
                     buttonColor={colors.buttonPrimary}
                     textColor={colors.buttonText}
-                    disabled={loading}
-                    loading={loading}
+                    disabled={isSyncing}
+                    loading={isSyncing}
+                    compact
+                    style={styles.button}
+                    labelStyle={styles.buttonLabel}
                 >
-                    Enviar Dados
+                    Enviar
                 </Button>
-            </Surface>
-
-            <InfoDialog
-                visible={dialog.visible}
-                description={dialog.description}
-                title={dialog.title}
-                onDismiss={dialog.hide}
-            />
-        </>
+            </View>
+        </Surface>
     );
 };
 
 export default SendAllData;
 
 const createStyles = (colors: ThemeColors) => StyleSheet.create({
-    infoCard: {
+    card: {
         backgroundColor: colors.surface,
         borderRadius: 12,
-        padding: 10,
+        padding: 14,
         marginBottom: 14,
     },
-    infoHeader: {
+    row: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 8,
+        gap: 10,
     },
-    infoTitle: {
-        fontWeight: '700',
-        color: colors.text,
+    info: {
         flex: 1,
-        flexWrap: "wrap",
     },
-    infoDescription: {
-        color: colors.textSecondary,
-        marginRight: 2,
-        flex: 1,
-        flexWrap: "wrap",
-    },
-    syncStatusRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 10,
-        gap: 8,
-    },
-    syncIndicator: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-    },
-    syncStatusText: {
-        fontSize: 13,
-        color: colors.textSecondary,
-        fontWeight: '500',
-    },
-    pendingBadge: {
-        fontSize: 12,
-        color: colors.warning,
+    statusLabel: {
+        fontSize: 14,
         fontWeight: '600',
     },
-    lastSyncText: {
+    lastSync: {
         fontSize: 11,
         color: colors.textMuted,
-        marginTop: 4,
-        marginLeft: 16,
+        marginTop: 1,
     },
-    sendButton: {
-        marginTop: 10,
+    badge: {
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        minWidth: 28,
+        alignItems: 'center',
+    },
+    badgeText: {
+        fontSize: 13,
+        fontWeight: '700',
+    },
+    button: {
+        borderRadius: 8,
+    },
+    buttonLabel: {
+        fontSize: 13,
     },
 });
