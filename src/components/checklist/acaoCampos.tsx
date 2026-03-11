@@ -28,6 +28,7 @@ export default function AcaoCamposScreen(props: {
     const [selectedAcoes, setSelectedAcoes] = useState<ChecklistRealizadoAcaoCampoDatabaseWithRelations[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isQuantidadeDirty, setIsQuantidadeDirty] = useState(false);
+    const [quantidadeInputs, setQuantidadeInputs] = useState<Record<number, string>>({});
     const [showPicker, setShowPicker] = useState(false);
 
     const dialog = useDialog();
@@ -117,17 +118,18 @@ export default function AcaoCamposScreen(props: {
     };
 
     const handleQuantidadeChange = (id: number, value: string) => {
-        const sanitized = value.replace(',', '.');
-        const num = parseFloat(sanitized);
-
-        setSelectedAcoes(prev =>
-            prev.map(a => a.id === id ? { ...a, quantidade: isNaN(num) ? 0 : num } : a)
-        );
+        setQuantidadeInputs(prev => ({ ...prev, [id]: value }));
         setIsQuantidadeDirty(true);
     };
 
     const handleSaveQuantidades = async () => {
-        const invalid = selectedAcoes.find(a => a.quantidade <= 0);
+        const parsedAcoes = selectedAcoes.map(acao => {
+            const raw = quantidadeInputs[acao.id];
+            const quantidade = raw !== undefined ? parseFloat(raw.replace(',', '.')) : acao.quantidade;
+            return { ...acao, quantidade };
+        });
+
+        const invalid = parsedAcoes.find(a => isNaN(a.quantidade) || a.quantidade <= 0);
         if (invalid) {
             dialog.show('Atenção', `A quantidade deve ser maior que 0.\nVerifique: "${invalid.nome}"`);
             return;
@@ -135,10 +137,11 @@ export default function AcaoCamposScreen(props: {
 
         setIsSaving(true);
         try {
-            for (const acao of selectedAcoes) {
+            for (const acao of parsedAcoes) {
                 await checklistAcaoCampoDb.update(acao.id, acao.quantidade);
             }
             setIsQuantidadeDirty(false);
+            setQuantidadeInputs({});
             props.formUpdated();
             dialog.show('Sucesso', 'Quantidades atualizadas com sucesso.');
         } catch (error) {
@@ -284,7 +287,7 @@ export default function AcaoCamposScreen(props: {
                                     <Text style={styles.quantidadeLabel}>Quantidade:</Text>
                                     <TextInput
                                         style={styles.quantidadeInput}
-                                        value={String(acao.quantidade)}
+                                        value={quantidadeInputs[acao.id] !== undefined ? quantidadeInputs[acao.id] : String(acao.quantidade)}
                                         onChangeText={(value) => handleQuantidadeChange(acao.id, value)}
                                         keyboardType="decimal-pad"
                                         mode="outlined"
