@@ -18,7 +18,6 @@ export function ChecklistRealizado({ data, isUserOperacao, onOpen, onLongPress, 
     const isFinalizado = data.is_finalizado
     const statusColor = isFinalizado ? colors.success : colors.primary
     const statusText = isFinalizado ? "Finalizado" : "Em andamento"
-    const isApr = data.checklist_grupo_nome_interno === 'checklist_apr'
 
     return (
         <Pressable
@@ -38,35 +37,21 @@ export function ChecklistRealizado({ data, isUserOperacao, onOpen, onLongPress, 
                         : String(data.checklist_grupo_nome)
                     }
                 </Text>
+
+                {isUserOperacao && (
+                    <View style={styles.grupoBadgeContainer}>
+                        <Text style={[styles.grupoBadge, { backgroundColor: colors.primary + '18', color: colors.primary }]}>
+                            {String(data.checklist_grupo_nome)}
+                        </Text>
+                    </View>
+                )}
                 <MaterialIcons name="chevron-right" size={28} color={colors.iconMuted} />
             </View>
-
-            {isUserOperacao && (
-                <View style={styles.grupoBadgeContainer}>
-                    <Text style={[styles.grupoBadge, { backgroundColor: colors.primary + '18', color: colors.primary }]}>
-                        {String(data.checklist_grupo_nome)}
-                    </Text>
-                </View>
-            )}
 
             <View style={styles.cardContainer}>
                 {isUserOperacao ? (
                     <>
-                        <View style={styles.cardRow}>
-                            <MaterialIcons name="location-on" size={18} color={colors.textTertiary} style={{ marginRight: 4 }} />
-                            <Text style={styles.cardLabel}>Município:</Text>
-                            <Text style={styles.cardValue} numberOfLines={1} ellipsizeMode="tail">
-                                {String(data.localidade_cidade_nome || '-')}
-                            </Text>
-                        </View>
-                        <View style={styles.cardRow}>
-                            <MaterialIcons name="map" size={18} color={colors.textTertiary} style={{ marginRight: 4 }} />
-                            <Text style={styles.cardLabel}>Área:</Text>
-                            <Text style={styles.cardValue} numberOfLines={1} ellipsizeMode="tail">
-                                {String(data.area || '-')}
-                            </Text>
-                        </View>
-                        {isApr && data.ordem_servico ? (
+                        {data.ordem_servico ? (
                             <View style={styles.cardRow}>
                                 <MaterialIcons name="assignment" size={18} color={colors.textTertiary} style={{ marginRight: 4 }} />
                                 <Text style={styles.cardLabel}>O.S.:</Text>
@@ -142,7 +127,7 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     },
     titleCard: {
         fontWeight: '700',
-        fontSize: 18,
+        fontSize: 15,
         color: colors.text,
         flex: 1,
         flexWrap: "wrap",
