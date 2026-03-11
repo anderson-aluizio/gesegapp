@@ -8,6 +8,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
 import { AuthProvider } from "@/contexts/AuthContext"
 import { UpdateProvider } from "@/contexts/UpdateContext"
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext"
+import { BackgroundSyncProvider } from "@/contexts/BackgroundSyncContext"
 
 function AppContent() {
   const { isDark, colors } = useTheme();
@@ -40,6 +41,7 @@ function AppContent() {
       <UpdateProvider>
         <SQLiteProvider databaseName="myDatabase.db" onInit={safeInitializeDatabase}>
           <AuthProvider>
+            <BackgroundSyncProvider>
             <PaperProvider theme={paperTheme}>
               <Stack
                 screenOptions={{
@@ -55,6 +57,7 @@ function AppContent() {
                 <Stack.Screen name="+not-found" />
               </Stack>
             </PaperProvider>
+            </BackgroundSyncProvider>
           </AuthProvider>
         </SQLiteProvider>
       </UpdateProvider>

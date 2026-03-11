@@ -13,6 +13,7 @@ import { Button, Surface, Text } from "react-native-paper";
 import InfoDialog from "@/components/ui/dialogs/InfoDialog";
 import { checkNetworkConnection, useDialog } from "@/hooks";
 import { useTheme, ThemeColors } from "@/contexts/ThemeContext";
+import { useBackgroundSync } from "@/contexts/BackgroundSyncContext";
 
 type EquipeTurnoFormatted = {
     equipe_id: number;
@@ -47,6 +48,7 @@ const SendAllData = () => {
     const [loading, setLoading] = useState(false);
     const dialog = useDialog();
     const { colors } = useTheme();
+    const { syncStatus, lastSyncAt, pendingCount } = useBackgroundSync();
 
     const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -223,6 +225,32 @@ const SendAllData = () => {
                 <Text variant="bodySmall" style={styles.infoDescription}>
                     Envie todos os turnos e checklists finalizados para o servidor.
                 </Text>
+
+                <View style={styles.syncStatusRow}>
+                    <View style={[styles.syncIndicator, {
+                        backgroundColor: syncStatus === 'syncing' ? colors.warning
+                            : syncStatus === 'success' ? colors.success
+                                : syncStatus === 'error' ? colors.error
+                                    : colors.textMuted
+                    }]} />
+                    <Text style={styles.syncStatusText}>
+                        {syncStatus === 'syncing' ? 'Sincronizando...'
+                            : syncStatus === 'success' ? 'Sincronizado'
+                                : syncStatus === 'error' ? 'Erro na sincronização'
+                                    : 'Aguardando'}
+                    </Text>
+                    {pendingCount > 0 && (
+                        <Text style={styles.pendingBadge}>
+                            {pendingCount} pendente{pendingCount !== 1 ? 's' : ''}
+                        </Text>
+                    )}
+                </View>
+                {lastSyncAt && (
+                    <Text style={styles.lastSyncText}>
+                        Última sincronização: {lastSyncAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </Text>
+                )}
+
                 <Button
                     mode="contained"
                     icon="send"
@@ -273,6 +301,33 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginRight: 2,
         flex: 1,
         flexWrap: "wrap",
+    },
+    syncStatusRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        gap: 8,
+    },
+    syncIndicator: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+    },
+    syncStatusText: {
+        fontSize: 13,
+        color: colors.textSecondary,
+        fontWeight: '500',
+    },
+    pendingBadge: {
+        fontSize: 12,
+        color: colors.warning,
+        fontWeight: '600',
+    },
+    lastSyncText: {
+        fontSize: 11,
+        color: colors.textMuted,
+        marginTop: 4,
+        marginLeft: 16,
     },
     sendButton: {
         marginTop: 10,
