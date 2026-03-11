@@ -1,6 +1,7 @@
-import { useEffect, useState, useMemo } from 'react';
-import { BottomNavigation, Button, Dialog, Portal, Text, ActivityIndicator, MD2Colors, IconButton } from 'react-native-paper';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { Button, Dialog, Portal, Text, ActivityIndicator, MD2Colors, IconButton } from 'react-native-paper';
+import { StyleSheet, View, TouchableOpacity, ScrollView, Pressable } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DadosGeraisScreen from '@/components/checklist/dadosGerais';
 import LiderancaScreen from '@/components/checklist/lideranca';
 import RiscosScreen from '@/components/checklist/riscos';
@@ -17,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function EditChecklistRealizado() {
   const { user } = useAuth();
@@ -32,7 +34,7 @@ export default function EditChecklistRealizado() {
     { key: 'colaborador', title: 'Colaboradores', focusedIcon: 'account-group', unfocusedIcon: 'account-group-outline' },
     { key: 'itens', title: 'Itens', focusedIcon: 'clipboard-list', unfocusedIcon: 'clipboard-list-outline' },
     { key: 'riscos', title: 'Riscos', focusedIcon: 'alert', unfocusedIcon: 'alert-outline' },
-    { key: 'acaoCampos', title: 'Ações', focusedIcon: 'hammer-wrench', unfocusedIcon: 'hammer-wrench' },
+    { key: 'acaoCampos', title: 'Serviços', focusedIcon: 'notebook-edit', unfocusedIcon: 'notebook-edit-outline' },
   ];
 
   const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabaseWithRelations>({} as ChecklistRealizadoDatabaseWithRelations);
@@ -77,11 +79,24 @@ export default function EditChecklistRealizado() {
   const [isdialogFinishShow, setIsdialogFinishShow] = useState<boolean>(false);
   const [isUserDeclarouConformidade, setIsUserDeclarouConformidade] = useState<boolean>(false);
 
-  type Route = { key: string; title: string; focusedIcon: string; unfocusedIcon: string };
-  const renderScene = ({ route }: { route: Route }) => {
-    const isActive = routes[index].key === route.key;
+  const tabScrollRef = useRef<ScrollView>(null);
+  const [showScrollHint, setShowScrollHint] = useState(true);
 
-    switch (route.key) {
+  const handleTabScroll = useCallback((event: any) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const isAtEnd = contentOffset.x + layoutMeasurement.width >= contentSize.width - 10;
+    setShowScrollHint(!isAtEnd);
+  }, []);
+
+  const handleTabPress = useCallback((tabIndex: number) => {
+    setIndex(tabIndex);
+  }, []);
+
+  const renderActiveScene = () => {
+    const activeRoute = routes[index];
+    if (!activeRoute) return null;
+
+    switch (activeRoute.key) {
       case 'dadosGerais':
         return <DadosGeraisScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} isUserOperacao={user?.is_operacao || false} />;
       case 'lideranca':
@@ -90,7 +105,7 @@ export default function EditChecklistRealizado() {
         return <FuncionariosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} setReloadList={setisReloadList} />;
       case 'itens':
         return <ItensScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado}
-          isActive={isActive} reloadList={isReloadList} setReloadList={setisReloadList} />;
+          isActive={true} reloadList={isReloadList} setReloadList={setisReloadList} />;
       case 'riscos':
         return <RiscosScreen checklistRealizado={checklistRealizado} formUpdated={getChecklistRealizado} />;
       case 'acaoCampos':
@@ -255,16 +270,54 @@ export default function EditChecklistRealizado() {
                 ),
               }}
             />
-            <BottomNavigation
-              navigationState={{ index, routes }}
-              onIndexChange={setIndex}
-              renderScene={renderScene}
-              barStyle={{ backgroundColor: colors.surface }}
-              activeColor={colors.primary}
-              inactiveColor={colors.textSecondary}
-              sceneAnimationEnabled={false}
-              sceneAnimationType="shifting"
-            />
+            <View style={styles.tabBarContainer}>
+              <ScrollView
+                ref={tabScrollRef}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.tabBarContent}
+                onScroll={handleTabScroll}
+                scrollEventThrottle={16}
+              >
+                {routes.map((route, i) => {
+                  const isActive = i === index;
+                  return (
+                    <Pressable
+                      key={route.key}
+                      style={[styles.tabItem, isActive && styles.tabItemActive]}
+                      onPress={() => handleTabPress(i)}
+                    >
+                      <MaterialCommunityIcons
+                        name={isActive ? route.focusedIcon as any : route.unfocusedIcon as any}
+                        size={22}
+                        color={isActive ? colors.primary : colors.textSecondary}
+                      />
+                      <Text style={[
+                        styles.tabLabel,
+                        { color: isActive ? colors.primary : colors.textSecondary },
+                        isActive && styles.tabLabelActive,
+                      ]}>
+                        {route.title}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+              {showScrollHint && (
+                <LinearGradient
+                  colors={[colors.surface + '00', colors.surface]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.scrollHintGradient}
+                  pointerEvents="none"
+                >
+                  <MaterialCommunityIcons name="chevron-right" size={18} color={colors.textSecondary} />
+                </LinearGradient>
+              )}
+            </View>
+            <View style={styles.sceneContainer}>
+              {renderActiveScene()}
+            </View>
             <Portal>
               <Dialog visible={isdialogFinishShow} onDismiss={() => setIsdialogFinishShow(false)}>
                 <Dialog.Title>Finalizar Registro</Dialog.Title>
@@ -320,6 +373,51 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  tabBarContainer: {
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    elevation: 2,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  tabBarContent: {
+    paddingHorizontal: 4,
+    paddingRight: 32,
+  },
+  scrollHintGradient: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 36,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingRight: 4,
+  },
+  tabItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabItemActive: {
+    borderBottomColor: colors.primary,
+  },
+  tabLabel: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  tabLabelActive: {
+    fontWeight: '700',
+  },
+  sceneContainer: {
+    flex: 1,
   },
   section: {
     flexDirection: 'row',
