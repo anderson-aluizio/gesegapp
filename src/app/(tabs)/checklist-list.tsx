@@ -20,7 +20,6 @@ export default function ChecklistListScreen() {
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [checklistRealizados, setChecklistRealizados] = useState<ChecklistRealizadoDatabase[]>([]);
-    const [filteredChecklists, setFilteredChecklists] = useState<ChecklistRealizadoDatabase[]>([]);
     const [selectedChecklist, setSelectedChecklist] = useState<ChecklistRealizadoDatabase | null>(null);
     const [isShowEditDialog, setIsShowEditDialog] = useState<boolean>(false);
     const [isShowDeleteDialog, setIsShowDeleteDialog] = useState<boolean>(false);
@@ -48,9 +47,8 @@ export default function ChecklistListScreen() {
 
     const list = async () => {
         try {
-            const response = await checklistDb.getAllNotSynced();
+            const response = await checklistDb.getAll();
             setChecklistRealizados(response);
-            setFilteredChecklists(response);
 
             Animated.timing(fadeAnim, {
                 toValue: 1,
@@ -64,16 +62,19 @@ export default function ChecklistListScreen() {
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);
-        if (query.trim() === '') {
-            setFilteredChecklists(checklistRealizados);
-        } else {
-            const filtered = checklistRealizados.filter(checklist =>
-                checklist.checklist_grupo_nome?.toLowerCase().includes(query.toLowerCase()) ||
-                checklist.equipe_nome?.toLowerCase().includes(query.toLowerCase())
-            );
-            setFilteredChecklists(filtered);
-        }
     };
+
+    const filteredChecklists = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return checklistRealizados;
+
+        return checklistRealizados.filter(checklist =>
+            checklist.checklist_grupo_nome?.toLowerCase().includes(query) ||
+            checklist.equipe_nome?.toLowerCase().includes(query) ||
+            checklist.checklist_estrutura_nome?.toLowerCase().includes(query) ||
+            checklist.ordem_servico?.toLowerCase().includes(query)
+        );
+    }, [checklistRealizados, searchQuery]);
 
     useFocusEffect(
         useCallback(() => {
@@ -127,6 +128,10 @@ export default function ChecklistListScreen() {
 
     const handleClickChecklist = (checklist: ChecklistRealizadoDatabase) => {
         if (!checklist) return;
+        if (Boolean(checklist.is_synced)) {
+            router.push(`/checklist/view/${checklist.id}`);
+            return;
+        }
         if (checklist.is_finalizado) {
             setIsShowEditDialog(true);
             setSelectedChecklist(checklist);
@@ -173,6 +178,7 @@ export default function ChecklistListScreen() {
     }
 
     const handleLongPressChecklist = (checklist: ChecklistRealizadoDatabase) => {
+        if (Boolean(checklist.is_synced)) return;
         setSelectedChecklist(checklist);
         setIsShowDeleteDialog(true);
     };
@@ -212,10 +218,7 @@ export default function ChecklistListScreen() {
 
                         <View style={styles.resultsContainer}>
                             <Text style={styles.resultsText}>
-                                {searchQuery
-                                    ? `${filteredChecklists.length} resultado${filteredChecklists.length !== 1 ? 's' : ''} encontrado${filteredChecklists.length !== 1 ? 's' : ''}`
-                                    : `${filteredChecklists.length} registro${filteredChecklists.length !== 1 ? 's' : ''} ${filteredChecklists.length !== 1 ? 'disponíveis' : 'disponível'}`
-                                }
+                                {filteredChecklists.length} registro{filteredChecklists.length !== 1 ? 's' : ''}
                             </Text>
                         </View>
 

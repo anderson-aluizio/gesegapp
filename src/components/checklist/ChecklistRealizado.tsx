@@ -15,9 +15,10 @@ export function ChecklistRealizado({ data, isUserOperacao, onOpen, onLongPress, 
     const { colors } = useTheme()
     const styles = useMemo(() => createStyles(colors), [colors])
 
+    const isSynced = Boolean(data.is_synced)
     const isFinalizado = data.is_finalizado
-    const statusColor = isFinalizado ? colors.success : colors.primary
-    const statusText = isFinalizado ? "Finalizado" : "Em andamento"
+    const statusColor = isSynced ? colors.textMuted : isFinalizado ? colors.success : colors.primary
+    const statusText = isSynced ? "Enviado" : isFinalizado ? "Finalizado" : "Em andamento"
 
     return (
         <Pressable

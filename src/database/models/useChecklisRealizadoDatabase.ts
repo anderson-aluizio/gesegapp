@@ -112,14 +112,19 @@ export const useChecklisRealizadoDatabase = () => {
   const getAll = async () => {
     try {
       const query =
-        `SELECT 
+        `SELECT
           checklist_realizados.*,
           equipes.nome AS equipe_nome,
           veiculos.nome AS veiculo_nome,
           localidade_cidades.nome AS localidade_cidade_nome,
           centro_custos.nome AS centro_custo_nome,
           checklist_grupos.nome AS checklist_grupo_nome,
-          checklist_estruturas.modelo AS checklist_estrutura_nome
+          checklist_estruturas.modelo AS checklist_estrutura_nome,
+          (SELECT GROUP_CONCAT(ac.nome, ', ')
+           FROM checklist_realizado_acao_campos crac
+           INNER JOIN acao_campos ac ON crac.acao_campo_id = ac.id
+           WHERE crac.checklist_realizado_id = checklist_realizados.id
+          ) AS acao_campos_nomes
         FROM checklist_realizados
           INNER JOIN equipes ON checklist_realizados.equipe_id = equipes.id
           INNER JOIN veiculos ON checklist_realizados.veiculo_id = veiculos.id
