@@ -7,6 +7,7 @@ import { ChecklistRealizadoItemsDatabaseWithItem, useChecklisRealizadoItemsDatab
 import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
 import { ChecklistRealizadoRiscosDatabaseWithRelations, useChecklisRealizadoRiscosDatabase } from '@/database/models/useChecklisRealizadoRiscosDatabase';
 import { ChecklistRealizadoControleRiscosDatabaseWithRelations, useChecklisRealizadoControleRiscosDatabase } from '@/database/models/useChecklisRealizadoControleRiscosDatabase';
+import { ChecklistRealizadoAcaoCampoDatabaseWithRelations, useChecklistRealizadoAcaoCampoDatabase } from '@/database/models/useChecklistRealizadoAcaoCampoDatabase';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 
@@ -26,12 +27,14 @@ export default function ChecklistViewScreen() {
     const [funcionarios, setFuncionarios] = useState<ChecklistRealizadoFuncionarioDatabase[]>([]);
     const [riscos, setRiscos] = useState<ChecklistRealizadoRiscosDatabaseWithRelations[]>([]);
     const [controles, setControles] = useState<ChecklistRealizadoControleRiscosDatabaseWithRelations[]>([]);
+    const [acaoCampos, setAcaoCampos] = useState<ChecklistRealizadoAcaoCampoDatabaseWithRelations[]>([]);
 
     const checklistDb = useChecklisRealizadoDatabase();
     const itemsDb = useChecklisRealizadoItemsDatabase();
     const funcionariosDb = useChecklistRealizadoFuncionarioDatabase();
     const riscosDb = useChecklisRealizadoRiscosDatabase();
     const controlesDb = useChecklisRealizadoControleRiscosDatabase();
+    const acaoCamposDb = useChecklistRealizadoAcaoCampoDatabase();
 
     const loadData = useCallback(async () => {
         if (!id) return;
@@ -48,6 +51,8 @@ export default function ChecklistViewScreen() {
                 setRiscos(riscosData);
                 const controlesData = await controlesDb.getByChecklistRealizadoId(Number(id));
                 setControles(controlesData);
+                const acaoCamposData = await acaoCamposDb.getByChecklistRealizadoId(Number(id));
+                setAcaoCampos(acaoCamposData);
             }
         } catch (error) {
             console.error('Error loading checklist:', error);
@@ -374,6 +379,32 @@ export default function ChecklistViewScreen() {
                             </View>
                         ))}
                     </Surface>
+
+                    {/* Ação de Campos Section */}
+                    {acaoCampos.length > 0 && (
+                        <Surface style={styles.section} elevation={1}>
+                            <View style={styles.sectionHeader}>
+                                <IconButton icon="notebook-edit-outline" size={20} iconColor={colors.primary} style={styles.sectionIcon} />
+                                <Text style={styles.sectionTitle}>Serviços ({acaoCampos.length})</Text>
+                            </View>
+                            <Divider style={styles.divider} />
+
+                            {acaoCampos.map((acao, index) => (
+                                <View key={acao.id} style={styles.acaoCampoItem}>
+                                    <View style={styles.acaoCampoHeader}>
+                                        <Text style={styles.acaoCampoNome}>{acao.nome}</Text>
+                                        <Chip style={styles.acaoCampoQtdChip} textStyle={styles.acaoCampoQtdText}>
+                                            Qtd: {acao.quantidade}
+                                        </Chip>
+                                    </View>
+                                    {acao.codigo_descricao && (
+                                        <Text style={styles.acaoCampoCodigo}>{acao.codigo_descricao}</Text>
+                                    )}
+                                    {index < acaoCampos.length - 1 && <Divider style={styles.itemDivider} />}
+                                </View>
+                            ))}
+                        </Surface>
+                    )}
 
                     <View style={styles.bottomSpacer} />
                 </ScrollView>
@@ -770,6 +801,36 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontSize: 13,
         color: colors.text,
         lineHeight: 18,
+    },
+    acaoCampoItem: {
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+    },
+    acaoCampoHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    acaoCampoNome: {
+        flex: 1,
+        fontSize: 14,
+        fontWeight: '500',
+        color: colors.text,
+        marginRight: 8,
+    },
+    acaoCampoQtdChip: {
+        backgroundColor: colors.primary,
+        height: 28,
+    },
+    acaoCampoQtdText: {
+        fontSize: 12,
+        color: colors.textOnPrimary,
+        fontWeight: '600',
+    },
+    acaoCampoCodigo: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginTop: 4,
     },
     bottomSpacer: {
         height: 32,
