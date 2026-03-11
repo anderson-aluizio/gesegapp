@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { Button, Dialog, Portal, Text, ActivityIndicator, MD2Colors, IconButton } from 'react-native-paper';
+import { Button, Dialog, Portal, Text, ActivityIndicator } from 'react-native-paper';
 import { StyleSheet, View, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import DadosGeraisScreen from '@/components/checklist/dadosGerais';
@@ -18,7 +18,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useDialog } from '@/hooks/useDialog';
 import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function EditChecklistRealizado() {
   const { user } = useAuth();
@@ -29,12 +28,12 @@ export default function EditChecklistRealizado() {
   const [index, setIndex] = useState(0);
 
   const allRoutes = [
-    { key: 'dadosGerais', title: 'Dados Gerais', focusedIcon: 'file-document-edit', unfocusedIcon: 'file-document-edit-outline' },
-    { key: 'lideranca', title: 'Liderança', focusedIcon: 'account-supervisor', unfocusedIcon: 'account-supervisor-outline' },
-    { key: 'colaborador', title: 'Colaboradores', focusedIcon: 'account-group', unfocusedIcon: 'account-group-outline' },
-    { key: 'itens', title: 'Itens', focusedIcon: 'clipboard-list', unfocusedIcon: 'clipboard-list-outline' },
-    { key: 'riscos', title: 'Riscos', focusedIcon: 'alert', unfocusedIcon: 'alert-outline' },
-    { key: 'acaoCampos', title: 'Serviços', focusedIcon: 'notebook-edit', unfocusedIcon: 'notebook-edit-outline' },
+    { key: 'dadosGerais', title: 'Dados Gerais', icon: 'file-document-edit-outline' },
+    { key: 'lideranca', title: 'Liderança', icon: 'account-supervisor-outline' },
+    { key: 'colaborador', title: 'Colaboradores', icon: 'account-group-outline' },
+    { key: 'itens', title: 'Itens', icon: 'clipboard-list-outline' },
+    { key: 'riscos', title: 'Riscos', icon: 'alert-outline' },
+    { key: 'acaoCampos', title: 'Serviços', icon: 'notebook-edit-outline' },
   ];
 
   const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabaseWithRelations>({} as ChecklistRealizadoDatabaseWithRelations);
@@ -80,16 +79,21 @@ export default function EditChecklistRealizado() {
   const [isUserDeclarouConformidade, setIsUserDeclarouConformidade] = useState<boolean>(false);
 
   const tabScrollRef = useRef<ScrollView>(null);
-  const [showScrollHint, setShowScrollHint] = useState(true);
-
-  const handleTabScroll = useCallback((event: any) => {
-    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
-    const isAtEnd = contentOffset.x + layoutMeasurement.width >= contentSize.width - 10;
-    setShowScrollHint(!isAtEnd);
-  }, []);
+  const tabItemRefs = useRef<{ [key: number]: View | null }>({});
 
   const handleTabPress = useCallback((tabIndex: number) => {
     setIndex(tabIndex);
+    // Scroll tab bar to make the selected tab visible
+    const tabView = tabItemRefs.current[tabIndex];
+    if (tabView && tabScrollRef.current) {
+      tabView.measureLayout(
+        tabScrollRef.current.getInnerViewRef(),
+        (x) => {
+          tabScrollRef.current?.scrollTo({ x: Math.max(0, x - 40), animated: true });
+        },
+        () => { }
+      );
+    }
   }, []);
 
   const renderActiveScene = () => {
@@ -240,84 +244,120 @@ export default function EditChecklistRealizado() {
       );
   };
 
+  const hasPrev = index > 0;
+  const hasNext = index < routes.length - 1;
+
   return (
     <ProtectedRoute>
       <>
         {isLoading ? (
           <View style={styles.loading}>
-            <ActivityIndicator animating={true} color={MD2Colors.blue500} size="large" />
+            <ActivityIndicator animating={true} color={colors.primary} size="large" />
           </View>
         ) : (
           <View style={styles.container}>
             <Stack.Screen
               options={{
-                title: 'Editar',
+                headerTitle: () => (
+                  <Text style={styles.headerTitle} numberOfLines={1}>
+                    {checklistRealizado.checklist_grupo_nome || 'Editar Checklist'}
+                  </Text>
+                ),
                 headerLeft: () => (
-                  <IconButton
-                    icon="arrow-left"
-                    iconColor={colors.text}
-                    size={24}
+                  <Pressable
+                    style={styles.headerBackButton}
                     onPress={() => {
                       router.dismissAll();
                       router.push('/checklist-list');
                     }}
-                  />
+                  >
+                    <MaterialCommunityIcons name="arrow-left" size={22} color={colors.text} />
+                    <Text style={styles.headerBackText}>Voltar</Text>
+                  </Pressable>
                 ),
                 headerRight: () => (
-                  <Button icon="checkbox-marked-circle-outline" onPress={() => setIsdialogFinishShow(true)} textColor={colors.success}>
-                    Finalizar
-                  </Button>
+                  <Pressable
+                    style={styles.headerFinishButton}
+                    onPress={() => setIsdialogFinishShow(true)}
+                  >
+                    <MaterialCommunityIcons name="check-circle-outline" size={20} color={colors.textOnPrimary} />
+                    <Text style={styles.headerFinishText}>Finalizar</Text>
+                  </Pressable>
                 ),
               }}
             />
+
+            {/* Tab Bar */}
             <View style={styles.tabBarContainer}>
               <ScrollView
                 ref={tabScrollRef}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.tabBarContent}
-                onScroll={handleTabScroll}
-                scrollEventThrottle={16}
               >
                 {routes.map((route, i) => {
                   const isActive = i === index;
                   return (
                     <Pressable
                       key={route.key}
+                      ref={(ref) => { tabItemRefs.current[i] = ref; }}
                       style={[styles.tabItem, isActive && styles.tabItemActive]}
                       onPress={() => handleTabPress(i)}
                     >
-                      <MaterialCommunityIcons
-                        name={isActive ? route.focusedIcon as any : route.unfocusedIcon as any}
-                        size={22}
-                        color={isActive ? colors.primary : colors.textSecondary}
-                      />
                       <Text style={[
                         styles.tabLabel,
-                        { color: isActive ? colors.primary : colors.textSecondary },
                         isActive && styles.tabLabelActive,
-                      ]}>
+                      ]}
+                        numberOfLines={1}
+                      >
                         {route.title}
                       </Text>
                     </Pressable>
                   );
                 })}
               </ScrollView>
-              {showScrollHint && (
-                <LinearGradient
-                  colors={[colors.surface + '00', colors.surface]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.scrollHintGradient}
-                  pointerEvents="none"
-                >
-                  <MaterialCommunityIcons name="chevron-right" size={18} color={colors.textSecondary} />
-                </LinearGradient>
-              )}
             </View>
+
+            {/* Scene Content */}
             <View style={styles.sceneContainer}>
               {renderActiveScene()}
             </View>
+
+            {/* Bottom Navigation Bar */}
+            <View style={styles.bottomBar}>
+              {hasPrev ? (
+                <Pressable
+                  style={styles.navButton}
+                  onPress={() => handleTabPress(index - 1)}
+                >
+                  <MaterialCommunityIcons name="arrow-left" size={18} color={colors.primary} />
+                  <Text style={styles.navButtonText} numberOfLines={1}>
+                    {routes[index - 1].title}
+                  </Text>
+                </Pressable>
+              ) : (
+                <View style={styles.navButtonPlaceholder} />
+              )}
+
+              <Text style={styles.stepIndicator}>
+                {index + 1} / {routes.length}
+              </Text>
+
+              {hasNext ? (
+                <Pressable
+                  style={styles.navButtonEnd}
+                  onPress={() => handleTabPress(index + 1)}
+                >
+                  <Text style={styles.navButtonText} numberOfLines={1}>
+                    {routes[index + 1].title}
+                  </Text>
+                  <MaterialCommunityIcons name="arrow-right" size={18} color={colors.primary} />
+                </Pressable>
+              ) : (
+                <View style={styles.navButtonPlaceholder} />
+              )}
+            </View>
+
             <Portal>
               <Dialog visible={isdialogFinishShow} onDismiss={() => setIsdialogFinishShow(false)}>
                 <Dialog.Title>Finalizar Registro</Dialog.Title>
@@ -368,57 +408,124 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     position: 'absolute',
     zIndex: 10,
     width: '100%',
-    height: '100%'
+    height: '100%',
+    backgroundColor: colors.background,
   },
   container: {
     flex: 1,
     backgroundColor: colors.background,
   },
+
+  // Header
+  headerTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text,
+    maxWidth: 160,
+  },
+  headerBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingRight: 8,
+  },
+  headerBackText: {
+    fontSize: 15,
+    color: colors.text,
+  },
+  headerFinishButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.success,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  headerFinishText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.textOnPrimary,
+  },
+
+  // Tab Bar
   tabBarContainer: {
     backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    elevation: 2,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   tabBarContent: {
-    paddingHorizontal: 4,
-    paddingRight: 32,
-  },
-  scrollHintGradient: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 36,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingRight: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 6,
   },
   tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.surfaceVariant,
   },
   tabItemActive: {
-    borderBottomColor: colors.primary,
+    backgroundColor: colors.primary,
   },
   tabLabel: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 13,
+    fontWeight: '500',
+    color: colors.textSecondary,
   },
   tabLabelActive: {
+    color: colors.textOnPrimary,
     fontWeight: '700',
   },
+
+  // Scene
   sceneContainer: {
     flex: 1,
   },
+
+  // Bottom Navigation Bar
+  bottomBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  navButtonEnd: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  navButtonPlaceholder: {
+    flex: 1,
+  },
+  navButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  stepIndicator: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.textMuted,
+    textAlign: 'center',
+    minWidth: 50,
+  },
+
+  // Dialog
   section: {
     flexDirection: 'row',
     alignItems: 'center',
