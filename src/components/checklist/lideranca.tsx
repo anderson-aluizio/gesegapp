@@ -1,12 +1,11 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Text } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import ModalSearchSelect from '@/components/ui/inputs/ModalSearchSelect';
-import { useDialog } from '@/hooks/useDialog';
-import InfoDialog from '@/components/ui/dialogs/InfoDialog';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function LiderancaScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void; isUserOperacao: boolean }) {
     const { colors } = useTheme();
@@ -15,14 +14,16 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
     const [checklistRealizado, setChecklistRealizado] = useState<ChecklistRealizadoDatabase>(props.checklistRealizado);
     const checklistRealizadoDb = useChecklisRealizadoDatabase();
     const equipeDb = useEquipeDatabase();
-    const dialog = useDialog();
     const isUserOperacao = props.isUserOperacao;
+
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    const latestDataRef = useRef(checklistRealizado);
 
     useEffect(() => {
         setChecklistRealizado(props.checklistRealizado);
+        latestDataRef.current = props.checklistRealizado;
     }, [props.checklistRealizado]);
 
-    const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
     const [selectedEncarregado, setSelectedEncarregado] = useState<string | null>();
     const [selectedSupervisor, setSelectedSupervisor] = useState<string | null>();
     const [selectedCoordenador, setSelectedCoordenador] = useState<string | null>();
@@ -45,75 +46,69 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
         );
     }, [checklistRealizado]);
 
+    const showSaveStatus = useCallback((status: 'saved' | 'error') => {
+        setSaveStatus(status);
+        setTimeout(() => setSaveStatus('idle'), 2000);
+    }, []);
+
+    const saveToDb = useCallback(async (updatedData: ChecklistRealizadoDatabase) => {
+        setSaveStatus('saving');
+        try {
+            await checklistRealizadoDb.updateLideranca(updatedData);
+
+            if (updatedData.equipe_id) {
+                await equipeDb.updateLideranca(
+                    updatedData.equipe_id,
+                    updatedData.encarregado_cpf,
+                    updatedData.supervisor_cpf,
+                    updatedData.coordenador_cpf
+                );
+            }
+
+            latestDataRef.current = updatedData;
+            setChecklistRealizado(updatedData);
+            showSaveStatus('saved');
+            props.formUpdated();
+        } catch (error) {
+            console.error('Erro ao salvar liderança:', error);
+            showSaveStatus('error');
+        }
+    }, []);
+
     const encarregadoInitialItem = checklistRealizado?.encarregado_nome ? [{
         id: String(checklistRealizado.encarregado_cpf),
         title: checklistRealizado.encarregado_nome
     }] : [];
     const handleChangeEncarregado = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedEncarregado(value);
-        } else {
-            setSelectedEncarregado(String(value));
-        }
-        setIsFormDirty(true);
+        const newValue = typeof value === 'string' || value === null ? value : String(value);
+        setSelectedEncarregado(newValue);
+        const updated = { ...latestDataRef.current, encarregado_cpf: newValue || '' };
+        latestDataRef.current = updated;
+        saveToDb(updated);
     }
     const supervisorInitialItem = checklistRealizado?.supervisor_nome ? [{
         id: String(checklistRealizado.supervisor_cpf),
         title: checklistRealizado.supervisor_nome
     }] : [];
     const handleChangeSupervisor = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedSupervisor(value);
-        } else {
-            setSelectedSupervisor(String(value));
-        }
-        setIsFormDirty(true);
+        const newValue = typeof value === 'string' || value === null ? value : String(value);
+        setSelectedSupervisor(newValue);
+        const updated = { ...latestDataRef.current, supervisor_cpf: newValue || '' };
+        latestDataRef.current = updated;
+        saveToDb(updated);
     }
     const coordenadorInitialItem = checklistRealizado?.coordenador_nome ? [{
         id: String(checklistRealizado.coordenador_cpf),
         title: checklistRealizado.coordenador_nome
     }] : [];
     const handleChangeCoordenador = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedCoordenador(value);
-        } else {
-            setSelectedCoordenador(String(value));
-        }
-        setIsFormDirty(true);
+        const newValue = typeof value === 'string' || value === null ? value : String(value);
+        setSelectedCoordenador(newValue);
+        const updated = { ...latestDataRef.current, coordenador_cpf: newValue || '' };
+        latestDataRef.current = updated;
+        saveToDb(updated);
     }
 
-    const handleNext = async () => {
-        if (!selectedEncarregado || !selectedSupervisor || !selectedCoordenador) {
-            dialog.show('Atenção', 'Preencha todos os campos obrigatórios.');
-            return;
-        }
-        const updatedChecklist = {
-            ...checklistRealizado,
-            encarregado_cpf: selectedEncarregado,
-            supervisor_cpf: selectedSupervisor,
-            coordenador_cpf: selectedCoordenador
-        };
-
-        try {
-            await checklistRealizadoDb.updateLideranca(updatedChecklist);
-
-            if (checklistRealizado.equipe_id) {
-                await equipeDb.updateLideranca(
-                    checklistRealizado.equipe_id,
-                    selectedEncarregado,
-                    selectedSupervisor,
-                    selectedCoordenador
-                );
-            }
-
-            dialog.show('Sucesso', 'Dados atualizados com sucesso.');
-            setIsFormDirty(false);
-            props.formUpdated();
-        } catch (error) {
-            console.error('Erro ao atualizar liderança:', error);
-            dialog.show('Atenção', 'Erro ao atualizar os dados. Tente novamente.');
-        }
-    }
     if (isUserOperacao) {
         return (
             <View style={styles.container}>
@@ -154,6 +149,24 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
         <View style={styles.container}>
             <ScrollView>
                 <View style={styles.inner}>
+                    {saveStatus !== 'idle' && (
+                        <View style={[
+                            styles.saveIndicator,
+                            saveStatus === 'error' && styles.saveIndicatorError,
+                        ]}>
+                            <MaterialCommunityIcons
+                                name={saveStatus === 'saving' ? 'loading' : saveStatus === 'saved' ? 'check-circle' : 'alert-circle'}
+                                size={16}
+                                color={saveStatus === 'error' ? colors.error : colors.success}
+                            />
+                            <Text style={[
+                                styles.saveIndicatorText,
+                                saveStatus === 'error' && { color: colors.error },
+                            ]}>
+                                {saveStatus === 'saving' ? 'Salvando...' : saveStatus === 'saved' ? 'Salvo' : 'Erro ao salvar'}
+                            </Text>
+                        </View>
+                    )}
                     <ModalSearchSelect
                         listName="funcionarios"
                         label="Encarregado"
@@ -177,19 +190,6 @@ export default function LiderancaScreen(props: { checklistRealizado: ChecklistRe
                         initialItems={coordenadorInitialItem} />
                 </View>
             </ScrollView>
-
-            <InfoDialog
-                visible={dialog.visible}
-                description={dialog.description}
-                title={dialog.title}
-                onDismiss={dialog.hide}
-            />
-
-            {isFormDirty ? (
-                <Button mode="contained" onPress={handleNext} buttonColor={colors.buttonPrimary} style={styles.btnNext}>
-                    ATUALIZAR
-                </Button>
-            ) : null}
         </View>
     );
 }
@@ -203,8 +203,23 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         gap: 10,
         padding: 16,
     },
-    btnNext: {
-        margin: 16,
+    saveIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-end',
+        gap: 6,
+        backgroundColor: colors.successLight,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+    },
+    saveIndicatorError: {
+        backgroundColor: colors.error + '18',
+    },
+    saveIndicatorText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: colors.success,
     },
     infoCard: {
         backgroundColor: colors.surfaceVariant,

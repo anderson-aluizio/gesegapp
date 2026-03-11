@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Button, Card, Checkbox, Text, ActivityIndicator } from 'react-native-paper';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useChecklisEstruturaRiscosDatabase, ChecklistEstruturaRiscosDatabase } from '@/database/models/useChecklisEstruturaRiscosDatabase';
 import { useChecklisEstruturaControleRiscosDatabase, ChecklistEstruturaControleRiscosDatabase } from '@/database/models/useChecklisEstruturaControleRiscosDatabase';
@@ -261,16 +262,25 @@ export default function RiscosScreen(props: { checklistRealizado: ChecklistReali
             />
 
             {isFormDirty && (
-                <Button
-                    mode="contained"
-                    onPress={handleSave}
-                    loading={isSaving}
-                    disabled={isSaving}
-                    buttonColor={colors.buttonPrimary}
-                    style={styles.btnSave}
-                >
-                    {isSaving ? 'SALVANDO...' : 'SALVAR RISCOS'}
-                </Button>
+                <View style={styles.saveBarContainer}>
+                    <View style={styles.saveBarWarning}>
+                        <MaterialCommunityIcons name="alert-circle-outline" size={16} color={colors.warning} />
+                        <Text style={styles.saveBarWarningText}>Alterações não salvas</Text>
+                    </View>
+                    <Button
+                        mode="contained"
+                        icon="content-save"
+                        onPress={handleSave}
+                        loading={isSaving}
+                        disabled={isSaving}
+                        buttonColor={colors.success}
+                        textColor={colors.textOnPrimary}
+                        style={styles.btnSave}
+                        labelStyle={styles.btnSaveLabel}
+                    >
+                        {isSaving ? 'SALVANDO...' : 'SALVAR RISCOS'}
+                    </Button>
+                </View>
             )}
         </View>
     );
@@ -375,7 +385,31 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         fontStyle: 'italic',
         textAlign: 'center',
     },
+    saveBarContainer: {
+        backgroundColor: colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: colors.warning,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        gap: 8,
+    },
+    saveBarWarning: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+    },
+    saveBarWarningText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: colors.warning,
+    },
     btnSave: {
-        margin: 16,
+        borderRadius: 8,
+    },
+    btnSaveLabel: {
+        fontSize: 15,
+        fontWeight: '700',
+        paddingVertical: 2,
     },
 });

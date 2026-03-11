@@ -1,11 +1,12 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, Text as RNText } from 'react-native';
-import { Button, Dialog, Portal, Text, TextInput } from 'react-native-paper';
+import { Text, TextInput } from 'react-native-paper';
 import { ChecklistRealizadoDatabase, useChecklisRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useEquipeDatabase } from '@/database/models/useEquipeDatabase';
 import { useCentroCustoDatabase } from '@/database/models/useCentroCustoDatabase';
 import ModalSearchSelect, { SearchSelectOption } from '@/components/ui/inputs/ModalSearchSelect';
 import { useTheme, ThemeColors } from '@/contexts/ThemeContext';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function DadosGeraisScreen(props: { checklistRealizado: ChecklistRealizadoDatabase; formUpdated: () => void; isUserOperacao: boolean }) {
     const { colors } = useTheme();
@@ -18,18 +19,21 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
     const isUserOperacao = props.isUserOperacao;
     const isAprChecklist = checklistRealizado?.checklist_grupo_nome_interno === 'checklist_apr';
 
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const latestDataRef = useRef(checklistRealizado);
+
     useEffect(() => {
         setChecklistRealizado(props.checklistRealizado);
+        latestDataRef.current = props.checklistRealizado;
     }, [props.checklistRealizado]);
 
-    const [isFormDirty, setIsFormDirty] = useState<boolean>(false);
     const [selectedMunicipio, setSelectedMunicipio] = useState<string | null>();
     const [selectedEquipe, setSelectedEquipe] = useState<string | null>();
     const [selectedVeiculo, setSelectedVeiculo] = useState<string | null>();
     const [selectedArea, setSelectedArea] = useState<string | null>(null);
     const [observacao, setObservacao] = useState<string>('');
     const [ordemServico, setOrdemServico] = useState<string>('');
-    const [dialogDesc, setDialogDesc] = useState<string>('');
     const [localidadeEstadoId, setLocalidadeEstadoId] = useState<number | undefined>();
 
     useEffect(() => {
@@ -72,97 +76,123 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
         setOrdemServico(checklistRealizado?.ordem_servico || '');
     }, [checklistRealizado]);
 
+    const showSaveStatus = useCallback((status: 'saved' | 'error') => {
+        setSaveStatus(status);
+        setTimeout(() => setSaveStatus('idle'), 2000);
+    }, []);
+
+    const saveToDb = useCallback(async (updatedData: ChecklistRealizadoDatabase) => {
+        setSaveStatus('saving');
+        try {
+            const equipe = updatedData.equipe_id ? await equipeDb.show(Number(updatedData.equipe_id)) : null;
+            const dataToSave = {
+                ...updatedData,
+                encarregado_cpf: isUserOperacao ? updatedData.encarregado_cpf : (equipe?.encarregado_cpf || updatedData.encarregado_cpf),
+                supervisor_cpf: isUserOperacao ? updatedData.supervisor_cpf : (equipe?.supervisor_cpf || updatedData.supervisor_cpf),
+                coordenador_cpf: isUserOperacao ? updatedData.coordenador_cpf : (equipe?.coordenador_cpf || updatedData.coordenador_cpf),
+            };
+            await checklistRealizadoDb.updateDadosGerais(dataToSave);
+            latestDataRef.current = dataToSave;
+            setChecklistRealizado(dataToSave);
+            showSaveStatus('saved');
+            props.formUpdated();
+        } catch (error) {
+            console.error('Erro ao salvar dados gerais:', error);
+            showSaveStatus('error');
+        }
+    }, [isUserOperacao]);
+
+    const debouncedSave = useCallback((updatedData: ChecklistRealizadoDatabase) => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            saveToDb(updatedData);
+        }, 800);
+    }, [saveToDb]);
+
+    // Cleanup debounce on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, []);
+
     const municipioInitialItem = checklistRealizado?.localidade_cidade_id ? [{
         id: String(checklistRealizado?.localidade_cidade_id),
         title: String(checklistRealizado?.localidade_cidade_nome)
     }] : [];
     const handleChangeMunicipio = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedMunicipio(value);
-        } else {
-            setSelectedMunicipio(String(value));
-        }
-        setIsFormDirty(true);
+        const newValue = typeof value === 'string' || value === null ? value : String(value);
+        setSelectedMunicipio(newValue);
+        const updated = { ...latestDataRef.current, localidade_cidade_id: Number(newValue) };
+        latestDataRef.current = updated;
+        saveToDb(updated);
     }
     const equipeInitialItem = checklistRealizado?.equipe_id ? [{
         id: String(checklistRealizado.equipe_id),
         title: String(checklistRealizado.equipe_nome)
     }] : [];
     const handleChangeEquipe = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedEquipe(value);
-        } else {
-            setSelectedEquipe(String(value));
-        }
-        setIsFormDirty(true);
+        const newValue = typeof value === 'string' || value === null ? value : String(value);
+        setSelectedEquipe(newValue);
+        const updated = { ...latestDataRef.current, equipe_id: Number(newValue) };
+        latestDataRef.current = updated;
+        saveToDb(updated);
     }
     const veiculoInitialItem = checklistRealizado?.veiculo_id ? [{
         id: String(checklistRealizado.veiculo_id),
         title: checklistRealizado.veiculo_id
     }] : [];
     const handleChangeVeiculo = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedVeiculo(value);
-        } else {
-            setSelectedVeiculo(String(value));
-        }
-        setIsFormDirty(true);
+        const newValue = typeof value === 'string' || value === null ? value : String(value);
+        setSelectedVeiculo(newValue);
+        const updated = { ...latestDataRef.current, veiculo_id: newValue || '' };
+        latestDataRef.current = updated;
+        saveToDb(updated);
     }
     const handleChangeArea = (value: string | object | null) => {
-        if (typeof value === 'string' || value === null) {
-            setSelectedArea(value);
-        } else {
-            setSelectedArea(String(value));
-        }
-        setIsFormDirty(true);
+        const newValue = typeof value === 'string' || value === null ? value : String(value);
+        setSelectedArea(newValue);
+        const updated = { ...latestDataRef.current, area: newValue || '' };
+        latestDataRef.current = updated;
+        saveToDb(updated);
     };
 
     const handleChangeObservacao = (value: string) => {
         setObservacao(value);
-        setIsFormDirty(true);
+        const updated = { ...latestDataRef.current, observacao: value };
+        latestDataRef.current = updated;
+        debouncedSave(updated);
     };
 
     const handleChangeOrdemServico = (value: string) => {
         setOrdemServico(value);
-        setIsFormDirty(true);
+        const updated = { ...latestDataRef.current, ordem_servico: value };
+        latestDataRef.current = updated;
+        debouncedSave(updated);
     };
 
-    const handleUpdate = async () => {
-        if (!selectedMunicipio || !selectedEquipe || !selectedVeiculo || !selectedArea) {
-            setDialogDesc('Preencha todos os campos.');
-            return;
-        }
-        if (isAprChecklist && !ordemServico.trim()) {
-            setDialogDesc('Ordem de Serviço é obrigatória para APR.');
-            return;
-        }
-        const equipe = await equipeDb.show(Number(selectedEquipe));
-        if (!equipe) {
-            setDialogDesc('Equipe não encontrada.');
-            return;
-        }
-        const updatedChecklist = {
-            ...checklistRealizado,
-            localidade_cidade_id: Number(selectedMunicipio),
-            equipe_id: Number(selectedEquipe),
-            veiculo_id: selectedVeiculo,
-            area: selectedArea,
-            observacao: observacao,
-            ordem_servico: ordemServico,
-            encarregado_cpf: isUserOperacao ? checklistRealizado.encarregado_cpf : equipe.encarregado_cpf,
-            supervisor_cpf: isUserOperacao ? checklistRealizado.supervisor_cpf : equipe.supervisor_cpf,
-            coordenador_cpf: isUserOperacao ? checklistRealizado.coordenador_cpf : equipe.coordenador_cpf
-        };
-        await checklistRealizadoDb.updateDadosGerais(updatedChecklist);
-        setChecklistRealizado(updatedChecklist);
-        setDialogDesc('Registro atualizado com sucesso.');
-        setIsFormDirty(false);
-        props.formUpdated();
-    }
     return (
         <View style={styles.container}>
             <ScrollView>
                 <View style={styles.inner}>
+                    {saveStatus !== 'idle' && (
+                        <View style={[
+                            styles.saveIndicator,
+                            saveStatus === 'error' && styles.saveIndicatorError,
+                        ]}>
+                            <MaterialCommunityIcons
+                                name={saveStatus === 'saving' ? 'loading' : saveStatus === 'saved' ? 'check-circle' : 'alert-circle'}
+                                size={16}
+                                color={saveStatus === 'error' ? colors.error : colors.success}
+                            />
+                            <Text style={[
+                                styles.saveIndicatorText,
+                                saveStatus === 'error' && { color: colors.error },
+                            ]}>
+                                {saveStatus === 'saving' ? 'Salvando...' : saveStatus === 'saved' ? 'Salvo' : 'Erro ao salvar'}
+                            </Text>
+                        </View>
+                    )}
                     <View style={styles.infoCard}>
                         <View style={styles.infoRow}>
                             <View style={styles.infoItem}>
@@ -273,25 +303,7 @@ export default function DadosGeraisScreen(props: { checklistRealizado: Checklist
                         />
                     </View>
                 </View>
-                <Portal>
-                    <Dialog visible={Boolean(dialogDesc.length)} onDismiss={() => setDialogDesc('')} style={styles.dialog}>
-                        <Dialog.Title style={styles.dialogTitle}>Atenção</Dialog.Title>
-                        <Dialog.Content>
-                            <Text variant="bodyMedium" style={styles.dialogText}>
-                                {dialogDesc}
-                            </Text>
-                        </Dialog.Content>
-                        <Dialog.Actions>
-                            <Button onPress={() => setDialogDesc('')} textColor={colors.buttonPrimary}>Fechar</Button>
-                        </Dialog.Actions>
-                    </Dialog>
-                </Portal>
             </ScrollView>
-            {isFormDirty ? (
-                <Button mode="contained" onPress={handleUpdate} buttonColor={colors.buttonPrimary} style={styles.btnNext}>
-                    ATUALIZAR
-                </Button>
-            ) : null}
         </View>
     );
 }
@@ -304,6 +316,24 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
     inner: {
         gap: 10,
         padding: 16,
+    },
+    saveIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-end',
+        gap: 6,
+        backgroundColor: colors.successLight,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+    },
+    saveIndicatorError: {
+        backgroundColor: colors.error + '18',
+    },
+    saveIndicatorText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: colors.success,
     },
     infoCard: {
         backgroundColor: colors.surfaceVariant,
@@ -353,22 +383,8 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         textAlign: 'center',
         fontWeight: '500',
     },
-    btnNext: {
-        margin: 16,
-    },
     textInput: {
         backgroundColor: colors.cardBackground,
-    },
-    dialog: {
-        backgroundColor: colors.surface,
-        borderRadius: 16,
-    },
-    dialogTitle: {
-        color: colors.text,
-        fontWeight: 'bold',
-    },
-    dialogText: {
-        color: colors.textSecondary,
     },
     label: {
         fontSize: 15,

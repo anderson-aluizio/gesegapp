@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Button, Dialog, Portal, Text, Searchbar, Chip } from 'react-native-paper';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { ChecklistRealizadoItemsDatabaseWithItem, useChecklisRealizadoItemsDatabase } from '@/database/models/useChecklisRealizadoItemsDatabase';
 import { ChecklistRealizadoFuncionarioDatabase, useChecklistRealizadoFuncionarioDatabase } from '@/database/models/useChecklistRealizadoFuncionarioDatabase';
@@ -539,14 +540,23 @@ export default function ItensScreen(props: {
                         </View>
                     </ScrollView>
                     {isFormDirty && (
-                        <Button
-                            mode="contained"
-                            onPress={handleUpdate}
-                            buttonColor={colors.buttonPrimary}
-                            style={styles.btnNext}
-                        >
-                            ATUALIZAR
-                        </Button>
+                        <View style={styles.saveBarContainer}>
+                            <View style={styles.saveBarWarning}>
+                                <MaterialCommunityIcons name="alert-circle-outline" size={16} color={colors.warning} />
+                                <Text style={styles.saveBarWarningText}>Alterações não salvas</Text>
+                            </View>
+                            <Button
+                                mode="contained"
+                                icon="content-save"
+                                onPress={handleUpdate}
+                                buttonColor={colors.success}
+                                textColor={colors.textOnPrimary}
+                                style={styles.btnSave}
+                                labelStyle={styles.btnSaveLabel}
+                            >
+                                SALVAR RESPOSTAS
+                            </Button>
+                        </View>
                     )}
                 </View>
             )}
@@ -633,8 +643,32 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         marginVertical: 24,
         fontSize: 16
     },
-    btnNext: {
-        margin: 16,
+    saveBarContainer: {
+        backgroundColor: colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: colors.warning,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        gap: 8,
+    },
+    saveBarWarning: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+    },
+    saveBarWarningText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: colors.warning,
+    },
+    btnSave: {
+        borderRadius: 8,
+    },
+    btnSaveLabel: {
+        fontSize: 15,
+        fontWeight: '700',
+        paddingVertical: 2,
     },
     dialog: {
         backgroundColor: colors.surface,

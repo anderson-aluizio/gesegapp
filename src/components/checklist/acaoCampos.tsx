@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
 import { Button, Text, ActivityIndicator, IconButton, Searchbar, TextInput, Chip } from 'react-native-paper';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { ChecklistRealizadoDatabase } from '@/database/models/useChecklisRealizadoDatabase';
 import { useAcaoCampoDatabase, AcaoCampoDatabase } from '@/database/models/useAcaoCampoDatabase';
 import {
@@ -26,6 +27,7 @@ export default function AcaoCamposScreen(props: {
     const [availableAcoes, setAvailableAcoes] = useState<AcaoCampoDatabase[]>([]);
     const [selectedAcoes, setSelectedAcoes] = useState<ChecklistRealizadoAcaoCampoDatabaseWithRelations[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isQuantidadeDirty, setIsQuantidadeDirty] = useState(false);
     const [showPicker, setShowPicker] = useState(false);
 
     const dialog = useDialog();
@@ -121,6 +123,7 @@ export default function AcaoCamposScreen(props: {
         setSelectedAcoes(prev =>
             prev.map(a => a.id === id ? { ...a, quantidade: isNaN(num) ? 0 : num } : a)
         );
+        setIsQuantidadeDirty(true);
     };
 
     const handleSaveQuantidades = async () => {
@@ -135,6 +138,7 @@ export default function AcaoCamposScreen(props: {
             for (const acao of selectedAcoes) {
                 await checklistAcaoCampoDb.update(acao.id, acao.quantidade);
             }
+            setIsQuantidadeDirty(false);
             props.formUpdated();
             dialog.show('Sucesso', 'Quantidades atualizadas com sucesso.');
         } catch (error) {
@@ -302,17 +306,26 @@ export default function AcaoCamposScreen(props: {
                 onDismiss={dialog.hide}
             />
 
-            {selectedAcoes.length > 0 && (
-                <Button
-                    mode="contained"
-                    onPress={handleSaveQuantidades}
-                    loading={isSaving}
-                    disabled={isSaving}
-                    buttonColor={colors.buttonPrimary}
-                    style={styles.btnSave}
-                >
-                    {isSaving ? 'SALVANDO...' : 'SALVAR AÇÕES'}
-                </Button>
+            {isQuantidadeDirty && (
+                <View style={styles.saveBarContainer}>
+                    <View style={styles.saveBarWarning}>
+                        <MaterialCommunityIcons name="alert-circle-outline" size={16} color={colors.warning} />
+                        <Text style={styles.saveBarWarningText}>Alterações não salvas</Text>
+                    </View>
+                    <Button
+                        mode="contained"
+                        icon="content-save"
+                        onPress={handleSaveQuantidades}
+                        loading={isSaving}
+                        disabled={isSaving}
+                        buttonColor={colors.success}
+                        textColor={colors.textOnPrimary}
+                        style={styles.btnSave}
+                        labelStyle={styles.btnSaveLabel}
+                    >
+                        {isSaving ? 'SALVANDO...' : 'SALVAR AÇÕES'}
+                    </Button>
+                </View>
             )}
         </View>
     );
@@ -487,7 +500,31 @@ const createStyles = (colors: ThemeColors) => StyleSheet.create({
         height: 36,
         fontSize: 14,
     },
+    saveBarContainer: {
+        backgroundColor: colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: colors.warning,
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        gap: 8,
+    },
+    saveBarWarning: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+    },
+    saveBarWarningText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: colors.warning,
+    },
     btnSave: {
-        margin: 16,
+        borderRadius: 8,
+    },
+    btnSaveLabel: {
+        fontSize: 15,
+        fontWeight: '700',
+        paddingVertical: 2,
     },
 });
